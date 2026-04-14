@@ -53,13 +53,18 @@ function handleSearchInput() {
     .getElementById("searchInput")
     .value.toLowerCase();
   let filteredGames;
-  if (searchInputValue === "favourites") {
+ const favFilterOn = localStorage.getItem("favFilter") === "true";
+  if (favFilterOn) {
     const favs = getFavourites();
-    filteredGames = gamesData.filter((game) => favs.includes(game.name));
+    filteredGames = gamesData.filter((game) =>
+      favs.includes(game.name) &&
+      game.name.toLowerCase().includes(searchInputValue)
+    );
   } else {
     filteredGames = gamesData.filter((game) =>
       game.name.toLowerCase().includes(searchInputValue)
     );
+  }
   }
   displayFilteredGames(filteredGames);
 }
