@@ -30,7 +30,6 @@ function displayFilteredGames(filteredGames) {
     const gameDiv = document.createElement("div");
     gameDiv.classList.add("game");
     const gameImage = document.createElement("img");
-    // Handle external vs local image URLs
     let imageSrc;
     if (game.image.startsWith('http')) {
       imageSrc = game.image;
@@ -39,7 +38,6 @@ function displayFilteredGames(filteredGames) {
     }
     gameImage.src = imageSrc;
     gameImage.alt = game.name;
-    // Handle external vs local game URLs
     gameImage.onclick = () => {
       if (game.url.startsWith('http')) {
         window.location.href = game.url;
@@ -98,14 +96,12 @@ function toggleFavSidebar() {
     const searchRect = searchBar.getBoundingClientRect();
 
     let delay = 0;
-    const promises = [];
 
     allCards.forEach((card) => {
       const isFaved = favs.includes(card.querySelector("p").textContent);
       if (!isFaved) {
         const cardRect = card.getBoundingClientRect();
 
-        // create a flying clone
         const clone = card.cloneNode(true);
         clone.style.position = "fixed";
         clone.style.left = cardRect.left + "px";
@@ -118,10 +114,8 @@ function toggleFavSidebar() {
         clone.style.pointerEvents = "none";
         document.body.appendChild(clone);
 
-        // hide original immediately
         card.style.visibility = "hidden";
 
-        // fly clone to searchbar
         const targetX = searchRect.left + searchRect.width / 2 - cardRect.left - cardRect.width / 2;
         const targetY = searchRect.top - cardRect.top;
 
@@ -132,7 +126,6 @@ function toggleFavSidebar() {
           });
         });
 
-        // remove clone after animation
         setTimeout(() => {
           clone.remove();
         }, delay * 1000 + 400);
@@ -147,38 +140,6 @@ function toggleFavSidebar() {
     }, delay * 1000 + 300);
 
   } else {
-    localStorage.setItem("favFilter", "false");
-    handleSearchInput();
-  }
-}
-
-  if (!favFilterOn) {
-    // turning ON - animate non-favourites away
-    const favs = getFavourites();
-    const allCards = document.querySelectorAll(".game");
-    const searchBar = document.getElementById("searchInput");
-    const searchRect = searchBar.getBoundingClientRect();
-
-    let delay = 0;
-    allCards.forEach((card) => {
-      const cardRect = card.getBoundingClientRect();
-      const isFaved = favs.includes(card.querySelector("p").textContent);
-      if (!isFaved) {
-      const flyY = -(cardRect.top - searchRect.top);
-       card.style.transition = `transform 0.2s ease ${delay}s, opacity 0.2s ease ${delay}s`;
-        card.style.transform = `translateY(${flyY}px)`;
-        card.style.opacity = "0";
-        delay += 0.015;
-      }
-    });
-
-  setTimeout(() => {
-      localStorage.setItem("favFilter", "true");
-      handleSearchInput();
-    }, delay * 1000 + 200);
-  } else {
-    
-    // turning OFF - just show all
     localStorage.setItem("favFilter", "false");
     handleSearchInput();
   }
