@@ -1,9 +1,17 @@
 // these change the name of the site (at the top
+
 var sitename = "fanter beta."; // Change this to change the name of your website.
+
 var subtext = "v0.2, games not added, styling incomplete. :3"; // set the subtext
+
 // more settings in main.css
-// END CONFIG
-// DO NOT MODIFY IF YOU DO NOT KNOW WHAT YOUR DOING!
+
+
+// end of config
+// only change this if you know what your doing - a wise man
+// also if you're a beginner coder, use this code to study or something; this code is pretty good 
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 var serverUrl1 = "https://gms.parcoil.com";
 var currentPageTitle = document.title;
 document.title = `${currentPageTitle} | ${sitename}`;
