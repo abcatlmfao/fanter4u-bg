@@ -91,7 +91,6 @@ function handleSearchInput() {
   displayFilteredGames(filteredGames);
 }
 
-// FIX 1: toggleFavFilter was missing from main.js but referenced via window.toggleFavFilter
 function toggleFavFilter() {
   const current = localStorage.getItem("favFilter") === "true";
   localStorage.setItem("favFilter", (!current).toString());
@@ -106,53 +105,90 @@ function toggleFavSidebar() {
 
   if (!favFilterOn) {
     const favs = getFavourites();
-    const allCards = document.querySelectorAll(".game");
+    const allCards = Array.from(document.querySelectorAll(".game"));
     const searchBar = document.getElementById("searchInput");
+
+    // Get the exact center of the search bar on screen
     const searchRect = searchBar.getBoundingClientRect();
+    const searchCenterX = searchRect.left + searchRect.width / 2;
+    const searchCenterY = searchRect.top + searchRect.height / 2;
+
+    // Only animate non-favourited cards
+    const nonFavedCards = allCards.filter(card =>
+      !favs.includes(card.querySelector("p").textContent)
+    );
+
+    // Sort by distance to search bar so closest ones fly first
+    nonFavedCards.sort((a, b) => {
+      const ra = a.getBoundingClientRect();
+      const rb = b.getBoundingClientRect();
+      const da = Math.hypot((ra.left + ra.width / 2) - searchCenterX, (ra.top + ra.height / 2) - searchCenterY);
+      const db = Math.hypot((rb.left + rb.width / 2) - searchCenterX, (rb.top + rb.height / 2) - searchCenterY);
+      return da - db;
+    });
 
     let delay = 0;
 
-    allCards.forEach((card) => {
-      const isFaved = favs.includes(card.querySelector("p").textContent);
-      if (!isFaved) {
-        const cardRect = card.getBoundingClientRect();
+    nonFavedCards.forEach((card) => {
+      const cardRect = card.getBoundingClientRect();
+      const cardCenterX = cardRect.left + cardRect.width / 2;
+      const cardCenterY = cardRect.top + cardRect.height / 2;
 
-        const clone = card.cloneNode(true);
-        clone.style.position = "fixed";
-        clone.style.left = cardRect.left + "px";
-        clone.style.top = cardRect.top + "px";
-        clone.style.width = cardRect.width + "px";
-        clone.style.height = cardRect.height + "px";
-        clone.style.margin = "0";
-        clone.style.zIndex = "999";
-        clone.style.transition = `transform 0.3s ease ${delay}s, opacity 0.25s ease ${delay + 0.05}s`;
-        clone.style.pointerEvents = "none";
-        document.body.appendChild(clone);
+      // Clone the card and pin it to the exact screen position
+      const clone = card.cloneNode(true);
+      clone.style.cssText = `
+        position: fixed;
+        left: ${cardRect.left}px;
+        top: ${cardRect.top}px;
+        width: ${cardRect.width}px;
+        height: ${cardRect.height}px;
+        margin: 0;
+        padding: 0;
+        z-index: 9999;
+        pointer-events: none;
+        transform-origin: center center;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(45, 90, 227, 0.4);
+      `;
+      document.body.appendChild(clone);
 
-        card.style.visibility = "hidden";
+      // Hide original immediately so layout doesn't jump
+      card.style.visibility = "hidden";
 
-        const targetX = searchRect.left + searchRect.width / 2 - cardRect.left - cardRect.width / 2;
-        const targetY = searchRect.top - cardRect.top;
+      // How far to translate so the clone lands exactly on the search bar center
+      const tx = searchCenterX - cardCenterX;
+      const ty = searchCenterY - cardCenterY;
 
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            clone.style.transform = `translate(${targetX}px, ${targetY}px) scale(0.2)`;
-            clone.style.opacity = "0";
-          });
-        });
+      setTimeout(() => {
+        // Fast arc into the search bar, shrinking to nothing
+        clone.style.transition = `transform 0.42s cubic-bezier(0.55, 0, 0.85, 0.6), opacity 0.18s ease 0.26s, border-radius 0.42s ease`;
+        clone.style.transform = `translate(${tx}px, ${ty}px) scale(0.05)`;
+        clone.style.opacity = "0";
+        clone.style.borderRadius = "50%";
 
-        setTimeout(() => {
-          clone.remove();
-        }, delay * 1000 + 400);
+        setTimeout(() => clone.remove(), 500);
+      }, delay);
 
-        delay += 0.04;
-      }
+      delay += 30;
     });
 
+    // Flash the search bar when the last card lands
+    setTimeout(() => {
+      searchBar.style.transition = "box-shadow 0.15s ease, border-color 0.15s ease";
+      searchBar.style.boxShadow = "0 0 40px rgba(45, 90, 227, 0.9), 0 0 80px rgba(45, 90, 227, 0.4)";
+      searchBar.style.borderColor = "rgba(45, 90, 227, 1)";
+      setTimeout(() => {
+        searchBar.style.boxShadow = "";
+        searchBar.style.borderColor = "";
+      }, 300);
+    }, delay + 100);
+
+    // Apply the filter after animation finishes
     setTimeout(() => {
       localStorage.setItem("favFilter", "true");
       handleSearchInput();
-    }, delay * 1000 + 300);
+    }, delay + 280);
 
   } else {
     localStorage.setItem("favFilter", "false");
