@@ -130,6 +130,7 @@ body::after {
   justify-content: center;
   padding: 0 20px;
 }
+
 /* Game cards */
 .game {
   margin: 15px;
@@ -143,16 +144,13 @@ body::after {
   border-radius: 15px;
 
   animation: drift 6s ease-in-out infinite;
-  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-  padding: 0;
+  transition: transform 0.3s ease;
 }
 
 .game:hover {
   transform: scale(1.08) translateY(-15px);
   border: 2px solid var(--accent-color);
   filter: drop-shadow(0 15px 30px rgba(45, 90, 227, 0.5));
-  padding: 8px;
-  border-radius: 20px;
 }
 
 /* Game images (BRIGHT MODE BOOSTED) */
@@ -167,18 +165,10 @@ body::after {
 
   cursor: pointer;
 
-  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: all 0.3s ease;
   animation: glow 5s ease-in-out infinite;
 }
 
-.game:hover img {
-  transform: scale(1.05);
-  width: 216px;
-  height: 216px;
-  border-radius: 18px;
-  filter: brightness(1.65) contrast(1.2) saturate(1.3);
-  box-shadow: 0 12px 40px rgba(45, 90, 227, 0.7);
-}
 .game img:hover {
   transform: scale(1.05);
   filter: brightness(1.65) contrast(1.2) saturate(1.3);
