@@ -30,28 +30,28 @@
     "new": true
   },
   {
-    "name": "2048 Multitask",
-    "image": "splash.png",
-    "url": "2048-multitask",
-    "new": false
+    "name": "hollow knight",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsLIpQXZ-qUzdIOxeFC9LAaYznn0jmMIE9WA&s",
+    "url": "https://abcatlmfao.github.io/hollow-knight2/",
+    "new": true
   },
   {
-    "name": "9007199254740992",
-    "image": "logo-4.png",
-    "url": "9007199254740992",
-    "new": false
+    "name": "untitled goose game",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVncC3_9HHXxKI9M5bsTJiJ7-EB-G5_rYERuqgXRGs6zFQEBbhXpzulbm9wTuUcswxmrDy&s=10",
+    "url": "https://chipikipal800.github.io/Untitled-Goose-Game/",
+    "new": true
   },
   {
-    "name": "DogeMiner",
+    "name": "doge miner",
     "image": "favicon.ico",
-    "url": "DogeMiner",
-    "new": false
+    "url": "https://abcatlmfao.github.io/DogeMiner/ ",
+    "new": true
   },
   {
-    "name": "HexGL",
+    "name": "hex-gl",
     "image": "icon.png",
-    "url": "HexGL",
-    "new": false
+    "url": "https://fosiper.com/games/hexgl-lite/",
+    "new": true
   },
   {
     "name": "Offline Paradise",
@@ -66,10 +66,10 @@
     "new": false
   },
   {
-    "name": "A Dance of Fire and Ice",
+    "name": "a dance of fire and ice",
     "image": "splash.png",
-    "url": "a-dance-of-fire-and-ice",
-    "new": false
+    "url": "https://chipikipal800.github.io/adofai/ ",
+    "new": true
   },
   {
     "name": "Achievement Unlocked",
@@ -134,8 +134,8 @@
   {
     "name": "Aquapark Slides",
     "image": "splash.png",
-    "url": "aquapark-slides",
-    "new": false
+    "url": "https://chipikipal800.github.io/aquapark-slides-unblocked/",
+    "new": true
   },
   {
     "name": "Astray",
