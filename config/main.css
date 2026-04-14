@@ -39,10 +39,10 @@
 
 /* General styles */
 body {
-background: linear-gradient(270deg,
-    #ff0000, #ff7700, #ffff00, #00ff00,
-    #00ffff, #0000ff, #8800ff, #ff00ff,
-    #ff0000);
+ background: linear-gradient(270deg,
+    #8b0000, #8b4500, #8b8b00, #006400,
+    #008b8b, #00008b, #4b0082, #8b008b,
+    #8b0000);
   background-size: 800% 800%;
   animation: gradientShift 45s linear infinite;
 
