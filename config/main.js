@@ -10,8 +10,6 @@ var subtext = "v1.989898"; // set the subtext
 // END CONFIG
 // DO NOT MODIFY IF YOU DO NOT KNOW WHAT YOUR DOING!
 
-import "/./config/custom.js";
-
 var serverUrl1 = "https://gms.parcoil.com";
 var currentPageTitle = document.title;
 document.title = `${currentPageTitle} | ${sitename}`;
