@@ -33,7 +33,7 @@
     const now = Date.now();
     const pressedKey = e.key.toLowerCase();
     const storedKey = safetyKey.toLowerCase();
-    if (pressedKey === storedKey && pressedKey === lastKey && now - lastKeyTime < 500) {
+    if (pressedKey === storedKey && pressedKey === lastKey && now - lastKeyTime < 1000) {
       e.preventDefault();
       window.location.href = safetyUrl;
     }
