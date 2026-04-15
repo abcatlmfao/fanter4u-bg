@@ -851,3 +851,51 @@ body.theme-neon #searchInput {
   color: gold;
   background: rgba(255, 215, 0, 0.1);
 }
+
+/* remove bar */
+/* Hide Google Translate top bar */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+.goog-te-menu-frame {
+  display: none !important;
+}
+
+/* Remove the body shift that Google Translate creates */
+body {
+  top: 0px !important;
+  position: relative !important;
+}
+
+/* Hide the Google Translate notification */
+.goog-te-balloon-frame {
+  display: none !important;
+}
+
+/* Remove the white space at the top */
+html {
+  margin-top: 0px !important;
+  overflow-x: hidden !important;
+}
+
+/* Hide the "Translate" status text */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+/* Remove any padding/margin Google adds */
+body.skiptranslate {
+  top: 0px !important;
+}
+
+/* Hide the iframe completely */
+iframe.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Remove the background overlay */
+.goog-te-banner {
+  display: none !important;
+}
