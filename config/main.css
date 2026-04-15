@@ -10,7 +10,7 @@
 }
 
 * {
-  font-family: ubuntu;
+  font-family: var(--site-font, ubuntu);
   transition: all 0.3s ease;
 }
 
