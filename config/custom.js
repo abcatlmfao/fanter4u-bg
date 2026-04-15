@@ -1,7 +1,7 @@
 // Initialize the homepage
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('title').textContent = 'fanter beta';
-  document.getElementById('subtitle').textContent = 'v0.25, some settings complete, more games added, bugfixes and more coming soon! :3';
+  document.getElementById('subtitle').textContent = 'v0.273, some settings complete, more games added, bugfixes and more coming soon! :3';
   
   // Load your games
   loadGames();
@@ -44,7 +44,8 @@ function setupSearch() {
 }
 
 <script>
-// ===== LOADING SCREEN SYSTEM (COMPLETE - WITH FIXES) =====
+<script>
+// ===== LOADING SCREEN SYSTEM (FIXED - WAITS FOR GAMES PROPERLY) =====
 (function() {
   // Add loading class to body
   document.body.classList.add('loading');
@@ -95,11 +96,11 @@ function setupSearch() {
   const matrixInterval = setInterval(drawMatrix, 50);
   window.addEventListener('resize', resizeCanvas);
   
-  // ===== FALLING MATRIX CODE WITH RANDOM COLORS =====
+  // ===== FALLING MATRIX CODE =====
   function createFallingCode() {
     const el = document.createElement('div');
     el.className = 'falling-matrix';
-    const length = Math.floor(Math.random() * 25) + 10;
+    const length = Math.floor(Math.random() * 20) + 10;
     let code = '';
     for (let i = 0; i < length; i++) {
       code += Math.random() > 0.5 ? '1' : '0';
@@ -107,20 +108,17 @@ function setupSearch() {
     el.textContent = code;
     el.style.left = Math.random() * 100 + '%';
     el.style.fontSize = (Math.random() * 12 + 8) + 'px';
-    el.style.animationDuration = (Math.random() * 2.5 + 1) + 's';
+    el.style.animationDuration = (Math.random() * 2 + 1) + 's';
     
-    // Random color for each falling code string
     const colors = ['#00ff88', '#ff4444', '#ffcc00'];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    el.style.color = randomColor;
-    el.style.textShadow = `0 0 5px ${randomColor}`;
-    el.style.opacity = Math.random() * 0.6 + 0.4;
+    el.style.color = colors[Math.floor(Math.random() * colors.length)];
+    el.style.opacity = Math.random() * 0.5 + 0.3;
     
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3000);
   }
   
-  // ===== BROKEN WALL (MORE RED POPUPS) =====
+  // ===== BROKEN WALL =====
   function createBrokenWall() {
     const wall = document.createElement('div');
     wall.className = 'broken-wall';
@@ -128,19 +126,13 @@ function setupSearch() {
     wall.style.top = Math.random() * 100 + '%';
     wall.style.width = (Math.random() * 200 + 80) + 'px';
     wall.style.height = (Math.random() * 120 + 60) + 'px';
-    
-    // 50% chance to be red/cracked (more red popups)
-    if (Math.random() > 0.5) {
-      wall.classList.add('cracked');
-    }
-    
+    if (Math.random() > 0.5) wall.classList.add('cracked');
     brokenWallContainer.appendChild(wall);
     setTimeout(() => wall.remove(), 800);
   }
   
-  // Create multiple red popups at once
   function createRedPopupCluster() {
-    const clusterSize = Math.floor(Math.random() * 5) + 3; // 3-7 red popups
+    const clusterSize = Math.floor(Math.random() * 4) + 2;
     for (let i = 0; i < clusterSize; i++) {
       setTimeout(() => {
         const wall = document.createElement('div');
@@ -157,6 +149,9 @@ function setupSearch() {
   
   // ===== PROGRESS SIMULATION =====
   let progress = 0;
+  let loadingComplete = false;
+  let gamesLoaded = false;
+  
   const messages = [
     "Initializing fanter.OS...",
     "Loading core modules...",
@@ -166,124 +161,96 @@ function setupSearch() {
     "Applying themes...",
     "Hacking mainframe...",
     "Optimizing performance...",
-    "Loading user preferences...",
     "Almost there...",
     "Starting fanter.OS..."
   ];
   let msgIndex = 0;
   
-  // Start random effects (more frequent red popups)
+  // Random effects
   const effectsInterval = setInterval(() => {
-    if (progress < 100) {
+    if (!loadingComplete) {
       if (Math.random() > 0.6) createBrokenWall();
       if (Math.random() > 0.7) createFallingCode();
-      if (Math.random() > 0.85) createRedPopupCluster(); // Extra red clusters
+      if (Math.random() > 0.85) createRedPopupCluster();
     }
   }, 400);
   
-  // Progress update
+  // Progress bar animation
   const progressInterval = setInterval(() => {
-    progress += Math.random() * 3 + 1;
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(progressInterval);
-      clearInterval(effectsInterval);
-      clearInterval(matrixInterval);
-      progressBar.style.width = '100%';
-      statusEl.textContent = "Complete! Starting fanter.OS...";
-      
-      // Force wait for games to load
-      forceWaitForGames();
-    } else {
-      progressBar.style.width = progress + '%';
-      const newIndex = Math.floor(progress / 9);
-      if (newIndex > msgIndex && newIndex < messages.length) {
-        msgIndex = newIndex;
-        statusEl.textContent = messages[msgIndex];
+    if (!loadingComplete) {
+      progress += Math.random() * 3 + 1;
+      if (progress >= 100) {
+        progress = 100;
+        progressBar.style.width = '100%';
+        statusEl.textContent = "Complete! Loading games...";
+        loadingComplete = true;
+        
+        // Stop effects
+        clearInterval(progressInterval);
+        
+        // Wait for games to load
+        waitForGames();
+      } else {
+        progressBar.style.width = progress + '%';
+        const newIndex = Math.floor(progress / 10);
+        if (newIndex > msgIndex && newIndex < messages.length) {
+          msgIndex = newIndex;
+          statusEl.textContent = messages[msgIndex];
+        }
       }
     }
   }, 300);
   
-  // ===== FORCE WAIT FOR GAMES (FIXED) =====
-  function forceWaitForGames() {
+  // ===== CRITICAL: WAIT FOR GAMES TO ACTUALLY LOAD =====
+  function waitForGames() {
     let attempts = 0;
-    const maxAttempts = 60;
+    const maxAttempts = 100; // 10 seconds max
     
     const checkInterval = setInterval(() => {
       attempts++;
       
-      // Try multiple ways to detect games
+      // Check multiple conditions
       const gamesContainer = document.getElementById('gamesContainer');
-      const hasGames = gamesContainer && gamesContainer.children.length > 0;
-      const hasGamesData = typeof gamesData !== 'undefined' && gamesData && gamesData.length > 0;
+      const gamesInDOM = gamesContainer && gamesContainer.children.length > 0;
+      const gamesDataExists = typeof gamesData !== 'undefined' && gamesData && gamesData.length > 0;
       
-      console.log(`Attempt ${attempts}: Games in DOM: ${hasGames}, GamesData loaded: ${hasGamesData}`);
+      console.log(`Waiting for games - Attempt ${attempts}: Games in DOM: ${gamesInDOM}, GamesData: ${gamesDataExists}`);
       
-      if (hasGames || hasGamesData) {
+      // If games are in the DOM, we're ready
+      if (gamesInDOM) {
+        console.log("Games found in DOM! Starting transition...");
         clearInterval(checkInterval);
-        // Force games to be visible if they exist
-        if (gamesContainer && gamesContainer.children.length === 0 && hasGamesData) {
-          // If gamesData exists but DOM is empty, force reload
-          if (typeof handleSearchInput === 'function') {
-            handleSearchInput();
-          }
+        clearInterval(effectsInterval);
+        clearInterval(matrixInterval);
+        gamesLoaded = true;
+        startTransition();
+      }
+      // If gamesData exists but DOM is empty, force display
+      else if (gamesDataExists && !gamesInDOM) {
+        console.log("GamesData exists but DOM empty, forcing display...");
+        if (typeof handleSearchInput === 'function') {
+          handleSearchInput();
         }
-        
+        // Check again in a moment
         setTimeout(() => {
-          startTransition();
-        }, 800);
-      } else if (attempts >= maxAttempts) {
+          if (gamesContainer && gamesContainer.children.length > 0) {
+            clearInterval(checkInterval);
+            startTransition();
+          }
+        }, 500);
+      }
+      // Timeout - force transition anyway
+      else if (attempts >= maxAttempts) {
+        console.log("Timeout reached, forcing transition...");
         clearInterval(checkInterval);
+        clearInterval(effectsInterval);
+        clearInterval(matrixInterval);
         startTransition();
       }
     }, 100);
   }
   
-  // ===== TRANSITION EFFECT WITH COLORFUL CODE RISE =====
-  function startTransition() {
-    // Create rising code effect before transition
-    createRisingCode();
-    
-    // White flash
-    whiteFlash.style.opacity = '1';
-    
-    setTimeout(() => {
-      // Hide loading screen
-      loadingScreen.style.opacity = '0';
-      
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-        
-        // Show reveal overlay
-        revealOverlay.style.transform = 'scaleX(1)';
-        
-        setTimeout(() => {
-          // Remove white flash
-          whiteFlash.style.opacity = '0';
-          
-          // Show content
-          document.body.classList.remove('loading');
-          
-          // Animate games
-          setTimeout(() => {
-            animateGamesRandomly();
-            animateUIElements();
-          }, 100);
-          
-          setTimeout(() => {
-            revealOverlay.style.transform = 'scaleX(0)';
-            setTimeout(() => {
-              if (revealOverlay.parentNode) revealOverlay.remove();
-              if (whiteFlash.parentNode) whiteFlash.remove();
-            }, 1200);
-          }, 500);
-          
-        }, 300);
-      }, 400);
-    }, 300);
-  }
-  
-  // ===== RISING CODE EFFECT (COLORS CHANGE THEN RISE UP) =====
+  // ===== RISING CODE EFFECT =====
   function createRisingCode() {
     const codeContainer = document.createElement('div');
     codeContainer.style.cssText = `
@@ -310,7 +277,6 @@ function setupSearch() {
       "01001000 01100001 01100011 01101011 01101001 01101110 01100111"
     ];
     
-    // Create multiple rising code lines
     for (let i = 0; i < 15; i++) {
       setTimeout(() => {
         const codeLine = document.createElement('div');
@@ -333,64 +299,66 @@ function setupSearch() {
         `;
         codeContainer.appendChild(codeLine);
         
-        // Add animation keyframes if not exists
-        if (!document.querySelector('#riseAnimation')) {
-          const style = document.createElement('style');
-          style.id = 'riseAnimation';
-          style.textContent = `
-            @keyframes riseAndFade {
-              0% {
-                bottom: -50px;
-                opacity: 0;
-                transform: scale(0.5);
-              }
-              20% {
-                opacity: 1;
-                transform: scale(1);
-              }
-              80% {
-                opacity: 1;
-              }
-              100% {
-                bottom: 100vh;
-                opacity: 0;
-                transform: scale(1.2);
-              }
-            }
-          `;
-          document.head.appendChild(style);
-        }
-        
         setTimeout(() => {
           if (codeLine) codeLine.remove();
         }, 3000);
       }, i * 100);
     }
     
-    // Remove container after animation
     setTimeout(() => {
       if (codeContainer) codeContainer.remove();
     }, 4000);
   }
   
-  // ===== RANDOM GAME APPEARANCE =====
+  // ===== TRANSITION EFFECT =====
+  function startTransition() {
+    // Create rising code effect
+    createRisingCode();
+    
+    // White flash
+    whiteFlash.style.opacity = '1';
+    
+    setTimeout(() => {
+      loadingScreen.style.opacity = '0';
+      
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        revealOverlay.style.transform = 'scaleX(1)';
+        
+        setTimeout(() => {
+          whiteFlash.style.opacity = '0';
+          document.body.classList.remove('loading');
+          
+          // Animate everything
+          setTimeout(() => {
+            animateGamesRandomly();
+            animateUIElements();
+          }, 100);
+          
+          setTimeout(() => {
+            revealOverlay.style.transform = 'scaleX(0)';
+            setTimeout(() => {
+              if (revealOverlay.parentNode) revealOverlay.remove();
+              if (whiteFlash.parentNode) whiteFlash.remove();
+            }, 1200);
+          }, 500);
+          
+        }, 300);
+      }, 400);
+    }, 300);
+  }
+  
+  // ===== ANIMATIONS =====
   function animateGamesRandomly() {
     const games = document.querySelectorAll('.game');
     const gameArray = Array.from(games);
     
     if (gameArray.length === 0) {
-      // If no games found, try to reload them
-      if (typeof handleSearchInput === 'function') {
-        setTimeout(() => {
-          handleSearchInput();
-          setTimeout(() => {
-            const retryGames = document.querySelectorAll('.game');
-            animateGamesRandomly();
-          }, 500);
-        }, 100);
-      }
+      console.log("No games found to animate!");
       return;
     }
+    
+    console.log(`Animating ${gameArray.length} games`);
     
     gameArray.forEach(game => {
       game.style.opacity = '0';
@@ -398,7 +366,7 @@ function setupSearch() {
       game.style.display = 'inline-block';
     });
     
-    // Shuffle array
+    // Shuffle
     for (let i = gameArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [gameArray[i], gameArray[j]] = [gameArray[j], gameArray[i]];
@@ -416,7 +384,6 @@ function setupSearch() {
     });
   }
   
-  // ===== SLIDE IN UI ELEMENTS =====
   function animateUIElements() {
     const elements = [
       { el: document.getElementById('searchInput'), dir: 'left', delay: 100 },
@@ -441,7 +408,7 @@ function setupSearch() {
     });
   }
   
-  // Hide UI elements initially
+  // Hide UI initially
   const searchInput = document.getElementById('searchInput');
   const settingsBtn = document.querySelector('.center .settings-btn');
   if (searchInput) {
@@ -453,11 +420,11 @@ function setupSearch() {
     settingsBtn.style.transform = 'translateX(100px)';
   }
   
-  // Block clicks on loading screen
+  // Block clicks
   loadingScreen.addEventListener('click', (e) => {
     e.stopPropagation();
   });
   
-  console.log('Loading screen active - waiting for games to render...');
+  console.log('Loading screen active - will wait for games to load');
 })();
 </script>
