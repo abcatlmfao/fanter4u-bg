@@ -1,8 +1,7 @@
 // Wait for DOM to be fully loaded before running
 document.addEventListener('DOMContentLoaded', function() {
-  // these change the name of the site (at the top
-  var sitename = "fanter beta."; // Change this to change the name of your website.
-  var subtext = "v0.2, games not added, styling incomplete. :3"; // set the subtext
+  var sitename = "fanter beta.";
+  var subtext = "v0.273, some settings complete, more games added, bugfixes and more coming soon! :3";
 
   var serverUrl1 = "https://gms.parcoil.com";
   var currentPageTitle = document.title;
@@ -73,8 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (favFilterOn) {
       const favs = getFavourites();
       filteredGames = gamesData.filter((game) =>
-        favs.includes(game.name) &&
-        game.name.toLowerCase().includes(searchInputValue)
+        favs.includes(game.name) && game.name.toLowerCase().includes(searchInputValue)
       );
     } else {
       filteredGames = gamesData.filter((game) =>
