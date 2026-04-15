@@ -160,7 +160,10 @@
 
     </div>
 
-    <!-- Language dropdown (portal-style, appended to body) -->
+    <!-- Hidden container for Google Translate -->
+    <div id="google_translate_element" style="display: none;"></div>
+
+    <!-- Language dropdown -->
     <div id="langDropdown">
       <input class="lang-search" id="langSearch" placeholder="🔍 search languages..." oninput="filterLangs()" />
       <div class="lang-list" id="langList"></div>
@@ -281,6 +284,193 @@
     </div>
 
     <script>
+      // ========== GOOGLE TRANSLATE (WORKING VERSION) ==========
+      let translateInitialized = false;
+      let currentLang = localStorage.getItem("siteLang") || "en";
+
+      // Load Google Translate API
+      function loadGoogleTranslate() {
+        if (document.querySelector('script[src*="translate.google.com"]')) return;
+        
+        // Set the default language via cookie
+        document.cookie = "googtrans=/en/" + currentLang + "; path=/";
+        
+        // Create callback function
+        window.googleTranslateElementInit = function() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: currentLang === 'en' ? 'en' : currentLang,
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: true
+          }, 'google_translate_element');
+          translateInitialized = true;
+        };
+        
+        // Add the script
+        const script = document.createElement('script');
+        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+
+      // Remove translation and reset to English
+      function removeTranslation() {
+        // Remove Google Translate frame
+        const frame = document.querySelector('.goog-te-banner-frame');
+        if (frame) frame.remove();
+        
+        // Remove any translate elements
+        const translateElements = document.querySelectorAll('.goog-te-balloon-frame, .goog-te-banner-frame, .goog-te-menu-frame');
+        translateElements.forEach(el => el.remove());
+        
+        // Reset cookie
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + window.location.hostname + "; path=/";
+        
+        // Remove the translate class from body
+        document.body.classList.remove('translated');
+        
+        // Reload the page to reset (simplest approach)
+        window.location.reload();
+      }
+
+      // Apply translation
+      function applyTranslation(langCode) {
+        if (langCode === 'en') {
+          removeTranslation();
+          return;
+        }
+        
+        currentLang = langCode;
+        localStorage.setItem("siteLang", langCode);
+        
+        // Set cookie and reload for clean translation
+        document.cookie = "googtrans=/en/" + langCode + "; path=/";
+        window.location.reload();
+      }
+
+      // ========== LANGUAGE DROPDOWN ==========
+      const LANGUAGES = [
+        { code: "en", name: "English",    flag: "🇬🇧" },
+        { code: "es", name: "Spanish",    flag: "🇪🇸" },
+        { code: "fr", name: "French",     flag: "🇫🇷" },
+        { code: "de", name: "German",     flag: "🇩🇪" },
+        { code: "it", name: "Italian",    flag: "🇮🇹" },
+        { code: "pt", name: "Portuguese", flag: "🇧🇷" },
+        { code: "ru", name: "Russian",    flag: "🇷🇺" },
+        { code: "zh-CN", name: "Chinese (Simplified)", flag: "🇨🇳" },
+        { code: "ja", name: "Japanese",   flag: "🇯🇵" },
+        { code: "ko", name: "Korean",     flag: "🇰🇷" },
+        { code: "ar", name: "Arabic",     flag: "🇸🇦" },
+        { code: "hi", name: "Hindi",      flag: "🇮🇳" },
+        { code: "nl", name: "Dutch",      flag: "🇳🇱" },
+        { code: "pl", name: "Polish",     flag: "🇵🇱" },
+        { code: "tr", name: "Turkish",    flag: "🇹🇷" },
+        { code: "sv", name: "Swedish",    flag: "🇸🇪" },
+        { code: "no", name: "Norwegian",  flag: "🇳🇴" },
+        { code: "da", name: "Danish",     flag: "🇩🇰" },
+        { code: "fi", name: "Finnish",    flag: "🇫🇮" },
+        { code: "uk", name: "Ukrainian",  flag: "🇺🇦" },
+        { code: "vi", name: "Vietnamese", flag: "🇻🇳" },
+        { code: "th", name: "Thai",       flag: "🇹🇭" },
+        { code: "el", name: "Greek",      flag: "🇬🇷" },
+        { code: "he", name: "Hebrew",     flag: "🇮🇱" },
+      ];
+
+      let langDropdownOpen = false;
+
+      function buildLangList(filter = "") {
+        const list = document.getElementById("langList");
+        list.innerHTML = "";
+        const filtered = LANGUAGES.filter(l =>
+          l.name.toLowerCase().includes(filter.toLowerCase()) ||
+          l.code.toLowerCase().includes(filter.toLowerCase())
+        );
+        filtered.forEach(lang => {
+          const btn = document.createElement("button");
+          btn.className = "lang-option" + (lang.code === currentLang ? " active" : "");
+          btn.innerHTML = `<span class="lang-flag">${lang.flag}</span><span>${lang.name}</span>`;
+          btn.onclick = () => selectLang(lang);
+          list.appendChild(btn);
+        });
+      }
+
+      function selectLang(lang) {
+        currentLang = lang.code;
+        localStorage.setItem("siteLang", lang.code);
+        document.getElementById("langCurrentLabel").textContent = `current: ${lang.name}`;
+        document.getElementById("langTriggerBtn").textContent = `${lang.flag} ${lang.name}`;
+        buildLangList(document.getElementById("langSearch").value);
+        closeLangDropdown();
+        
+        // Apply translation (page will reload for non-English)
+        applyTranslation(lang.code);
+      }
+
+      window.toggleLangDropdown = function(e) {
+        e.stopPropagation();
+        if (langDropdownOpen) {
+          closeLangDropdown();
+        } else {
+          openLangDropdown(e.currentTarget);
+        }
+      };
+
+      function openLangDropdown(triggerBtn) {
+        const dropdown = document.getElementById("langDropdown");
+        const rect = triggerBtn.getBoundingClientRect();
+
+        dropdown.style.top = (rect.bottom + window.scrollY + 8) + "px";
+        dropdown.style.left = (rect.left + window.scrollX) + "px";
+
+        buildLangList();
+        document.getElementById("langSearch").value = "";
+
+        const cur = LANGUAGES.find(l => l.code === currentLang);
+        if (cur) {
+          document.getElementById("langCurrentLabel").textContent = `current: ${cur.name}`;
+          document.getElementById("langTriggerBtn").textContent = `${cur.flag} ${cur.name}`;
+        }
+
+        dropdown.classList.add("open");
+        langDropdownOpen = true;
+        setTimeout(() => document.getElementById("langSearch").focus(), 50);
+      }
+
+      function closeLangDropdown() {
+        const dropdown = document.getElementById("langDropdown");
+        dropdown.classList.remove("open");
+        langDropdownOpen = false;
+      }
+
+      window.filterLangs = function() {
+        buildLangList(document.getElementById("langSearch").value);
+      };
+
+      document.addEventListener("click", (e) => {
+        if (langDropdownOpen && !document.getElementById("langDropdown").contains(e.target)) {
+          closeLangDropdown();
+        }
+      });
+
+      // Check if we need to apply translation on page load
+      (function initTranslation() {
+        const savedLang = localStorage.getItem("siteLang");
+        if (savedLang && savedLang !== "en") {
+          currentLang = savedLang;
+          const cur = LANGUAGES.find(l => l.code === savedLang);
+          if (cur) {
+            document.getElementById("langTriggerBtn").textContent = `${cur.flag} ${cur.name}`;
+          }
+          // Set cookie and load translate
+          document.cookie = "googtrans=/en/" + savedLang + "; path=/";
+          loadGoogleTranslate();
+        } else {
+          currentLang = "en";
+          localStorage.setItem("siteLang", "en");
+        }
+      })();
+
       // ========== FAVOURITES ==========
       function updateFavBtn() {
         const btn = document.getElementById("favToggleBtn");
@@ -356,17 +546,13 @@
         spacegrotesk: "'Space Grotesk', sans-serif"
       };
 
-      // Live preview — updates font size, color, and font family instantly
       window.updateFontPreview = function() {
         const preview = document.getElementById("fontPreview");
         if (!preview) return;
-
         const sizeVal = document.getElementById("fontSizeSlider").value;
         const colorVal = document.getElementById("fontColorPicker").value;
-
         selectedFontSize = parseInt(sizeVal);
         selectedFontColor = colorVal;
-
         preview.style.fontSize = sizeVal + "px";
         preview.style.color = colorVal;
         preview.style.fontFamily = fontMap[selectedFontFamily] || selectedFontFamily;
@@ -393,7 +579,6 @@
         document.getElementById("themeTabSelector").style.display = "none";
         document.querySelectorAll(".theme-tab-content").forEach(t => t.style.display = "none");
         document.getElementById("themeTab-" + tab).style.display = "block";
-        // Refresh preview when opening text tab
         if (tab === "text") updateFontPreview();
       };
       window.selectBg = function(type) {
@@ -447,165 +632,6 @@
       document.getElementById("themeOverlay").addEventListener("click", (e) => {
         if (e.target.id === "themeOverlay") closeThemeMenu();
       });
-
-      // ========== LANGUAGE DROPDOWN ==========
-      const LANGUAGES = [
-        { code: "en", name: "English",    flag: "🇬🇧" },
-        { code: "es", name: "Spanish",    flag: "🇪🇸" },
-        { code: "fr", name: "French",     flag: "🇫🇷" },
-        { code: "de", name: "German",     flag: "🇩🇪" },
-        { code: "it", name: "Italian",    flag: "🇮🇹" },
-        { code: "pt", name: "Portuguese", flag: "🇧🇷" },
-        { code: "ru", name: "Russian",    flag: "🇷🇺" },
-        { code: "zh", name: "Chinese",    flag: "🇨🇳" },
-        { code: "ja", name: "Japanese",   flag: "🇯🇵" },
-        { code: "ko", name: "Korean",     flag: "🇰🇷" },
-        { code: "ar", name: "Arabic",     flag: "🇸🇦" },
-        { code: "hi", name: "Hindi",      flag: "🇮🇳" },
-        { code: "nl", name: "Dutch",      flag: "🇳🇱" },
-        { code: "pl", name: "Polish",     flag: "🇵🇱" },
-        { code: "tr", name: "Turkish",    flag: "🇹🇷" },
-        { code: "sv", name: "Swedish",    flag: "🇸🇪" },
-        { code: "no", name: "Norwegian",  flag: "🇳🇴" },
-        { code: "da", name: "Danish",     flag: "🇩🇰" },
-        { code: "fi", name: "Finnish",    flag: "🇫🇮" },
-        { code: "uk", name: "Ukrainian",  flag: "🇺🇦" },
-      ];
-
-      let langDropdownOpen = false;
-      let currentLang = localStorage.getItem("siteLang") || "en";
-
-      function buildLangList(filter = "") {
-        const list = document.getElementById("langList");
-        list.innerHTML = "";
-        const filtered = LANGUAGES.filter(l =>
-          l.name.toLowerCase().includes(filter.toLowerCase()) ||
-          l.code.toLowerCase().includes(filter.toLowerCase())
-        );
-        filtered.forEach(lang => {
-          const btn = document.createElement("button");
-          btn.className = "lang-option" + (lang.code === currentLang ? " active" : "");
-          btn.innerHTML = `<span class="lang-flag">${lang.flag}</span><span>${lang.name}</span>`;
-          btn.onclick = () => selectLang(lang);
-          list.appendChild(btn);
-        });
-      }
-
-      function selectLang(lang) {
-        currentLang = lang.code;
-        localStorage.setItem("siteLang", lang.code);
-        document.getElementById("langCurrentLabel").textContent = `current: ${lang.name}`;
-        document.getElementById("langTriggerBtn").textContent = `${lang.flag} ${lang.name}`;
-        buildLangList(document.getElementById("langSearch").value);
-
-        // Inject Google Translate if not English
-        if (lang.code !== "en") {
-          injectGoogleTranslate(lang.code);
-        } else {
-          removeGoogleTranslate();
-        }
-
-        closeLangDropdown();
-      }
-
-      function injectGoogleTranslate(langCode) {
-        // Remove any existing instance first
-        removeGoogleTranslate();
-
-        // Add Google Translate script
-        window.googleTranslateElementInit = function() {
-          new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: langCode,
-            autoDisplay: true,
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-          }, 'google_translate_element');
-        };
-
-        const el = document.createElement("div");
-        el.id = "google_translate_element";
-        el.style.display = "none";
-        document.body.appendChild(el);
-
-        const script = document.createElement("script");
-        script.id = "gt_script";
-        script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-        document.body.appendChild(script);
-      }
-
-      function removeGoogleTranslate() {
-        const el = document.getElementById("google_translate_element");
-        const sc = document.getElementById("gt_script");
-        if (el) el.remove();
-        if (sc) sc.remove();
-        // Remove Google Translate bar if injected
-        const bar = document.querySelector(".skiptranslate");
-        if (bar) bar.remove();
-        document.body.style.top = "";
-        const frame = document.querySelector("iframe.skiptranslate");
-        if (frame) frame.remove();
-        // Reset cookie
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      }
-
-      window.toggleLangDropdown = function(e) {
-        e.stopPropagation();
-        if (langDropdownOpen) {
-          closeLangDropdown();
-        } else {
-          openLangDropdown(e.currentTarget);
-        }
-      };
-
-      function openLangDropdown(triggerBtn) {
-        const dropdown = document.getElementById("langDropdown");
-        const rect = triggerBtn.getBoundingClientRect();
-
-        // Position below the button
-        dropdown.style.top = (rect.bottom + window.scrollY + 8) + "px";
-        dropdown.style.left = (rect.left + window.scrollX) + "px";
-
-        buildLangList();
-        document.getElementById("langSearch").value = "";
-
-        // Update current label
-        const cur = LANGUAGES.find(l => l.code === currentLang);
-        if (cur) {
-          document.getElementById("langCurrentLabel").textContent = `current: ${cur.name}`;
-          document.getElementById("langTriggerBtn").textContent = `${cur.flag} ${cur.name}`;
-        }
-
-        dropdown.classList.add("open");
-        langDropdownOpen = true;
-
-        // Focus search
-        setTimeout(() => document.getElementById("langSearch").focus(), 50);
-      }
-
-      function closeLangDropdown() {
-        const dropdown = document.getElementById("langDropdown");
-        dropdown.classList.remove("open");
-        langDropdownOpen = false;
-      }
-
-      window.filterLangs = function() {
-        buildLangList(document.getElementById("langSearch").value);
-      };
-
-      // Close dropdown on outside click
-      document.addEventListener("click", (e) => {
-        if (langDropdownOpen && !document.getElementById("langDropdown").contains(e.target)) {
-          closeLangDropdown();
-        }
-      });
-
-      // Init button label on load
-      (function initLangBtn() {
-        const cur = LANGUAGES.find(l => l.code === currentLang);
-        if (cur && cur.code !== "en") {
-          document.getElementById("langTriggerBtn").textContent = `${cur.flag} ${cur.name}`;
-        }
-      })();
 
       // ========== SAFETY KEY DOUBLE-TAP ==========
       let lastKeyTime = 0;
