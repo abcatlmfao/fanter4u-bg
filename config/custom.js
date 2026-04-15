@@ -43,11 +43,12 @@ function setupSearch() {
   });
 }
 
-// ===== LOADING SCREEN WITH MATRIX RAIN =====
+// ===== LOADING SCREEN WITH BROKEN WALL BREAKTHROUGHS =====
 (function() {
   const loadingScreen = document.getElementById('loadingScreen');
   const progressBar = document.querySelector('.loading-progress-bar');
   const statusText = document.querySelector('.loading-status');
+  const brokenWallContainer = document.getElementById('brokenWallContainer');
   
   // Matrix Rain Effect
   const canvas = document.getElementById('matrixCanvas');
@@ -55,10 +56,11 @@ function setupSearch() {
   
   let width = window.innerWidth;
   let height = window.innerHeight;
-  let columns = [];
   let drops = [];
+  let fontSize = 16;
+  let columns;
   
-  // Matrix characters (green code)
+  // Matrix characters
   const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#%&@!?<>{}[]()*+-=~`";
   
   function resizeCanvas() {
@@ -67,8 +69,7 @@ function setupSearch() {
     canvas.width = width;
     canvas.height = height;
     
-    // Initialize drops
-    columns = Math.floor(width / 20);
+    columns = Math.floor(width / fontSize);
     drops = [];
     for (let i = 0; i < columns; i++) {
       drops.push(Math.random() * -height);
@@ -79,17 +80,15 @@ function setupSearch() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
     ctx.fillRect(0, 0, width, height);
     
-    ctx.fillStyle = '#00ff88';
-    ctx.font = '16px monospace';
-    
     for (let i = 0; i < drops.length; i++) {
       const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-      const x = i * 20;
-      const y = drops[i] * 20;
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
       
-      // Random green shades
-      const greenShades = ['#00ff88', '#00cc66', '#33ff99', '#00ffaa'];
+      // Gradient green shades
+      const greenShades = ['#00ff88', '#00cc66', '#33ff99', '#00ffaa', '#66ffcc'];
       ctx.fillStyle = greenShades[Math.floor(Math.random() * greenShades.length)];
+      ctx.font = fontSize + 'px monospace';
       
       ctx.fillText(text, x, y);
       
@@ -105,42 +104,51 @@ function setupSearch() {
   
   window.addEventListener('resize', resizeCanvas);
   
-  // Random glitch blocks (broken monitor effect)
-  function createGlitchBlock() {
-    const block = document.createElement('div');
-    block.className = 'glitch-block';
-    block.style.left = Math.random() * 100 + '%';
-    block.style.top = Math.random() * 100 + '%';
-    block.style.width = Math.random() * 200 + 50 + 'px';
-    block.style.height = Math.random() * 10 + 2 + 'px';
-    block.style.background = `rgba(${Math.random() * 255}, ${Math.random() * 100}, ${Math.random() * 100}, 0.5)`;
-    document.body.appendChild(block);
+  // ===== BROKEN WALL BREAKTHROUGHS =====
+  function createBrokenWall() {
+    const wall = document.createElement('div');
+    wall.className = 'broken-wall';
     
-    setTimeout(() => block.remove(), 500);
+    // Random position
+    const posX = Math.random() * 100;
+    const posY = Math.random() * 100;
+    
+    // Random size (like broken wall pieces)
+    const sizeW = Math.random() * 250 + 100;
+    const sizeH = Math.random() * 150 + 80;
+    
+    wall.style.left = posX + '%';
+    wall.style.top = posY + '%';
+    wall.style.width = sizeW + 'px';
+    wall.style.height = sizeH + 'px';
+    
+    // 30% chance to be a "cracked" red wall
+    if (Math.random() > 0.7) {
+      wall.classList.add('cracked');
+    }
+    
+    brokenWallContainer.appendChild(wall);
+    
+    // Remove after animation
+    setTimeout(() => {
+      if (wall && wall.remove) wall.remove();
+    }, 800);
   }
   
-  // Random colored glitch blocks
-  function createColorGlitch() {
-    const glitch = document.createElement('div');
-    glitch.style.cssText = `
-      position: fixed;
-      top: ${Math.random() * 100}%;
-      left: ${Math.random() * 100}%;
-      width: ${Math.random() * 300 + 50}px;
-      height: ${Math.random() * 20 + 5}px;
-      background: ${Math.random() > 0.5 ? 'rgba(255, 0, 0, 0.4)' : 'rgba(0, 255, 0, 0.4)'};
-      pointer-events: none;
-      z-index: 99999;
-      animation: glitchFlash 0.2s ease-out forwards;
-    `;
-    document.body.appendChild(glitch);
-    setTimeout(() => glitch.remove(), 200);
+  // Create multiple breakthroughs at once (like a wall shattering)
+  function createBreakthroughCluster() {
+    const clusterSize = Math.floor(Math.random() * 5) + 2; // 2-6 breakthroughs
+    for (let i = 0; i < clusterSize; i++) {
+      setTimeout(() => {
+        createBrokenWall();
+      }, i * 50);
+    }
   }
   
   // Random screen shake
   function screenShake() {
-    if (Math.random() > 0.95) {
-      loadingScreen.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+    if (Math.random() > 0.92) {
+      loadingScreen.style.transform = `translate(${Math.random() * 6 - 3}px, ${Math.random() * 6 - 3}px)`;
       setTimeout(() => {
         loadingScreen.style.transform = 'translate(0, 0)';
       }, 100);
@@ -152,9 +160,11 @@ function setupSearch() {
   const statusMessages = [
     "Initializing fanter.OS...",
     "Loading core modules...",
-    "Connecting to database...",
+    "Bypassing firewalls...",
+    "Decrypting game database...",
     "Loading games library...",
     "Applying custom themes...",
+    "Hacking mainframe...",
     "Checking for updates...",
     "Loading user preferences...",
     "Almost there...",
@@ -163,13 +173,30 @@ function setupSearch() {
   
   let messageIndex = 0;
   
+  // Create breakthroughs at intervals
+  const breakthroughInterval = setInterval(() => {
+    if (progress < 100) {
+      createBreakthroughCluster();
+      screenShake();
+    }
+  }, 800);
+  
+  // Extra random single breakthroughs
+  const randomBreakthroughInterval = setInterval(() => {
+    if (progress < 100 && Math.random() > 0.6) {
+      createBrokenWall();
+    }
+  }, 300);
+  
   const loadInterval = setInterval(() => {
-    progress += Math.random() * 15 + 5;
+    progress += Math.random() * 12 + 3;
     
     if (progress >= 100) {
       progress = 100;
       clearInterval(loadInterval);
       clearInterval(matrixInterval);
+      clearInterval(breakthroughInterval);
+      clearInterval(randomBreakthroughInterval);
       
       statusText.textContent = "Complete! Starting fanter.OS...";
       progressBar.style.width = '100%';
@@ -180,7 +207,7 @@ function setupSearch() {
         
         // Remove loading screen from DOM after animation
         setTimeout(() => {
-          loadingScreen.remove();
+          if (loadingScreen && loadingScreen.remove) loadingScreen.remove();
         }, 800);
       }, 500);
     }
@@ -188,25 +215,15 @@ function setupSearch() {
     progressBar.style.width = progress + '%';
     
     // Update status message
-    if (progress > (messageIndex + 1) * 11 && messageIndex < statusMessages.length - 1) {
-      messageIndex++;
+    const messageIndexCalc = Math.floor(progress / 10);
+    if (messageIndexCalc > messageIndex && messageIndexCalc < statusMessages.length) {
+      messageIndex = messageIndexCalc;
       statusText.textContent = statusMessages[messageIndex];
     }
     
-    // Create random glitch effcts during loading
-    if (Math.random() > 0.85) {
-      createGlitchBlock();
-    }
-    
-    if (Math.random() > 0.9) {
-      createColorGlitch();
-    }
-    
-    screenShake();
-    
-  }, 300);
+  }, 250);
   
-  // extra glitch effects on the title
+  // Extra glitch effects on the title
   const title = document.querySelector('.loading-title');
   if (title) {
     setInterval(() => {
@@ -214,7 +231,7 @@ function setupSearch() {
         const originalText = title.textContent;
         const glitchChars = "!@#$%^&*()_+{}[]|\\:;\"'<>,.?/";
         const glitched = originalText.split('').map(char => {
-          if (Math.random() > 0.9) {
+          if (Math.random() > 0.85) {
             return glitchChars[Math.floor(Math.random() * glitchChars.length)];
           }
           return char;
@@ -225,16 +242,23 @@ function setupSearch() {
           title.textContent = originalText;
         }, 100);
       }
-    }, 200);
+    }, 150);
   }
   
-  // Prevent user from interacting with the page while loading
+  // Block all interaction with the background
   loadingScreen.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  });
+  
+  loadingScreen.addEventListener('mousemove', (e) => {
     e.stopPropagation();
   });
   
-  // Ensure canvs updates on resize
+  // Ensure canvas updates on resize
   window.addEventListener('resize', () => {
     resizeCanvas();
   });
+  
+  console.log('Loading screen initialized with matrix breakthroughs!');
 })();
