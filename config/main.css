@@ -1191,7 +1191,7 @@ body.loading .fav-sidebar-btn {
   visibility: hidden;
 }
 
-/* Game pop animation */
+/* Game pop aniation */
 @keyframes gamePop {
   0% { transform: scale(0); opacity: 0; }
   60% { transform: scale(1.1); }
@@ -1200,4 +1200,25 @@ body.loading .fav-sidebar-btn {
 
 .game {
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Rising code animation */
+@keyframes riseAndFade {
+  0% {
+    bottom: -50px;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 100vh;
+    opacity: 0;
+    transform: scale(1.2);
+  }
 }
