@@ -1,86 +1,912 @@
-/* Settings Tabs */
-#settingsMenu {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fanter v0.3 | settings</title>
+    <link rel="stylesheet" href="config/main.css" />
+    <script src="config/theme-loader.js"></script>
+    <script src="config/main.js"></script>
+    <style>
+      .settings-category {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      .settings-category h3 {
+        color: #ffcc00;
+        font-family: 'Orbitron', monospace;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid rgba(255,204,0,0.3);
+      }
+      .settings-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+      }
+      .settings-card {
+        width: 260px;
+      }
+      .settings-card select, .settings-card input[type="range"] {
+        width: 100%;
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        background: rgba(20,30,50,0.8);
+        border: 1px solid rgba(45,90,227,0.5);
+        color: white;
+      }
+      .color-preview {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 10px;
+        vertical-align: middle;
+        border: 2px solid white;
+      }
+      .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 0;
+        padding: 8px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+      }
+      .toggle-switch {
+        width: 50px;
+        height: 24px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        cursor: pointer;
+        position: relative;
+        transition: 0.2s;
+      }
+      .toggle-switch.active {
+        background: #00ff88;
+      }
+      .toggle-switch::after {
+        content: '';
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        position: absolute;
+        top: 2px;
+        left: 4px;
+        transition: 0.2s;
+      }
+      .toggle-switch.active::after {
+        left: 26px;
+      }
+    </style>
+  </head>
+  <body>
+    <span id="title" style="display:none"></span>
+    <span id="subtitle" style="display:none"></span>
 
-/* Toggle Switch */
-.toggle-switch {
-  width: 50px;
-  height: 24px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 12px;
-  cursor: pointer;
-  position: relative;
-  transition: 0.2s;
-}
+    <div class="center">
+      <h1>settings.</h1>
+      <p>customization for your experience</p>
+      <button class="settings-btn" onclick="window.location.href='index.html'">← back</button>
+    </div>
 
-.toggle-switch.active {
-  background: #00ff88;
-}
+    <!-- Main Settings Menu with Tabs -->
+    <div id="settingsMenu">
+      <!-- Tab Selector -->
+      <div id="settingsTabSelector">
+        <h2>⚙️ fanter settings</h2>
+        <p class="safety-desc">choose a category to customize.</p>
+        <div class="theme-tab-grid">
+          <button class="theme-tab-card" onclick="showSettingsTab('game')">
+            <div class="theme-tab-icon">🎮</div>
+            <div>game</div>
+          </button>
+          <button class="theme-tab-card" onclick="showSettingsTab('visual')">
+            <div class="theme-tab-icon">🎨</div>
+            <div>visual</div>
+          </button>
+          <button class="theme-tab-card" onclick="showSettingsTab('audio')">
+            <div class="theme-tab-icon">🔊</div>
+            <div>audio</div>
+          </button>
+          <button class="theme-tab-card" onclick="showSettingsTab('performance')">
+            <div class="theme-tab-icon">⚡</div>
+            <div>performance</div>
+          </button>
+          <button class="theme-tab-card" onclick="showSettingsTab('privacy')">
+            <div class="theme-tab-icon">🔒</div>
+            <div>privacy</div>
+          </button>
+          <button class="theme-tab-card" onclick="showSettingsTab('theme')">
+            <div class="theme-tab-icon">🎨</div>
+            <div>theme presets</div>
+          </button>
+        </div>
+      </div>
 
-.toggle-switch::after {
-  content: '';
-  width: 20px;
-  height: 20px;
-  background: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 4px;
-  transition: 0.2s;
-}
+      <!-- GAME TAB -->
+      <div id="settingsTab-game" class="theme-tab-content" style="display:none;">
+        <button class="theme-back-btn" onclick="showSettingsTabSelector()">← back</button>
+        <h2>🎮 game settings</h2>
+        <p class="safety-desc">customize your gaming experience.</p>
+        
+        <div class="theme-option-grid">
+          <div class="settings-card" style="width:100%; max-width:300px;">
+            <div class="settings-card-icon">🎲</div>
+            <h2>Random Game</h2>
+            <p>Pick a random game to play</p>
+            <button class="settings-btn" onclick="openRandomGame()">🎲 Surprise Me!</button>
+          </div>
+        </div>
 
-.toggle-switch.active::after {
-  left: 26px;
-}
+        <label>grid layout</label>
+        <select id="gridLayout" onchange="setGridLayout(this.value)">
+          <option value="3">3 columns</option>
+          <option value="4" selected>4 columns</option>
+          <option value="5">5 columns</option>
+          <option value="6">6 columns</option>
+        </select>
 
-/* Setting Row */
-.setting-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 10px 0;
-  padding: 8px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-}
+        <label>card size</label>
+        <select id="cardSize" onchange="setCardSize(this.value)">
+          <option value="small">small (160px)</option>
+          <option value="medium" selected>medium (200px)</option>
+          <option value="large">large (240px)</option>
+        </select>
 
-/* Low Performance Mode */
-body.low-perf .game {
-  animation: none !important;
-  transition: none !important;
-}
+        <div class="setting-row">
+          <span>hide animations</span>
+          <div id="hideAnimationsToggle" class="toggle-switch" onclick="toggleHideAnimations()"></div>
+        </div>
 
-body.low-perf .game:hover {
-  transform: none !important;
-}
+        <div class="setting-row">
+          <span>compact mode</span>
+          <div id="compactModeToggle" class="toggle-switch" onclick="toggleCompactMode()"></div>
+        </div>
 
-/* Reduce Motion */
-body.reduce-motion * {
-  animation-duration: 0.01ms !important;
-  transition-duration: 0.01ms !important;
-}
+        <div class="setting-row">
+          <span>recently played</span>
+          <div id="recentlyPlayedToggle" class="toggle-switch" onclick="toggleRecentlyPlayed()"></div>
+        </div>
 
-/* Disable Animations */
-body.no-animations * {
-  animation: none !important;
-  transition: none !important;
-}
+        <div class="setting-row">
+          <span>popular games tracker</span>
+          <div id="popularGamesToggle" class="toggle-switch" onclick="togglePopularGames()"></div>
+        </div>
+      </div>
 
-/* Grid Layout */
-#gamesContainer {
-  transition: all 0.3s ease;
-}
+      <!-- VISUAL TAB -->
+      <div id="settingsTab-visual" class="theme-tab-content" style="display:none;">
+        <button class="theme-back-btn" onclick="showSettingsTabSelector()">← back</button>
+        <h2>🎨 visual settings</h2>
+        <p class="safety-desc">customize how the site looks.</p>
 
-/* Color Preview */
-.color-preview {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-left: 10px;
-  vertical-align: middle;
-  border: 2px solid white;
-}
+        <label>custom accent color</label>
+        <input type="color" id="accentColor" value="#2d5ae3" onchange="setAccentColor(this.value)" />
+        <div id="accentPreview" class="color-preview" style="background:#2d5ae3; margin-top:10px;"></div>
+
+        <label>blur intensity</label>
+        <input type="range" id="blurIntensity" min="0" max="20" value="6" onchange="setBlurIntensity(this.value)" />
+        
+        <label>card transparency</label>
+        <input type="range" id="cardOpacity" min="0.5" max="1" step="0.05" value="0.8" onchange="setCardOpacity(this.value)" />
+
+        <label>border style</label>
+        <select id="borderStyle" onchange="setBorderStyle(this.value)">
+          <option value="solid">solid</option>
+          <option value="glowing" selected>glowing</option>
+          <option value="neon">neon</option>
+          <option value="minimal">minimal</option>
+        </select>
+
+        <label>shadow intensity</label>
+        <input type="range" id="shadowIntensity" min="0" max="30" value="15" onchange="setShadowIntensity(this.value)" />
+
+        <label>corner roundness</label>
+        <input type="range" id="cornerRoundness" min="0" max="30" value="15" onchange="setCornerRoundness(this.value)" />
+
+        <div class="setting-row">
+          <span>sidebar position (right)</span>
+          <div id="sidebarRightToggle" class="toggle-switch" onclick="toggleSidebarPosition()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>reduce motion</span>
+          <div id="reduceMotionToggle" class="toggle-switch" onclick="toggleReduceMotion()"></div>
+        </div>
+      </div>
+
+      <!-- AUDIO TAB -->
+      <div id="settingsTab-audio" class="theme-tab-content" style="display:none;">
+        <button class="theme-back-btn" onclick="showSettingsTabSelector()">← back</button>
+        <h2>🔊 audio settings</h2>
+        <p class="safety-desc">control sounds and music.</p>
+
+        <div class="setting-row">
+          <span>hover sounds</span>
+          <div id="hoverSoundsToggle" class="toggle-switch" onclick="toggleHoverSounds()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>background music</span>
+          <div id="bgMusicToggle" class="toggle-switch" onclick="toggleBackgroundMusic()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>click effects</span>
+          <div id="clickEffectsToggle" class="toggle-switch" onclick="toggleClickEffects()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>mute all</span>
+          <div id="muteAllToggle" class="toggle-switch" onclick="toggleMuteAll()"></div>
+        </div>
+
+        <label>music volume</label>
+        <input type="range" id="musicVolume" min="0" max="100" value="30" onchange="setMusicVolume(this.value)" />
+        
+        <label>sfx volume</label>
+        <input type="range" id="sfxVolume" min="0" max="100" value="50" onchange="setSFXVolume(this.value)" />
+      </div>
+
+      <!-- PERFORMANCE TAB -->
+      <div id="settingsTab-performance" class="theme-tab-content" style="display:none;">
+        <button class="theme-back-btn" onclick="showSettingsTabSelector()">← back</button>
+        <h2>⚡ performance settings</h2>
+        <p class="safety-desc">optimize for your device.</p>
+
+        <div class="setting-row">
+          <span>low performance mode</span>
+          <div id="lowPerfModeToggle" class="toggle-switch" onclick="toggleLowPerformanceMode()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>lazy loading</span>
+          <div id="lazyLoadToggle" class="toggle-switch" onclick="toggleLazyLoading()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>disable shadows</span>
+          <div id="disableShadowsToggle" class="toggle-switch" onclick="toggleDisableShadows()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>disable animations</span>
+          <div id="disableAnimationsToggle" class="toggle-switch" onclick="toggleDisableAnimations()"></div>
+        </div>
+      </div>
+
+      <!-- PRIVACY TAB -->
+      <div id="settingsTab-privacy" class="theme-tab-content" style="display:none;">
+        <button class="theme-back-btn" onclick="showSettingsTabSelector()">← back</button>
+        <h2>🔒 privacy settings</h2>
+        <p class="safety-desc">control your data.</p>
+
+        <div class="setting-row">
+          <span>incognito mode</span>
+          <div id="incognitoToggle" class="toggle-switch" onclick="toggleIncognito()"></div>
+        </div>
+
+        <div class="setting-row">
+          <span>recommended games</span>
+          <div id="recommendedToggle" class="toggle-switch" onclick="toggleRecommended()"></div>
+        </div>
+
+        <button class="settings-btn" onclick="clearHistory()" style="margin-top:20px;">🗑️ clear search history</button>
+        <button class="settings-btn" onclick="clearRecentlyPlayed()" style="margin-top:10px;">🎮 clear recently played</button>
+        <button class="settings-btn danger-btn" onclick="resetAllSettings()" style="margin-top:10px;">⚠️ reset all settings</button>
+      </div>
+
+      <!-- THEME PRESETS TAB (existing) -->
+      <div id="settingsTab-theme" class="theme-tab-content" style="display:none;">
+        <button class="theme-back-btn" onclick="showSettingsTabSelector()">← back</button>
+        <h2>✨ theme presets</h2>
+        <p class="safety-desc">pick a full preset theme.</p>
+        <div class="theme-option-grid">
+          <button class="theme-option-btn theme-preset" onclick="selectThemePreset('chill')" id="theme-chill">chill (normal)</button>
+          <button class="theme-option-btn theme-preset" onclick="selectThemePreset('dark')" id="theme-dark">dark mode</button>
+          <button class="theme-option-btn theme-preset" onclick="selectThemePreset('light')" id="theme-light">light mode</button>
+          <button class="theme-option-btn theme-preset" onclick="selectThemePreset('rainbow')" id="theme-rainbow">rainbow</button>
+          <button class="theme-option-btn theme-preset" onclick="selectThemePreset('neon')" id="theme-neon">neon city</button>
+        </div>
+        
+        <label style="margin-top:20px;">seasonal themes</label>
+        <div class="theme-option-grid">
+          <button class="theme-option-btn" onclick="selectSeasonalTheme('halloween')">🎃 halloween</button>
+          <button class="theme-option-btn" onclick="selectSeasonalTheme('christmas')">🎄 christmas</button>
+          <button class="theme-option-btn" onclick="selectSeasonalTheme('spring')">🌸 spring</button>
+          <button class="theme-option-btn" onclick="selectSeasonalTheme('summer')">☀️ summer</button>
+        </div>
+
+        <label style="margin-top:20px;">dynamic themes</label>
+        <div class="theme-option-grid">
+          <button class="theme-option-btn" onclick="setDynamicTheme('time')">🕐 time of day</button>
+          <button class="theme-option-btn" onclick="setDynamicTheme('weather')">🌤️ weather based</button>
+        </div>
+
+        <label style="margin-top:20px;">custom background image</label>
+        <input type="file" id="bgImageUpload" accept="image/*" onchange="uploadBackgroundImage(this)" />
+        <button class="settings-btn" onclick="resetBackgroundImage()" style="margin-top:10px;">↺ reset background</button>
+
+        <label style="margin-top:20px;">user themes (save/load)</label>
+        <input type="text" id="themeName" placeholder="theme name" style="width:100%; padding:8px; margin-top:5px;" />
+        <button class="settings-btn" onclick="saveUserTheme()">💾 save current theme</button>
+        <select id="savedThemesList" onchange="loadUserTheme(this.value)" style="margin-top:10px;">
+          <option value="">-- load saved theme --</option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- Audio element for background music -->
+    <audio id="bgMusic" loop style="display:none;">
+      <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+      // ========== TAB MANAGEMENT ==========
+      function showSettingsTabSelector() {
+        document.getElementById("settingsTabSelector").style.display = "block";
+        document.querySelectorAll(".theme-tab-content").forEach(t => t.style.display = "none");
+      }
+
+      function showSettingsTab(tab) {
+        document.getElementById("settingsTabSelector").style.display = "none";
+        document.querySelectorAll(".theme-tab-content").forEach(t => t.style.display = "none");
+        document.getElementById("settingsTab-" + tab).style.display = "block";
+        loadSettingsForTab(tab);
+      }
+
+      function loadSettingsForTab(tab) {
+        // Load all saved settings when opening a tab
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        
+        // Game tab
+        if (document.getElementById('gridLayout')) {
+          document.getElementById('gridLayout').value = settings.gridLayout || '4';
+          document.getElementById('cardSize').value = settings.cardSize || 'medium';
+          updateToggle('hideAnimationsToggle', settings.hideAnimations || false);
+          updateToggle('compactModeToggle', settings.compactMode || false);
+          updateToggle('recentlyPlayedToggle', settings.recentlyPlayed || false);
+          updateToggle('popularGamesToggle', settings.popularGames || false);
+        }
+        
+        // Visual tab
+        if (document.getElementById('accentColor')) {
+          document.getElementById('accentColor').value = settings.accentColor || '#2d5ae3';
+          document.getElementById('blurIntensity').value = settings.blurIntensity || '6';
+          document.getElementById('cardOpacity').value = settings.cardOpacity || '0.8';
+          document.getElementById('borderStyle').value = settings.borderStyle || 'glowing';
+          document.getElementById('shadowIntensity').value = settings.shadowIntensity || '15';
+          document.getElementById('cornerRoundness').value = settings.cornerRoundness || '15';
+          updateToggle('sidebarRightToggle', settings.sidebarRight || false);
+          updateToggle('reduceMotionToggle', settings.reduceMotion || false);
+        }
+        
+        // Performance tab
+        if (document.getElementById('lowPerfModeToggle')) {
+          updateToggle('lowPerfModeToggle', settings.lowPerformanceMode || false);
+          updateToggle('lazyLoadToggle', settings.lazyLoading || false);
+          updateToggle('disableShadowsToggle', settings.disableShadows || false);
+          updateToggle('disableAnimationsToggle', settings.disableAnimations || false);
+        }
+        
+        // Privacy tab
+        if (document.getElementById('incognitoToggle')) {
+          updateToggle('incognitoToggle', settings.incognitoMode || false);
+          updateToggle('recommendedToggle', settings.recommendedGames || false);
+        }
+        
+        // Audio tab
+        if (document.getElementById('hoverSoundsToggle')) {
+          updateToggle('hoverSoundsToggle', settings.hoverSounds || false);
+          updateToggle('bgMusicToggle', settings.backgroundMusic || false);
+          updateToggle('clickEffectsToggle', settings.clickEffects || false);
+          updateToggle('muteAllToggle', settings.muteAll || false);
+          document.getElementById('musicVolume').value = settings.musicVolume || 30;
+          document.getElementById('sfxVolume').value = settings.sfxVolume || 50;
+        }
+        
+        applyAllSettings();
+      }
+
+      function updateToggle(elementId, isActive) {
+        const el = document.getElementById(elementId);
+        if (el) {
+          if (isActive) el.classList.add('active');
+          else el.classList.remove('active');
+        }
+      }
+
+      // ========== GAME SETTINGS ==========
+      function openRandomGame() {
+        if (typeof gamesData !== 'undefined' && gamesData.length > 0) {
+          const randomGame = gamesData[Math.floor(Math.random() * gamesData.length)];
+          if (randomGame.url.startsWith('http')) {
+            window.location.href = randomGame.url;
+          } else {
+            window.location.href = `play.html?gameurl=${randomGame.url}/`;
+          }
+        } else {
+          alert("Games are still loading! Try again in a moment.");
+        }
+      }
+
+      function setGridLayout(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.gridLayout = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        applyGridLayout(value);
+      }
+
+      function setCardSize(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.cardSize = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        applyCardSize(value);
+      }
+
+      function toggleHideAnimations() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.hideAnimations = !settings.hideAnimations;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('hideAnimationsToggle', settings.hideAnimations);
+        applyHideAnimations(settings.hideAnimations);
+      }
+
+      function toggleCompactMode() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.compactMode = !settings.compactMode;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('compactModeToggle', settings.compactMode);
+        applyCompactMode(settings.compactMode);
+      }
+
+      function toggleRecentlyPlayed() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.recentlyPlayed = !settings.recentlyPlayed;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('recentlyPlayedToggle', settings.recentlyPlayed);
+        if (settings.recentlyPlayed) loadRecentlyPlayed();
+      }
+
+      function togglePopularGames() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.popularGames = !settings.popularGames;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('popularGamesToggle', settings.popularGames);
+        if (settings.popularGames) loadPopularGames();
+      }
+
+      // ========== VISUAL SETTINGS ==========
+      function setAccentColor(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.accentColor = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        document.documentElement.style.setProperty('--accent-color', value);
+        document.getElementById('accentPreview').style.background = value;
+      }
+
+      function setBlurIntensity(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.blurIntensity = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        document.body.style.backdropFilter = `blur(${value}px)`;
+      }
+
+      function setCardOpacity(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.cardOpacity = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        document.documentElement.style.setProperty('--card-opacity', value);
+        document.querySelectorAll('.game, .settings-card').forEach(el => {
+          el.style.background = `rgba(20, 30, 50, ${value})`;
+        });
+      }
+
+      function setBorderStyle(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.borderStyle = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        applyBorderStyle(value);
+      }
+
+      function setShadowIntensity(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.shadowIntensity = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        document.querySelectorAll('.game, .settings-card').forEach(el => {
+          el.style.boxShadow = `0 ${value/2}px ${value}px rgba(45, 90, 227, 0.3)`;
+        });
+      }
+
+      function setCornerRoundness(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.cornerRoundness = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        document.querySelectorAll('.game, .settings-card').forEach(el => {
+          el.style.borderRadius = `${value}px`;
+        });
+      }
+
+      function toggleSidebarPosition() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.sidebarRight = !settings.sidebarRight;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('sidebarRightToggle', settings.sidebarRight);
+        const sidebar = document.querySelector('.fav-sidebar-btn');
+        if (sidebar) {
+          if (settings.sidebarRight) {
+            sidebar.style.left = 'auto';
+            sidebar.style.right = '-80px';
+            sidebar.style.borderLeft = 'none';
+            sidebar.style.borderRight = '4px solid gold';
+            sidebar.style.borderRadius = '15px 0 0 15px';
+          } else {
+            sidebar.style.left = '-80px';
+            sidebar.style.right = 'auto';
+            sidebar.style.borderRight = 'none';
+            sidebar.style.borderLeft = '4px solid gold';
+            sidebar.style.borderRadius = '0 15px 15px 0';
+          }
+        }
+      }
+
+      function toggleReduceMotion() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.reduceMotion = !settings.reduceMotion;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('reduceMotionToggle', settings.reduceMotion);
+        if (settings.reduceMotion) {
+          document.body.classList.add('reduce-motion');
+        } else {
+          document.body.classList.remove('reduce-motion');
+        }
+      }
+
+      // ========== PERFORMANCE SETTINGS ==========
+      function toggleLowPerformanceMode() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.lowPerformanceMode = !settings.lowPerformanceMode;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('lowPerfModeToggle', settings.lowPerformanceMode);
+        if (settings.lowPerformanceMode) {
+          document.body.classList.add('low-perf');
+          document.querySelectorAll('.game').forEach(game => {
+            game.style.animation = 'none';
+            game.style.transition = 'none';
+          });
+        } else {
+          document.body.classList.remove('low-perf');
+        }
+      }
+
+      function toggleLazyLoading() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.lazyLoading = !settings.lazyLoading;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('lazyLoadToggle', settings.lazyLoading);
+        if (settings.lazyLoading) {
+          // Implement lazy loading
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                observer.unobserve(img);
+              }
+            });
+          });
+          document.querySelectorAll('.game img').forEach(img => {
+            img.dataset.src = img.src;
+            img.src = '';
+            observer.observe(img);
+          });
+        }
+      }
+
+      function toggleDisableShadows() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.disableShadows = !settings.disableShadows;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('disableShadowsToggle', settings.disableShadows);
+        if (settings.disableShadows) {
+          document.querySelectorAll('.game, .settings-card').forEach(el => {
+            el.style.boxShadow = 'none';
+          });
+        }
+      }
+
+      function toggleDisableAnimations() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.disableAnimations = !settings.disableAnimations;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('disableAnimationsToggle', settings.disableAnimations);
+        if (settings.disableAnimations) {
+          document.body.classList.add('no-animations');
+        } else {
+          document.body.classList.remove('no-animations');
+        }
+      }
+
+      // ========== AUDIO SETTINGS ==========
+      let audioContext = null;
+      let musicPlaying = false;
+
+      function toggleHoverSounds() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.hoverSounds = !settings.hoverSounds;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('hoverSoundsToggle', settings.hoverSounds);
+      }
+
+      function toggleBackgroundMusic() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.backgroundMusic = !settings.backgroundMusic;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('bgMusicToggle', settings.backgroundMusic);
+        
+        const bgMusic = document.getElementById('bgMusic');
+        if (settings.backgroundMusic && !settings.muteAll) {
+          bgMusic.volume = (settings.musicVolume || 30) / 100;
+          bgMusic.play();
+          musicPlaying = true;
+        } else {
+          bgMusic.pause();
+          musicPlaying = false;
+        }
+      }
+
+      function toggleClickEffects() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.clickEffects = !settings.clickEffects;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('clickEffectsToggle', settings.clickEffects);
+      }
+
+      function toggleMuteAll() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.muteAll = !settings.muteAll;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('muteAllToggle', settings.muteAll);
+        
+        const bgMusic = document.getElementById('bgMusic');
+        if (settings.muteAll) {
+          bgMusic.pause();
+          musicPlaying = false;
+        } else if (settings.backgroundMusic) {
+          bgMusic.play();
+          musicPlaying = true;
+        }
+      }
+
+      function setMusicVolume(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.musicVolume = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = value / 100;
+      }
+
+      function setSFXVolume(value) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.sfxVolume = value;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+      }
+
+      // ========== PRIVACY SETTINGS ==========
+      function toggleIncognito() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.incognitoMode = !settings.incognitoMode;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('incognitoToggle', settings.incognitoMode);
+        if (settings.incognitoMode) {
+          localStorage.removeItem('recentlyPlayedList');
+          localStorage.removeItem('gameClicks');
+        }
+      }
+
+      function toggleRecommended() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.recommendedGames = !settings.recommendedGames;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        updateToggle('recommendedToggle', settings.recommendedGames);
+      }
+
+      function clearHistory() {
+        localStorage.removeItem('searchHistory');
+        alert('Search history cleared! ✅');
+      }
+
+      function clearRecentlyPlayed() {
+        localStorage.removeItem('recentlyPlayedList');
+        alert('Recently played cleared! ✅');
+      }
+
+      function resetAllSettings() {
+        if (confirm('⚠️ This will reset ALL settings to default. Continue?')) {
+          localStorage.removeItem('fanterSettings');
+          location.reload();
+        }
+      }
+
+      // ========== THEME PRESETS ==========
+      function selectThemePreset(theme) {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        settings.themePreset = theme;
+        localStorage.setItem("fanterSettings", JSON.stringify(settings));
+        document.body.classList.remove('theme-dark', 'theme-light', 'theme-rainbow', 'theme-neon');
+        if (theme !== 'chill') {
+          document.body.classList.add(`theme-${theme}`);
+        }
+      }
+
+      function selectSeasonalTheme(season) {
+        const themes = {
+          halloween: { bg: '#1a0a00', accent: '#ff6600', text: '#ffaa00' },
+          christmas: { bg: '#0a1a0a', accent: '#ff0000', text: '#00ff00' },
+          spring: { bg: '#1a2a1a', accent: '#ff88cc', text: '#88ff88' },
+          summer: { bg: '#2a1a0a', accent: '#ffcc00', text: '#ff8844' }
+        };
+        const theme = themes[season];
+        document.body.style.background = theme.bg;
+        document.documentElement.style.setProperty('--accent-color', theme.accent);
+        document.documentElement.style.setProperty('--text-color', theme.text);
+      }
+
+      function setDynamicTheme(type) {
+        if (type === 'time') {
+          const hour = new Date().getHours();
+          if (hour < 12) selectThemePreset('light');
+          else if (hour < 18) selectThemePreset('chill');
+          else selectThemePreset('dark');
+        }
+      }
+
+      function uploadBackgroundImage(input) {
+        const file = input.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            document.body.style.backgroundImage = `url(${e.target.result})`;
+            document.body.style.backgroundSize = 'cover';
+            localStorage.setItem('customBg', e.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      function resetBackgroundImage() {
+        document.body.style.backgroundImage = '';
+        localStorage.removeItem('customBg');
+      }
+
+      // ========== USER THEMES ==========
+      function saveUserTheme() {
+        const name = document.getElementById('themeName').value;
+        if (!name) {
+          alert('Please enter a theme name!');
+          return;
+        }
+        const currentSettings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        const userThemes = JSON.parse(localStorage.getItem("userThemes") || "{}");
+        userThemes[name] = currentSettings;
+        localStorage.setItem("userThemes", JSON.stringify(userThemes));
+        
+        const select = document.getElementById('savedThemesList');
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+        alert(`Theme "${name}" saved! ✅`);
+      }
+
+      function loadUserTheme(name) {
+        if (!name) return;
+        const userThemes = JSON.parse(localStorage.getItem("userThemes") || "{}");
+        const theme = userThemes[name];
+        if (theme) {
+          localStorage.setItem("fanterSettings", JSON.stringify(theme));
+          location.reload();
+        }
+      }
+
+      // ========== APPLY ALL SETTINGS ==========
+      function applyAllSettings() {
+        const settings = JSON.parse(localStorage.getItem("fanterSettings") || "{}");
+        
+        if (settings.gridLayout) applyGridLayout(settings.gridLayout);
+        if (settings.cardSize) applyCardSize(settings.cardSize);
+        if (settings.hideAnimations) applyHideAnimations(true);
+        if (settings.compactMode) applyCompactMode(true);
+        if (settings.accentColor) document.documentElement.style.setProperty('--accent-color', settings.accentColor);
+        if (settings.themePreset && settings.themePreset !== 'chill') {
+          document.body.classList.add(`theme-${settings.themePreset}`);
+        }
+        
+        const customBg = localStorage.getItem('customBg');
+        if (customBg) {
+          document.body.style.backgroundImage = `url(${customBg})`;
+          document.body.style.backgroundSize = 'cover';
+        }
+      }
+
+      function applyGridLayout(value) {
+        const container = document.getElementById('gamesContainer');
+        if (container) {
+          container.style.display = 'grid';
+          container.style.gridTemplateColumns = `repeat(${value}, 1fr)`;
+          container.style.gap = '20px';
+        }
+      }
+
+      function applyCardSize(value) {
+        const sizes = { small: 160, medium: 200, large: 240 };
+        document.querySelectorAll('.game').forEach(game => {
+          game.style.width = `${sizes[value]}px`;
+          const img = game.querySelector('img');
+          if (img) img.style.width = `${sizes[value]}px`;
+        });
+      }
+
+      function applyHideAnimations(hide) {
+        if (hide) {
+          document.querySelectorAll('.game').forEach(game => {
+            game.style.animation = 'none';
+            game.style.transition = 'none';
+          });
+        }
+      }
+
+      function applyCompactMode(compact) {
+        if (compact) {
+          document.querySelectorAll('.game').forEach(game => {
+            game.style.margin = '5px';
+            game.style.padding = '5px';
+          });
+        }
+      }
+
+      function applyBorderStyle(style) {
+        document.querySelectorAll('.game, .settings-card').forEach(el => {
+          if (style === 'glowing') {
+            el.style.border = '2px solid rgba(45, 90, 227, 0.6)';
+            el.style.boxShadow = '0 0 15px rgba(45, 90, 227, 0.4)';
+          } else if (style === 'neon') {
+            el.style.border = '2px solid #00ffcc';
+            el.style.boxShadow = '0 0 20px #00ffcc';
+          } else if (style === 'minimal') {
+            el.style.border = '1px solid rgba(255,255,255,0.2)';
+            el.style.boxShadow = 'none';
+          } else {
+            el.style.border = '2px solid rgba(45, 90, 227, 0.4)';
+          }
+        });
+      }
+
+      // Load saved user themes into dropdown
+      function loadUserThemesList() {
+        const userThemes = JSON.parse(localStorage.getItem("userThemes") || "{}");
+        const select = document.getElementById('savedThemesList');
+        if (select) {
+          select.innerHTML = '<option value="">-- load saved theme --</option>';
+          Object.keys(userThemes).forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+          });
+        }
+      }
+
+      // Initialize
+      showSettingsTabSelector();
+      loadUserThemesList();
+      applyAllSettings();
+    </script>
+
+  </body>
+</html>
