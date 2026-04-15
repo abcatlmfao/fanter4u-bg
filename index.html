@@ -8,7 +8,22 @@
     <script src="config/theme-loader.js"></script>
     <script src="config/main.js"></script>
   </head>
+
   <body>
+        <!-- loading Screen -->
+<div id="loadingScreen">
+  <div class="loading-content">
+    <div class="loading-icon"></div>
+    <h1 class="loading-title">Loading fanter.OS</h1>
+    <div class="loading-progress">
+      <div class="loading-progress-bar"></div>
+    </div>
+    <p class="loading-status">Initializing systems...</p>
+  </div>
+  <canvas id="matrixCanvas"></canvas>
+  <div class="glitch-overlay"></div>
+  <div class="scanlines"></div>
+</div>
     <button class="fav-sidebar-btn" id="favSidebarBtn" onclick="toggleFavSidebar()">★</button>
     <div class="center">
       <h1 id="title"></h1>
@@ -45,7 +60,7 @@
     
     <script>
       
-      // ===== CUSTOM CURSOR WITH TRAIL =====
+      // ===== CUSTOM CURSOR WITH TrAIL =====
 (function() {
   // Create main cursor orb
   const cursor = document.createElement('div');
