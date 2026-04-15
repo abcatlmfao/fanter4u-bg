@@ -1256,3 +1256,125 @@ body.loading .fav-sidebar-btn {
     transform: scale(1.2);
   }
 }
+
+/* ===== SMOOTHER ANIMATIONS ===== */
+
+/* Optimize all transitions */
+* {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Smooth game card animations */
+.game {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.game:hover {
+  transform: scale(1.08) translateY(-10px);
+  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+/* Smooth image hover */
+.game img {
+  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  will-change: transform;
+}
+
+.game img:hover {
+  transform: scale(1.04);
+}
+
+/* Smooth button transitions */
+.settings-btn, .fav-btn, .theme-option-btn {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.settings-btn:hover, .fav-btn:hover, .theme-option-btn:hover {
+  transform: translateY(-3px);
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+/* Smooth search input */
+#searchInput {
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#searchInput:focus {
+  transform: translateY(-3px) scale(1.01);
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+/* Smooth favorite sidebar */
+.fav-sidebar-btn {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.fav-sidebar-btn:hover {
+  transform: translateX(5px);
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+/* Smooth page transitions */
+#mainContent {
+  transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+}
+
+/* Smooth game container */
+#gamesContainer {
+  transition: all 0.3s ease-out;
+}
+
+/* Optimize performance for animations */
+.game, .settings-btn, .fav-btn, .theme-option-btn, #searchInput {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Prevent layout shifts */
+body {
+  overflow-x: hidden;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Faster game pop animation */
+@keyframes gamePop {
+  0% {
+    transform: scale(0) translateZ(0);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.08) translateZ(0);
+  }
+  100% {
+    transform: scale(1) translateZ(0);
+    opacity: 1;
+  }
+}
+
+.game {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+
+/* ===== NORMAL CURSOR WITH STYLE ===== */
+body, a, button, .game, .settings-btn, .fav-btn, .theme-option-btn, .game img, #searchInput, .fav-sidebar-btn, .link {
+  cursor: auto;
+}
+
+/* Optional: Add a sutle pointer effect */
+a:hover, button:hover, .game:hover, .settings-btn:hover, .fav-btn:hover, .theme-option-btn:hover, .link:hover {
+  cursor: pointer;
+}
+
+/* Text selection cursor */
+input, textarea, #searchInput {
+  cursor: text;
+}
