@@ -7,6 +7,105 @@
     <link rel="stylesheet" href="config/main.css" />
     <script src="config/theme-loader.js"></script>
     <script src="config/main.js"></script>
+    <style>
+      /* ===== LANGUAGE DROPDOWN ===== */
+      .lang-dropdown-wrap {
+        position: relative;
+      }
+
+      #langDropdown {
+        position: fixed;
+        top: 0; left: 0;
+        z-index: 2000;
+        background: rgba(10, 15, 35, 0.98);
+        border: 2px solid rgba(45, 90, 227, 0.5);
+        border-radius: 18px;
+        padding: 18px 10px 12px;
+        min-width: 220px;
+        box-shadow: 0 20px 60px rgba(45, 90, 227, 0.45);
+        backdrop-filter: blur(12px);
+
+        opacity: 0;
+        transform: scale(0.92) translateY(-8px);
+        pointer-events: none;
+        transition: opacity 0.22s cubic-bezier(0.22,1,0.36,1),
+                    transform 0.22s cubic-bezier(0.22,1,0.36,1);
+        transform-origin: top center;
+      }
+
+      #langDropdown.open {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        pointer-events: all;
+      }
+
+      .lang-search {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 2px solid rgba(45, 90, 227, 0.35);
+        background: rgba(20, 30, 50, 0.8);
+        color: #fff;
+        font-family: ubuntu, sans-serif;
+        font-size: 13px;
+        outline: none;
+        box-sizing: border-box;
+        margin-bottom: 8px;
+        transition: border-color 0.2s;
+      }
+      .lang-search:focus {
+        border-color: var(--accent-color);
+      }
+
+      .lang-list {
+        max-height: 200px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(45,90,227,0.4) transparent;
+      }
+
+      .lang-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px;
+        border-radius: 10px;
+        border: none;
+        background: transparent;
+        color: rgba(255,255,255,0.85);
+        font-family: ubuntu, sans-serif;
+        font-size: 14px;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s, color 0.15s;
+        width: 100%;
+      }
+      .lang-option:hover {
+        background: rgba(45, 90, 227, 0.18);
+        color: #fff;
+      }
+      .lang-option.active {
+        background: rgba(45, 90, 227, 0.3);
+        color: #fff;
+        font-weight: 700;
+      }
+      .lang-option .lang-flag {
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .lang-current {
+        font-size: 12px;
+        color: rgba(255,255,255,0.35);
+        text-align: center;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
+    </style>
   </head>
   <body>
     <span id="title" style="display:none"></span>
@@ -20,7 +119,7 @@
 
     <div class="settings-grid">
 
-     <div class="settings-card">
+      <div class="settings-card">
         <div class="settings-card-icon">🎨</div>
         <h2>theme</h2>
         <p>change the theme of the site.</p>
@@ -31,7 +130,9 @@
         <div class="settings-card-icon">🌐</div>
         <h2>language</h2>
         <p>change the language of the site.</p>
-        <button class="settings-btn" disabled>coming soon</button>
+        <div class="lang-dropdown-wrap">
+          <button class="settings-btn" id="langTriggerBtn" onclick="toggleLangDropdown(event)">🌐 select language</button>
+        </div>
       </div>
 
       <div class="settings-card">
@@ -48,7 +149,7 @@
         <button class="settings-btn" onclick="openSafetyKeyMenu()">configure</button>
       </div>
 
-     <div class="settings-card">
+      <div class="settings-card">
         <div class="settings-card-icon">⭐</div>
         <h2>favourites</h2>
         <p>only show your favourited games.</p>
@@ -57,13 +158,19 @@
         <button class="settings-btn" onclick="localStorage.removeItem('favourites'); alert('Favourites cleared!')">clear favourites</button>
       </div>
 
-    </div> <!-- closes settings-grid -->
+    </div>
+
+    <!-- Language dropdown (portal-style, appended to body) -->
+    <div id="langDropdown">
+      <input class="lang-search" id="langSearch" placeholder="🔍 search languages..." oninput="filterLangs()" />
+      <div class="lang-list" id="langList"></div>
+      <div class="lang-current" id="langCurrentLabel">current: english</div>
+    </div>
 
     <!-- Theme Menu -->
     <div id="themeOverlay" style="display:none;">
       <div id="themeMenu">
 
-        <!-- Tab selector -->
         <div id="themeTabSelector">
           <h2>🎨 customize</h2>
           <p class="safety-desc">pick a category to customize.</p>
@@ -117,13 +224,14 @@
             <input type="range" id="fontSizeSlider" min="12" max="24" value="16" oninput="updateFontPreview()" />
             <span>large</span>
           </div>
-          <div id="fontPreview" class="font-preview">preview text 🎮</div>
 
           <label style="margin-top:18px;">font color</label>
-         <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
-     <input type="color" id="fontColorPicker" value="#ffffff" style="flex:1; height:45px; border-radius:10px; border:none; cursor:pointer;" oninput="updateFontPreview()" />
-     <button class="settings-btn" onclick="resetFontColor()" style="white-space:nowrap;">↺ reset</button>
-    </div>
+          <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
+            <input type="color" id="fontColorPicker" value="#ffffff" style="flex:1; height:45px; border-radius:10px; border:none; cursor:pointer;" oninput="updateFontPreview()" />
+            <button class="settings-btn" onclick="resetFontColor()" style="white-space:nowrap;">↺ reset</button>
+          </div>
+
+          <div id="fontPreview" class="font-preview">preview text 🎮</div>
 
           <label style="margin-top:18px;">font style</label>
           <div class="theme-option-grid">
@@ -141,7 +249,7 @@
           <h2>✨ themes</h2>
           <p class="safety-desc">pick a full preset theme.</p>
           <div class="theme-option-grid">
-            <button class="theme-option-btn theme-preset" onclick="selectTheme('chill')" id="theme-chill"> chill (normal)</button>
+            <button class="theme-option-btn theme-preset" onclick="selectTheme('chill')" id="theme-chill">chill (normal)</button>
             <button class="theme-option-btn theme-preset" onclick="selectTheme('dark')" id="theme-dark">dark mode</button>
             <button class="theme-option-btn theme-preset" onclick="selectTheme('light')" id="theme-light">light mode</button>
             <button class="theme-option-btn theme-preset" onclick="selectTheme('rainbow')" id="theme-rainbow">rainbow</button>
@@ -151,11 +259,12 @@
 
       </div>
     </div>
-    
+
+    <!-- Safety Key Menu -->
     <div id="safetyKeyOverlay" style="display:none;">
       <div id="safetyKeyMenu">
-        <h2> safety key🔑</h2>
-        <p class="safety-desc">set a url and a key press it twice quickly on any page to escape there instantly.</p>
+        <h2>safety key 🔑</h2>
+        <p class="safety-desc">set a url and a key — press it twice quickly on any page to escape there instantly.</p>
 
         <label>redirect url</label>
         <input type="text" id="safetyUrl" placeholder="https://google.com" />
@@ -172,7 +281,7 @@
     </div>
 
     <script>
-      // ========== FAVOURITES BUTTON ==========
+      // ========== FAVOURITES ==========
       function updateFavBtn() {
         const btn = document.getElementById("favToggleBtn");
         const on = localStorage.getItem("favFilter") === "true";
@@ -180,13 +289,11 @@
         btn.style.borderColor = on ? "#00cc66" : "rgba(45, 90, 227, 0.5)";
         btn.style.boxShadow = on ? "0 8px 25px rgba(0, 204, 102, 0.4)" : "";
       }
-
       window.toggleFavFilter = function() {
         const current = localStorage.getItem("favFilter") === "true";
         localStorage.setItem("favFilter", (!current).toString());
         updateFavBtn();
       };
-
       updateFavBtn();
 
       // ========== SAFETY KEY ==========
@@ -195,14 +302,9 @@
         const urlInput = document.getElementById("safetyUrl");
         const keyDisplay = document.getElementById("keyDisplay");
         overlay.style.display = "flex";
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            overlay.classList.add("visible");
-          });
-        });
-        const savedUrl = localStorage.getItem("safetyUrl") || "";
+        requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add("visible")));
+        urlInput.value = localStorage.getItem("safetyUrl") || "";
         const savedKey = localStorage.getItem("safetyKey") || "";
-        urlInput.value = savedUrl;
         if (savedKey) {
           keyDisplay.textContent = savedKey.toUpperCase();
           keyDisplay.classList.add("set");
@@ -211,15 +313,11 @@
           keyDisplay.classList.remove("set");
         }
       };
-
       window.closeSafetyKeyMenu = function() {
         const overlay = document.getElementById("safetyKeyOverlay");
         overlay.classList.remove("visible");
-        setTimeout(() => {
-          overlay.style.display = "none";
-        }, 400);
+        setTimeout(() => overlay.style.display = "none", 400);
       };
-
       window.saveSafetyKey = function() {
         const url = document.getElementById("safetyUrl").value.trim();
         const key = localStorage.getItem("safetyKeyTemp") || localStorage.getItem("safetyKey");
@@ -230,7 +328,6 @@
         closeSafetyKeyMenu();
         alert("safety key saved! ✅");
       };
-
       document.getElementById("safetyKeyInput").addEventListener("keydown", (e) => {
         e.preventDefault();
         const key = e.key;
@@ -239,7 +336,6 @@
         display.textContent = key.toUpperCase();
         display.classList.add("set");
       });
-
       document.getElementById("safetyKeyOverlay").addEventListener("click", (e) => {
         if (e.target.id === "safetyKeyOverlay") closeSafetyKeyMenu();
       });
@@ -252,6 +348,31 @@
       let selectedFontColor = themeSettings.fontColor || "#ffffff";
       let selectedTheme = themeSettings.theme || "chill";
 
+      const fontMap = {
+        ubuntu: 'Ubuntu, sans-serif',
+        orbitron: 'Orbitron, monospace',
+        rajdhani: 'Rajdhani, sans-serif',
+        exo2: "'Exo 2', sans-serif",
+        spacegrotesk: "'Space Grotesk', sans-serif"
+      };
+
+      // Live preview — updates font size, color, and font family instantly
+      window.updateFontPreview = function() {
+        const preview = document.getElementById("fontPreview");
+        if (!preview) return;
+
+        const sizeVal = document.getElementById("fontSizeSlider").value;
+        const colorVal = document.getElementById("fontColorPicker").value;
+
+        selectedFontSize = parseInt(sizeVal);
+        selectedFontColor = colorVal;
+
+        preview.style.fontSize = sizeVal + "px";
+        preview.style.color = colorVal;
+        preview.style.fontFamily = fontMap[selectedFontFamily] || selectedFontFamily;
+        preview.textContent = `preview text 🎮  (${sizeVal}px)`;
+      };
+
       window.openThemeMenu = function() {
         const overlay = document.getElementById("themeOverlay");
         overlay.style.display = "flex";
@@ -259,98 +380,234 @@
         showThemeTabSelector();
         syncSelections();
       };
-
       window.closeThemeMenu = function() {
         const overlay = document.getElementById("themeOverlay");
         overlay.classList.remove("visible");
         setTimeout(() => overlay.style.display = "none", 400);
       };
-
       window.showThemeTabSelector = function() {
         document.getElementById("themeTabSelector").style.display = "block";
         document.querySelectorAll(".theme-tab-content").forEach(t => t.style.display = "none");
       };
-
       window.showThemeTab = function(tab) {
         document.getElementById("themeTabSelector").style.display = "none";
         document.querySelectorAll(".theme-tab-content").forEach(t => t.style.display = "none");
         document.getElementById("themeTab-" + tab).style.display = "block";
+        // Refresh preview when opening text tab
+        if (tab === "text") updateFontPreview();
       };
-
       window.selectBg = function(type) {
         selectedBg = type;
         document.querySelectorAll("[id^='bg-']").forEach(b => b.classList.remove("selected"));
         document.getElementById("bg-" + type).classList.add("selected");
         document.getElementById("colorPickerWrap").style.display = type === "solid" ? "block" : "none";
       };
-
       window.selectFont = function(font) {
         selectedFontFamily = font;
         document.querySelectorAll("[id^='font-']").forEach(b => b.classList.remove("selected"));
         document.getElementById("font-" + font).classList.add("selected");
         updateFontPreview();
       };
-
-      
-       window.resetFontColor = function() {
-       document.getElementById("fontColorPicker").value = "#ffffff";
-      selectedFontColor = "#ffffff";
-       updateFontPreview();
+      window.resetFontColor = function() {
+        document.getElementById("fontColorPicker").value = "#ffffff";
+        selectedFontColor = "#ffffff";
+        updateFontPreview();
       };
-
       window.selectTheme = function(theme) {
         selectedTheme = theme;
         document.querySelectorAll("[id^='theme-']").forEach(b => b.classList.remove("selected"));
         document.getElementById("theme-" + theme).classList.add("selected");
       };
-
       function syncSelections() {
         const fontSizeSlider = document.getElementById("fontSizeSlider");
         const fontColorPicker = document.getElementById("fontColorPicker");
         const solidPicker = document.getElementById("solidColorPicker");
-        
         if (fontSizeSlider) fontSizeSlider.value = selectedFontSize;
         if (fontColorPicker) fontColorPicker.value = selectedFontColor;
         selectBg(selectedBg);
         selectFont(selectedFontFamily);
         selectTheme(selectedTheme);
         updateFontPreview();
-        
-        if (themeSettings.solidColor && solidPicker) {
-          solidPicker.value = themeSettings.solidColor;
-        }
+        if (themeSettings.solidColor && solidPicker) solidPicker.value = themeSettings.solidColor;
       }
-
       window.saveTheme = function() {
-        const solidColor = document.getElementById("solidColorPicker").value;
-        const fontSize = document.getElementById("fontSizeSlider").value;
-        const fontColor = document.getElementById("fontColorPicker").value;
-        
         const themeToSave = {
           bg: selectedBg,
-          solidColor: solidColor,
+          solidColor: document.getElementById("solidColorPicker").value,
           font: selectedFontFamily,
-          fontSize: parseInt(fontSize),
-          fontColor: fontColor,
+          fontSize: parseInt(document.getElementById("fontSizeSlider").value),
+          fontColor: document.getElementById("fontColorPicker").value,
           theme: selectedTheme
         };
-        
         localStorage.setItem("themeSettings", JSON.stringify(themeToSave));
-        
-        // Apply to current page
-        if (typeof window.loadAndApplyTheme === 'function') {
-          window.loadAndApplyTheme();
-        }
-        
+        if (typeof window.loadAndApplyTheme === 'function') window.loadAndApplyTheme();
         closeThemeMenu();
         alert("Theme saved! ✅");
       };
-
       document.getElementById("themeOverlay").addEventListener("click", (e) => {
         if (e.target.id === "themeOverlay") closeThemeMenu();
       });
 
-      // ========== SAFETY KEY DOUBLE-TAP (for settings page) ==========
+      // ========== LANGUAGE DROPDOWN ==========
+      const LANGUAGES = [
+        { code: "en", name: "English",    flag: "🇬🇧" },
+        { code: "es", name: "Spanish",    flag: "🇪🇸" },
+        { code: "fr", name: "French",     flag: "🇫🇷" },
+        { code: "de", name: "German",     flag: "🇩🇪" },
+        { code: "it", name: "Italian",    flag: "🇮🇹" },
+        { code: "pt", name: "Portuguese", flag: "🇧🇷" },
+        { code: "ru", name: "Russian",    flag: "🇷🇺" },
+        { code: "zh", name: "Chinese",    flag: "🇨🇳" },
+        { code: "ja", name: "Japanese",   flag: "🇯🇵" },
+        { code: "ko", name: "Korean",     flag: "🇰🇷" },
+        { code: "ar", name: "Arabic",     flag: "🇸🇦" },
+        { code: "hi", name: "Hindi",      flag: "🇮🇳" },
+        { code: "nl", name: "Dutch",      flag: "🇳🇱" },
+        { code: "pl", name: "Polish",     flag: "🇵🇱" },
+        { code: "tr", name: "Turkish",    flag: "🇹🇷" },
+        { code: "sv", name: "Swedish",    flag: "🇸🇪" },
+        { code: "no", name: "Norwegian",  flag: "🇳🇴" },
+        { code: "da", name: "Danish",     flag: "🇩🇰" },
+        { code: "fi", name: "Finnish",    flag: "🇫🇮" },
+        { code: "uk", name: "Ukrainian",  flag: "🇺🇦" },
+      ];
+
+      let langDropdownOpen = false;
+      let currentLang = localStorage.getItem("siteLang") || "en";
+
+      function buildLangList(filter = "") {
+        const list = document.getElementById("langList");
+        list.innerHTML = "";
+        const filtered = LANGUAGES.filter(l =>
+          l.name.toLowerCase().includes(filter.toLowerCase()) ||
+          l.code.toLowerCase().includes(filter.toLowerCase())
+        );
+        filtered.forEach(lang => {
+          const btn = document.createElement("button");
+          btn.className = "lang-option" + (lang.code === currentLang ? " active" : "");
+          btn.innerHTML = `<span class="lang-flag">${lang.flag}</span><span>${lang.name}</span>`;
+          btn.onclick = () => selectLang(lang);
+          list.appendChild(btn);
+        });
+      }
+
+      function selectLang(lang) {
+        currentLang = lang.code;
+        localStorage.setItem("siteLang", lang.code);
+        document.getElementById("langCurrentLabel").textContent = `current: ${lang.name}`;
+        document.getElementById("langTriggerBtn").textContent = `${lang.flag} ${lang.name}`;
+        buildLangList(document.getElementById("langSearch").value);
+
+        // Inject Google Translate if not English
+        if (lang.code !== "en") {
+          injectGoogleTranslate(lang.code);
+        } else {
+          removeGoogleTranslate();
+        }
+
+        closeLangDropdown();
+      }
+
+      function injectGoogleTranslate(langCode) {
+        // Remove any existing instance first
+        removeGoogleTranslate();
+
+        // Add Google Translate script
+        window.googleTranslateElementInit = function() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: langCode,
+            autoDisplay: true,
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element');
+        };
+
+        const el = document.createElement("div");
+        el.id = "google_translate_element";
+        el.style.display = "none";
+        document.body.appendChild(el);
+
+        const script = document.createElement("script");
+        script.id = "gt_script";
+        script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        document.body.appendChild(script);
+      }
+
+      function removeGoogleTranslate() {
+        const el = document.getElementById("google_translate_element");
+        const sc = document.getElementById("gt_script");
+        if (el) el.remove();
+        if (sc) sc.remove();
+        // Remove Google Translate bar if injected
+        const bar = document.querySelector(".skiptranslate");
+        if (bar) bar.remove();
+        document.body.style.top = "";
+        const frame = document.querySelector("iframe.skiptranslate");
+        if (frame) frame.remove();
+        // Reset cookie
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      }
+
+      window.toggleLangDropdown = function(e) {
+        e.stopPropagation();
+        if (langDropdownOpen) {
+          closeLangDropdown();
+        } else {
+          openLangDropdown(e.currentTarget);
+        }
+      };
+
+      function openLangDropdown(triggerBtn) {
+        const dropdown = document.getElementById("langDropdown");
+        const rect = triggerBtn.getBoundingClientRect();
+
+        // Position below the button
+        dropdown.style.top = (rect.bottom + window.scrollY + 8) + "px";
+        dropdown.style.left = (rect.left + window.scrollX) + "px";
+
+        buildLangList();
+        document.getElementById("langSearch").value = "";
+
+        // Update current label
+        const cur = LANGUAGES.find(l => l.code === currentLang);
+        if (cur) {
+          document.getElementById("langCurrentLabel").textContent = `current: ${cur.name}`;
+          document.getElementById("langTriggerBtn").textContent = `${cur.flag} ${cur.name}`;
+        }
+
+        dropdown.classList.add("open");
+        langDropdownOpen = true;
+
+        // Focus search
+        setTimeout(() => document.getElementById("langSearch").focus(), 50);
+      }
+
+      function closeLangDropdown() {
+        const dropdown = document.getElementById("langDropdown");
+        dropdown.classList.remove("open");
+        langDropdownOpen = false;
+      }
+
+      window.filterLangs = function() {
+        buildLangList(document.getElementById("langSearch").value);
+      };
+
+      // Close dropdown on outside click
+      document.addEventListener("click", (e) => {
+        if (langDropdownOpen && !document.getElementById("langDropdown").contains(e.target)) {
+          closeLangDropdown();
+        }
+      });
+
+      // Init button label on load
+      (function initLangBtn() {
+        const cur = LANGUAGES.find(l => l.code === currentLang);
+        if (cur && cur.code !== "en") {
+          document.getElementById("langTriggerBtn").textContent = `${cur.flag} ${cur.name}`;
+        }
+      })();
+
+      // ========== SAFETY KEY DOUBLE-TAP ==========
       let lastKeyTime = 0;
       let lastKey = "";
       document.addEventListener("keydown", (e) => {
@@ -368,6 +625,6 @@
         lastKeyTime = now;
       });
     </script>
-    
+
   </body>
 </html>
