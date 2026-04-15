@@ -22,6 +22,24 @@
       <a style="font-weight: 700">a site created by abcatlmfao, / chipikipal800, / abcatlmfao69;
       </a><a style="font-weight: 700" class="link" href="https://dsc.gg/parcoil">parcoil network</a>
     </div>
+
+    <script>
+  let lastKeyTime = 0;
+  let lastKey = "";
+  document.addEventListener("keydown", (e) => {
+    const safetyKey = localStorage.getItem("safetyKey");
+    const safetyUrl = localStorage.getItem("safetyUrl");
+    if (!safetyKey || !safetyUrl) return;
+    const now = Date.now();
+    if (e.key === safetyKey && e.key === lastKey && now - lastKeyTime < 400) {
+      window.location.href = safetyUrl;
+    }
+    lastKey = e.key;
+    lastKeyTime = now;
+  });
+</script>
+
+    
   </body>
 </html>
 
