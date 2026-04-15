@@ -48,11 +48,11 @@
         <button class="settings-btn" disabled>coming soon</button>
       </div>
 
-       <div class="settings-card">
-        <div class="settings-card-icon">✌️💨</div>
+      <div class="settings-card">
+        <div class="settings-card-icon">🔑</div>
         <h2>safety key</h2>
-        <p>select a key that will launch a site you picked on click.</p>
-        <button class="settings-btn" disabled>coming soon</button>
+        <p>press a key twice to instantly redirect to a safe url.</p>
+        <button class="settings-btn" onclick="openSafetyKeyMenu()">configure</button>
       </div>
 
      <div class="settings-card">
@@ -68,6 +68,26 @@
 
 
     </div> <!-- closes settings-grid -->
+    
+  
+    <div id="safetyKeyOverlay" style="display:none;">
+      <div id="safetyKeyMenu">
+        <h2> safety key🔑</h2>
+        <p class="safety-desc">set a url and a key press it twice quickly on any page to escape there instantly.</p>
+
+        <label>redirect url</label>
+        <input type="text" id="safetyUrl" placeholder="https://google.com" />
+
+        <label>escape key</label>
+        <div id="keyDisplay" class="key-display">press a key...</div>
+        <input type="text" id="safetyKeyInput" class="key-capture" placeholder="click here then press a key" readonly />
+
+        <div class="safety-btn-row">
+          <button class="settings-btn" onclick="saveSafetyKey()">save</button>
+          <button class="settings-btn danger-btn" onclick="closeSafetyKeyMenu()">cancel</button>
+        </div>
+      </div>
+    </div>
 
     <script>
       function updateFavBtn() {
