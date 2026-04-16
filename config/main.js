@@ -63,41 +63,23 @@ function displayFilteredGames(filteredGames) {
     gameImage.alt = game.name;
     gameImage.style.cursor = 'pointer';
     
-   gameImage.onclick = (e) => {
+  gameImage.onclick = (e) => {
   e.preventDefault();
   e.stopPropagation();
   
-  // Track game play count
-  if (typeof trackGamePlayCount === 'function') {
-    trackGamePlayCount(game.name);
-  }
+  // Get the game URL - make sure it's not undefined
+  let gamePath = game.url;
+  let gameName = game.name;
   
-  // Check for food game
-  if (typeof isFoodGame === 'function' && isFoodGame(game.name)) {
-    if (typeof checkAndUnlockAchievement === 'function') {
-      checkAndUnlockAchievement(57);
-    }
-  }
+  console.log("Game clicked:", gameName, "URL:", gamePath);
   
-  // Track played game
-  if (typeof trackPlayedGame === 'function') {
-    trackPlayedGame(game.name);
-  }
+  // Build the play.html URL correctly
+  let playUrl = `play.html?gameurl=${encodeURIComponent(gamePath)}&game=${encodeURIComponent(gameName)}`;
   
-  // Build URL - 
-  let gameUrl;
-  if (game.url.startsWith('http')) {
-    gameUrl = game.url;
-  } else {
-    // Remove trailing slash if exists, then add it back cleanly
-    let cleanUrl = game.url.replace(/\/$/, '');
-    gameUrl = `play.html?gameurl=${encodeURIComponent(cleanUrl)}/&game=${encodeURIComponent(game.name)}`;
-  }
-  
-  console.log('Launching game:', game.name, 'URL:', gameUrl);
+  console.log("Opening:", playUrl);
   
   // Open in new tab
-  window.open(gameUrl, '_blank');
+  window.open(playUrl, '_blank');
   
   return false;
 };
