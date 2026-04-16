@@ -1,9 +1,31 @@
-// ===== GAME CATEGORIES / TAGS WITH SORTING (FIXED) =====
+// ===== GAME CATEGORIES / TAGS WITH SMOOTH DROPDOWN =====
 
 let currentCategory = 'all';
 let currentSort = 'default';
 let originalGamesOrder = [];
+let categoryDropdownOpen = false;
 
+// Category icons and colors
+const CATEGORY_INFO = {
+  'all': { icon: '🎮', color: '#ffffff', name: 'All Games' },
+  'action': { icon: '⚔️', color: '#ff4444', name: 'Action' },
+  'puzzle': { icon: '🧩', color: '#44ff44', name: 'Puzzle' },
+  'racing': { icon: '🏎️', color: '#ff8844', name: 'Racing' },
+  'sports': { icon: '⚽', color: '#44ff88', name: 'Sports' },
+  'adventure': { icon: '🗺️', color: '#44aaff', name: 'Adventure' },
+  'platformer': { icon: '🏃', color: '#ff44ff', name: 'Platformer' },
+  'strategy': { icon: '♟️', color: '#88ff44', name: 'Strategy' },
+  'multiplayer': { icon: '👥', color: '#ffaa44', name: 'Multiplayer' },
+  'arcade': { icon: '🕹️', color: '#ff44aa', name: 'Arcade' },
+  'horror': { icon: '👻', color: '#aa44ff', name: 'Horror' },
+  'simulation': { icon: '🏭', color: '#44ffcc', name: 'Simulation' },
+  'sandbox': { icon: '🎨', color: '#ff8844', name: 'Sandbox' },
+  'survival': { icon: '🏕️', color: '#44aa88', name: 'Survival' },
+  'art': { icon: '🎨', color: '#ff66cc', name: 'Art' },
+  'other': { icon: '🎮', color: '#aaaaaa', name: 'Other' }
+};
+
+// Store original game order
 function storeOriginalOrder() {
   const container = document.getElementById('gamesContainer');
   if (container && originalGamesOrder.length === 0) {
@@ -11,53 +33,12 @@ function storeOriginalOrder() {
   }
 }
 
+// Reset to original order
 function resetToOriginalOrder() {
   const container = document.getElementById('gamesContainer');
   if (container && originalGamesOrder.length > 0) {
     originalGamesOrder.forEach(game => container.appendChild(game));
   }
-}
-
-function getCategoryIcon(category) {
-  const icons = {
-    'action': '⚔️',
-    'puzzle': '🧩',
-    'racing': '🏎️',
-    'sports': '⚽',
-    'adventure': '🗺️',
-    'platformer': '🏃',
-    'strategy': '♟️',
-    'multiplayer': '👥',
-    'arcade': '🕹️',
-    'horror': '👻',
-    'simulation': '🏭',
-    'sandbox': '🎨',
-    'survival': '🏕️',
-    'art': '🎨',
-    'other': '🎮'
-  };
-  return icons[category] || '🎮';
-}
-
-function getCategoryColor(category) {
-  const colors = {
-    'action': '#ff4444',
-    'puzzle': '#44ff44',
-    'racing': '#ff8844',
-    'sports': '#44ff88',
-    'adventure': '#44aaff',
-    'platformer': '#ff44ff',
-    'strategy': '#88ff44',
-    'multiplayer': '#ffaa44',
-    'arcade': '#ff44aa',
-    'horror': '#aa44ff',
-    'simulation': '#44ffcc',
-    'sandbox': '#ff8844',
-    'survival': '#44aa88',
-    'art': '#ff66cc',
-    'other': '#aaaaaa'
-  };
-  return colors[category] || '#aaaaaa';
 }
 
 // Add category tag to game cards
@@ -69,6 +50,8 @@ function addCategoryTags() {
     if (gameName && typeof gamesData !== 'undefined') {
       const gameData = gamesData.find(g => g.name === gameName);
       const category = gameData?.category || 'other';
+      const catInfo = CATEGORY_INFO[category] || CATEGORY_INFO.other;
+      
       const categoryTag = document.createElement('div');
       categoryTag.className = 'game-category';
       categoryTag.style.cssText = `
@@ -76,12 +59,12 @@ function addCategoryTags() {
         font-size: 10px;
         padding: 2px 8px;
         border-radius: 20px;
-        background: ${getCategoryColor(category)}20;
-        color: ${getCategoryColor(category)};
+        background: ${catInfo.color}20;
+        color: ${catInfo.color};
         margin-top: 5px;
         font-family: monospace;
       `;
-      categoryTag.innerHTML = `${getCategoryIcon(category)} ${category}`;
+      categoryTag.innerHTML = `${catInfo.icon} ${catInfo.name}`;
       gameCard.appendChild(categoryTag);
       gameCard.setAttribute('data-category', category);
       gameCard.setAttribute('data-category-added', 'true');
@@ -108,17 +91,15 @@ function filterByCategory(category) {
   return visibleCount;
 }
 
-// Sort games by different criteria
+// Sort games
 function sortGames(sortType) {
   const container = document.getElementById('gamesContainer');
   const visibleGames = Array.from(container.children).filter(game => game.style.display !== 'none');
   const hiddenGames = Array.from(container.children).filter(game => game.style.display === 'none');
   
   if (sortType === 'default') {
-    // Restore original order for visible games
     const originalVisibleOrder = originalGamesOrder.filter(game => game.style.display !== 'none');
     originalVisibleOrder.forEach(game => container.appendChild(game));
-    //然后把hidden games加回去
     hiddenGames.forEach(game => container.appendChild(game));
     return;
   }
@@ -151,7 +132,6 @@ function sortGames(sortType) {
     }
   });
   
-  // Re-append in sorted order (visible first, then hidden)
   sortedVisible.forEach(game => container.appendChild(game));
   hiddenGames.forEach(game => container.appendChild(game));
 }
@@ -182,11 +162,269 @@ function updateCategoryCount(visibleCount) {
   }
   if (countDisplay) {
     const totalGames = document.querySelectorAll('.game').length;
-    countDisplay.textContent = `showing ${visibleCount} of ${totalGames} games`;
+    const categoryName = currentCategory === 'all' ? 'All Games' : (CATEGORY_INFO[currentCategory]?.name || currentCategory);
+    countDisplay.textContent = `${categoryName}: ${visibleCount} of ${totalGames} games`;
   }
 }
 
-// Add category filter bar
+// Create smooth dropdown category menu
+function createCategoryDropdown() {
+  const dropdown = document.createElement('div');
+  dropdown.id = 'category-dropdown';
+  dropdown.style.cssText = `
+    position: relative;
+    display: inline-block;
+  `;
+  
+  // Dropdown button
+  const dropdownBtn = document.createElement('button');
+  dropdownBtn.id = 'category-dropdown-btn';
+  dropdownBtn.style.cssText = `
+    background: rgba(20,30,50,0.8);
+    border: 1px solid rgba(45,90,227,0.4);
+    border-radius: 30px;
+    padding: 8px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `;
+  dropdownBtn.innerHTML = `🎮 <span id="selected-category-name">All Games</span> <span style="font-size: 12px;">▼</span>`;
+  
+  // Dropdown menu
+  const dropdownMenu = document.createElement('div');
+  dropdownMenu.id = 'category-dropdown-menu';
+  dropdownMenu.style.cssText = `
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(15,20,40,0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(45,90,227,0.4);
+    border-radius: 16px;
+    margin-top: 8px;
+    min-width: 180px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  `;
+  
+  // Get unique categories from games
+  let categories = ['all'];
+  if (typeof gamesData !== 'undefined' && gamesData.length) {
+    const cats = new Set();
+    gamesData.forEach(game => {
+      if (game.category) cats.add(game.category);
+    });
+    categories = ['all', ...Array.from(cats).sort()];
+  } else {
+    categories = ['all', 'action', 'puzzle', 'racing', 'sports', 'adventure', 'platformer', 'strategy', 'multiplayer', 'arcade', 'horror', 'simulation', 'sandbox'];
+  }
+  
+  categories.forEach(cat => {
+    const catInfo = CATEGORY_INFO[cat] || CATEGORY_INFO.other;
+    const item = document.createElement('div');
+    item.className = 'category-dropdown-item';
+    item.setAttribute('data-category', cat);
+    item.style.cssText = `
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: ${cat === currentCategory ? catInfo.color : 'rgba(255,255,255,0.7)'};
+      background: ${cat === currentCategory ? `${catInfo.color}10` : 'transparent'};
+    `;
+    item.innerHTML = `${catInfo.icon} ${catInfo.name}`;
+    
+    item.onmouseenter = () => {
+      item.style.background = `${catInfo.color}20`;
+      item.style.color = catInfo.color;
+    };
+    item.onmouseleave = () => {
+      item.style.background = cat === currentCategory ? `${catInfo.color}10` : 'transparent';
+      item.style.color = cat === currentCategory ? catInfo.color : 'rgba(255,255,255,0.7)';
+    };
+    item.onclick = () => {
+      currentCategory = cat;
+      const selectedName = document.getElementById('selected-category-name');
+      if (selectedName) selectedName.textContent = catInfo.name;
+      filterAndSort();
+      closeCategoryDropdown();
+      
+      // Update button style
+      dropdownBtn.style.borderColor = catInfo.color;
+      setTimeout(() => {
+        dropdownBtn.style.borderColor = 'rgba(45,90,227,0.4)';
+      }, 500);
+    };
+    
+    dropdownMenu.appendChild(item);
+  });
+  
+  dropdown.appendChild(dropdownBtn);
+  dropdown.appendChild(dropdownMenu);
+  
+  // Toggle dropdown
+  dropdownBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (categoryDropdownOpen) {
+      closeCategoryDropdown();
+    } else {
+      openCategoryDropdown();
+    }
+  };
+  
+  function openCategoryDropdown() {
+    dropdownMenu.style.maxHeight = '400px';
+    dropdownMenu.style.opacity = '1';
+    categoryDropdownOpen = true;
+  }
+  
+  function closeCategoryDropdown() {
+    dropdownMenu.style.maxHeight = '0';
+    dropdownMenu.style.opacity = '0';
+    categoryDropdownOpen = false;
+  }
+  
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && categoryDropdownOpen) {
+      closeCategoryDropdown();
+    }
+  });
+  
+  return dropdown;
+}
+
+// Create sort dropdown
+function createSortDropdown() {
+  const container = document.createElement('div');
+  container.style.cssText = `
+    position: relative;
+    display: inline-block;
+  `;
+  
+  const sortBtn = document.createElement('button');
+  sortBtn.id = 'sort-dropdown-btn';
+  sortBtn.style.cssText = `
+    background: rgba(20,30,50,0.8);
+    border: 1px solid rgba(45,90,227,0.4);
+    border-radius: 30px;
+    padding: 8px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `;
+  sortBtn.innerHTML = `📊 <span id="selected-sort-name">Default</span> <span style="font-size: 12px;">▼</span>`;
+  
+  const sortMenu = document.createElement('div');
+  sortMenu.style.cssText = `
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(15,20,40,0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(45,90,227,0.4);
+    border-radius: 16px;
+    margin-top: 8px;
+    min-width: 160px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  `;
+  
+  const sortOptions = [
+    { value: 'default', label: 'Default', icon: '🔄' },
+    { value: 'name-asc', label: 'Name A-Z', icon: '📝' },
+    { value: 'name-desc', label: 'Name Z-A', icon: '📝' },
+    { value: 'rating-desc', label: 'Highest Rated', icon: '⭐' },
+    { value: 'rating-asc', label: 'Lowest Rated', icon: '⭐' }
+  ];
+  
+  sortOptions.forEach(opt => {
+    const item = document.createElement('div');
+    item.style.cssText = `
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: ${currentSort === opt.value ? '#ffcc00' : 'rgba(255,255,255,0.7)'};
+      background: ${currentSort === opt.value ? 'rgba(255,204,0,0.1)' : 'transparent'};
+    `;
+    item.innerHTML = `${opt.icon} ${opt.label}`;
+    
+    item.onmouseenter = () => {
+      item.style.background = 'rgba(45,90,227,0.2)';
+      item.style.color = '#ffcc00';
+    };
+    item.onmouseleave = () => {
+      item.style.background = currentSort === opt.value ? 'rgba(255,204,0,0.1)' : 'transparent';
+      item.style.color = currentSort === opt.value ? '#ffcc00' : 'rgba(255,255,255,0.7)';
+    };
+    item.onclick = () => {
+      currentSort = opt.value;
+      document.getElementById('selected-sort-name').textContent = opt.label;
+      filterAndSort();
+      sortMenu.style.maxHeight = '0';
+      sortMenu.style.opacity = '0';
+      categoryDropdownOpen = false;
+      
+      sortBtn.style.borderColor = '#ffcc00';
+      setTimeout(() => {
+        sortBtn.style.borderColor = 'rgba(45,90,227,0.4)';
+      }, 500);
+    };
+    
+    sortMenu.appendChild(item);
+  });
+  
+  container.appendChild(sortBtn);
+  container.appendChild(sortMenu);
+  
+  let sortDropdownOpen = false;
+  
+  sortBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (sortDropdownOpen) {
+      sortMenu.style.maxHeight = '0';
+      sortMenu.style.opacity = '0';
+      sortDropdownOpen = false;
+    } else {
+      sortMenu.style.maxHeight = '400px';
+      sortMenu.style.opacity = '1';
+      sortDropdownOpen = true;
+    }
+  };
+  
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target) && sortDropdownOpen) {
+      sortMenu.style.maxHeight = '0';
+      sortMenu.style.opacity = '0';
+      sortDropdownOpen = false;
+    }
+  });
+  
+  return container;
+}
+
+// Add filter bar with dropdowns
 function addCategoryFilterBar() {
   const searchContainer = document.querySelector('.center');
   if (!searchContainer || document.getElementById('category-filter-bar')) return;
@@ -194,140 +432,35 @@ function addCategoryFilterBar() {
   const filterBar = document.createElement('div');
   filterBar.id = 'category-filter-bar';
   filterBar.style.cssText = `
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
     margin: 15px auto;
     max-width: 900px;
   `;
   
-  // Get unique categories from gamesData
-  let availableCategories = ['all'];
-  if (typeof gamesData !== 'undefined' && gamesData.length) {
-    const cats = new Set(gamesData.map(g => g.category || 'other'));
-    availableCategories.push(...Array.from(cats).sort());
-  } else {
-    availableCategories.push('action', 'puzzle', 'racing', 'sports', 'adventure', 'platformer', 'strategy', 'multiplayer', 'arcade', 'horror', 'simulation', 'sandbox', 'other');
-  }
+  const categoryDropdown = createCategoryDropdown();
+  const sortDropdown = createSortDropdown();
   
-  // Category buttons row
-  const categoryRow = document.createElement('div');
-  categoryRow.style.cssText = `
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 15px;
-  `;
-  
-  availableCategories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'category-btn';
-    btn.setAttribute('data-category', cat);
-    btn.style.cssText = `
-      background: rgba(20,30,50,0.8);
-      border: 1px solid rgba(45,90,227,0.4);
-      border-radius: 30px;
-      padding: 6px 14px;
-      color: white;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    `;
-    btn.innerHTML = cat === 'all' ? '🎮 all' : `${getCategoryIcon(cat)} ${cat}`;
-    btn.onmouseenter = () => {
-      btn.style.borderColor = getCategoryColor(cat);
-      btn.style.transform = 'translateY(-2px)';
-    };
-    btn.onmouseleave = () => {
-      btn.style.borderColor = 'rgba(45,90,227,0.4)';
-      btn.style.transform = 'translateY(0)';
-    };
-    btn.onclick = () => {
-      // Update active button styling
-      document.querySelectorAll('.category-btn').forEach(b => {
-        b.style.background = 'rgba(20,30,50,0.8)';
-        b.style.color = 'white';
-      });
-      btn.style.background = `linear-gradient(135deg, ${getCategoryColor(cat)}40, ${getCategoryColor(cat)}20)`;
-      btn.style.color = getCategoryColor(cat);
-      
-      // Update current category and refresh
-      currentCategory = cat;
-      filterAndSort();
-    };
-    categoryRow.appendChild(btn);
-  });
-  
-  // Sort options row
-  const sortRow = document.createElement('div');
-  sortRow.style.cssText = `
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-    margin-top: 5px;
-  `;
-  
-  const sortOptions = [
-    { value: 'default', label: 'default' },
-    { value: 'name-asc', label: 'name A-Z' },
-    { value: 'name-desc', label: 'name Z-A' },
-    { value: 'rating-desc', label: 'highest rated' },
-    { value: 'rating-asc', label: 'lowest rated' }
-  ];
-  
-  sortRow.innerHTML = `<span style="font-size: 11px; color: rgba(255,255,255,0.4);">sort by:</span>`;
-  
-  sortOptions.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'sort-btn';
-    btn.setAttribute('data-sort', opt.value);
-    btn.textContent = opt.label;
-    btn.style.cssText = `
-      background: rgba(20,30,50,0.6);
-      border: 1px solid rgba(45,90,227,0.3);
-      border-radius: 20px;
-      padding: 4px 12px;
-      color: white;
-      font-size: 11px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    `;
-    
-    btn.onclick = () => {
-      // Update active button styling
-      sortRow.querySelectorAll('.sort-btn').forEach(b => {
-        b.style.background = 'rgba(20,30,50,0.6)';
-        b.style.borderColor = 'rgba(45,90,227,0.3)';
-        b.style.color = 'white';
-      });
-      btn.style.background = `rgba(45,90,227,0.3)`;
-      btn.style.borderColor = `rgba(45,90,227,0.8)`;
-      btn.style.color = '#ffcc00';
-      
-      // Update current sort and refresh
-      currentSort = opt.value;
-      filterAndSort();
-    };
-    
-    sortRow.appendChild(btn);
-  });
-  
-  filterBar.appendChild(categoryRow);
-  filterBar.appendChild(sortRow);
+  filterBar.appendChild(categoryDropdown);
+  filterBar.appendChild(sortDropdown);
   
   searchContainer.parentNode.insertBefore(filterBar, searchContainer.nextSibling);
 }
 
-// Initialize categories
+// Initialize everything
 function initCategories() {
   storeOriginalOrder();
   if (!document.getElementById('category-filter-bar')) {
     addCategoryFilterBar();
   }
   addCategoryTags();
+  filterAndSort();
 }
 
-// Run after games load
+// Run when games load
 if (typeof gamesData !== 'undefined') {
   setTimeout(initCategories, 500);
 }
@@ -340,6 +473,7 @@ if (typeof MutationObserver !== 'undefined') {
       addCategoryFilterBar();
     }
     storeOriginalOrder();
+    filterAndSort();
   });
   const gamesContainer = document.getElementById('gamesContainer');
   if (gamesContainer) {
@@ -347,17 +481,4 @@ if (typeof MutationObserver !== 'undefined') {
   }
 }
 
-// Also run after displayFilteredGames
-const originalDisplay = window.displayFilteredGames;
-if (typeof originalDisplay === 'function') {
-  window.displayFilteredGames = function(filteredGames) {
-    originalDisplay(filteredGames);
-    setTimeout(() => {
-      addCategoryTags();
-      storeOriginalOrder();
-      filterAndSort();
-    }, 100);
-  };
-}
-
-console.log('✅ Game Categories with Sorting ready!');
+console.log('✅ Category dropdown ready! Click the category button to see all options');
