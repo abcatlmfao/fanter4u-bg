@@ -1,4 +1,4 @@
-Fanter.os
+fanter.OS
 
 what is it?
 
