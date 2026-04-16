@@ -774,3 +774,142 @@ function renderAchievementsHTML(achievements, userStats) {
   html += '</div>';
   return html;
 }
+
+// ===== ACHIEVEMENT TRIGGER FUNCTIONS =====
+
+// Call this when user logs in
+function triggerLoginAchievements() {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return;
+  
+  let achievements = getUserAchievements();
+  let changed = false;
+  
+  // Check login days streak
+  const lastLogin = localStorage.getItem('lastLoginDate');
+  const today = new Date().toDateString();
+  
+  if (lastLogin !== today) {
+    let loginDays = (currentUser.stats.loginDays || 0) + 1;
+    let loginStreak = (currentUser.stats.loginStreak || 0);
+    
+    // Check if consecutive day
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (lastLogin === yesterday.toDateString()) {
+      loginStreak++;
+    } else {
+      loginStreak = 1;
+    }
+    
+    currentUser.stats.loginDays = loginDays;
+    currentUser.stats.loginStreak = loginStreak;
+    localStorage.setItem('lastLoginDate', today);
+    updateUserInStorage(currentUser);
+    changed = true;
+  }
+  
+  if (changed) {
+    setTimeout(() => checkAchievements(), 100);
+  }
+}
+
+// Call this when rating a game (already in submitRating)
+// Call this when favoriting a game (already in toggleFavourite)
+// Call this when playing a game (already in trackPlayedGame)
+
+// Manual achievement grant (for The Owner's Gift)
+function grantManualAchievement(achievementId, userId) {
+  let users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
+  const user = users.find(u => u.id === userId || u.username === userId);
+  if (!user) return false;
+  
+  let achievements = user.achievements || {};
+  if (achievements[achievementId]) return false;
+  
+  achievements[achievementId] = true;
+  user.achievements = achievements;
+  
+  localStorage.setItem('fanter_users', JSON.stringify(users));
+  if (getCurrentUser()?.id === user.id) {
+    localStorage.setItem('fanter_currentUser', JSON.stringify(user));
+    checkAchievements();
+  }
+  
+  return true;
+}
+
+// Secret achievement: Konami Code
+function setupKonamiCode() {
+  let konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let konamiIndex = 0;
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === konamiSequence[konamiIndex]) {
+      konamiIndex++;
+      if (konamiIndex === konamiSequence.length) {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          let achievements = getUserAchievements();
+          if (!achievements[52]) {
+            achievements[52] = true;
+            saveUserAchievements(achievements);
+            showAchievementToast(ACHIEVEMENTS_DATA.secret.achievements.find(a => a.id === 52));
+          }
+        }
+        konamiIndex = 0;
+      }
+    } else {
+      konamiIndex = 0;
+    }
+  });
+}
+
+// Secret achievement: Console Warrior
+function setupConsoleWarrior() {
+  const originalLog = console.log;
+  console.log = function(...args) {
+    if (args[0] === 'i love fanter') {
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        let achievements = getUserAchievements();
+        if (!achievements[55]) {
+          achievements[55] = true;
+          saveUserAchievements(achievements);
+          showAchievementToast(ACHIEVEMENTS_DATA.secret.achievements.find(a => a.id === 55));
+        }
+      }
+    }
+    originalLog.apply(console, args);
+  };
+}
+
+// Secret achievement: Night Owl
+function checkNightOwl() {
+  const hour = new Date().getHours();
+  if (hour >= 2 && hour < 4) {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      let achievements = getUserAchievements();
+      if (!achievements[54]) {
+        achievements[54] = true;
+        saveUserAchievements(achievements);
+        showAchievementToast(ACHIEVEMENTS_DATA.secret.achievements.find(a => a.id === 54));
+      }
+    }
+  }
+}
+
+// Initialize secret achievement listeners
+function initSecretAchievements() {
+  setupKonamiCode();
+  setupConsoleWarrior();
+  checkNightOwl();
+  setInterval(checkNightOwl, 60000); // Check every minute
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', () => {
+  initSecretAchievements();
+  triggerLoginAchievements();
+});
