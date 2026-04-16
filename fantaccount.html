@@ -1,1 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fanter | account</title>
+  <link rel="stylesheet" href="config/main.css" />
+  <script src="config/theme-loader.js"></script>
+  <script src="config/main.js"></script>
+  <style>
+    .account-container {
+      max-width: 500px;
+      margin: 100px auto;
+      padding: 30px;
+      background: rgba(20, 30, 50, 0.8);
+      border-radius: 20px;
+      border: 1px solid rgba(45, 90, 227, 0.4);
+      text-align: center;
+    }
+    
+    .account-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+    }
+    
+    .account-tab {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .account-tab.active {
+      color: #ffcc00;
+      border-bottom: 2px solid #ffcc00;
+    }
+    
+    .account-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      text-align: left;
+    }
+    
+    .account-form input {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(45, 90, 227, 0.4);
+      background: rgba(0,0,0,0.3);
+      color: white;
+      font-size: 14px;
+    }
+    
+    .account-form input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+    
+    .profile-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #2d5ae3, #ffcc00);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 15px;
+    }
+    
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 20px 0;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffcc00;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    
+    .message {
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .message.error {
+      background: rgba(255,0,0,0.2);
+      color: #ff6666;
+    }
+    
+    .message.success {
+      background: rgba(0,255,0,0.2);
+      color: #66ff66;
+    }
+    
+    .logout-btn {
+      background: rgba(220, 50, 50, 0.2);
+      border-color: rgba(220, 50, 50, 0.5);
+      margin-top: 20px;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(220, 50, 50, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <!-- Account Button -->
+  <div class="account-btn-container">
+    <button class="account-btn" id="accountBtn" onclick="window.location.href='fantaccount.html'">
+      <span class="account-icon">👤</span>
+      <span class="account-name" id="accountName">Guest</span>
+    </button>
+  </div>
 
+  <div class="center">
+    <h1>account.</h1>
+    <p>manage your fanter profile</p>
+    <button class="settings-btn" onclick="window.location.href='index.html'">← back</button>
+  </div>
+
+  <div class="account-container">
+    <div class="account-tabs">
+      <button class="account-tab active" data-tab="profile">profile</button>
+      <button class="account-tab" data-tab="login">login</button>
+      <button class="account-tab" data-tab="register">register</button>
+    </div>
+
+    <!-- Profile Tab -->
+    <div id="profileTab" class="account-tab-content">
+      <div id="profileContent">
+        <!-- Dynamic profile content goes here -->
+      </div>
+    </div>
+
+    <!-- Login Tab -->
+    <div id="loginTab" class="account-tab-content" style="display:none;">
+      <form id="loginForm" class="account-form">
+        <input type="text" id="loginUsername" placeholder="username" required>
+        <input type="password" id="loginPassword" placeholder="password" required>
+        <button type="submit" class="settings-btn">login</button>
+        <div id="loginMessage" class="message"></div>
+      </form>
+    </div>
+
+    <!-- Register Tab -->
+    <div id="registerTab" class="account-tab-content" style="display:none;">
+      <form id="registerForm" class="account-form">
+        <input type="text" id="regUsername" placeholder="username" required>
+        <input type="text" id="regDisplayName" placeholder="display name (optional)">
+        <input type="password" id="regPassword" placeholder="password" required>
+        <input type="password" id="regConfirmPassword" placeholder="confirm password" required>
+        <button type="submit" class="settings-btn">register</button>
+        <div id="registerMessage" class="message"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== SIMPLE ACCOUNT SYSTEM =====
+    // Get logged in user from localStorage
+    let currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
+    let users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
+    
+    // Helper: Save users to localStorage
+    function saveUsers() {
+      localStorage.setItem('fanter_users', JSON.stringify(users));
+    }
+    
+    // Helper: Update current user
+    function setCurrentUser(user) {
+      currentUser = user;
+      localStorage.setItem('fanter_currentUser', JSON.stringify(user));
+      updateAccountButton();
+      renderProfile();
+    }
+    
+    // Helper: Update account button on other pages
+    function updateAccountButton() {
+      const accountNameSpan = document.getElementById('accountName');
+      if (accountNameSpan) {
+        accountNameSpan.textContent = currentUser ? (currentUser.displayName || currentUser.username) : 'Guest';
+      }
+    }
+    
+    // Register function
+    function register(username, displayName, password) {
+      // Check if username exists
+      if (users.find(u => u.username === username)) {
+        return { success: false, message: 'Username already exists!' };
+      }
+      
+      if (password.length < 4) {
+        return { success: false, message: 'Password must be at least 4 characters!' };
+      }
+      
+      const newUser = {
+        id: Date.now(),
+        username: username,
+        displayName: displayName || username,
+        password: password,
+        createdAt: new Date().toISOString(),
+        stats: {
+          ratingsGiven: 0,
+          favoritesCount: 0,
+          gamesPlayed: 0,
+          joinDate: new Date().toISOString()
+        }
+      };
+      
+      users.push(newUser);
+      saveUsers();
+      setCurrentUser(newUser);
+      
+      return { success: true, message: 'Account created successfully!' };
+    }
+    
+    // Login function
+    function login(username, password) {
+      const user = users.find(u => u.username === username && u.password === password);
+      if (!user) {
+        return { success: false, message: 'Invalid username or password!' };
+      }
+      
+      setCurrentUser(user);
+      return { success: true, message: 'Logged in successfully!' };
+    }
+    
+    // Logout function
+    function logout() {
+      setCurrentUser(null);
+      renderProfile();
+      showTab('login');
+    }
+    
+    // Update profile (display name)
+    function updateProfile(displayName) {
+      if (!currentUser) return;
+      
+      currentUser.displayName = displayName || currentUser.username;
+      // Update in users array
+      const index = users.findIndex(u => u.id === currentUser.id);
+      if (index !== -1) {
+        users[index].displayName = currentUser.displayName;
+        saveUsers();
+      }
+      setCurrentUser(currentUser);
+      renderProfile();
+    }
+    
+    // Render profile tab
+    function renderProfile() {
+      const profileDiv = document.getElementById('profileContent');
+      if (!profileDiv) return;
+      
+      if (!currentUser) {
+        profileDiv.innerHTML = `
+          <div class="profile-info">
+            <div class="profile-avatar">👤</div>
+            <p style="color: rgba(255,255,255,0.6);">Not logged in</p>
+            <p>Please login or register to access your profile.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      profileDiv.innerHTML = `
+        <div class="profile-info">
+          <div class="profile-avatar">🎮</div>
+          <h2>${escapeHtml(currentUser.displayName || currentUser.username)}</h2>
+          <p style="color: rgba(255,255,255,0.6);">@${escapeHtml(currentUser.username)}</p>
+        </div>
+        
+        <div class="profile-stats">
+          <div class="stat">
+            <div class="stat-number">${currentUser.stats?.ratingsGiven || 0}</div>
+            <div class="stat-label">ratings</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">${currentUser.stats?.favoritesCount || 0}</div>
+            <div class="stat-label">favorites</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">${currentUser.stats?.gamesPlayed || 0}</div>
+            <div class="stat-label">played</div>
+          </div>
+        </div>
+        
+        <div class="account-form">
+          <input type="text" id="editDisplayName" placeholder="display name" value="${escapeHtml(currentUser.displayName || currentUser.username)}">
+          <button class="settings-btn" onclick="updateProfile(document.getElementById('editDisplayName').value)">update display name</button>
+          <button class="settings-btn logout-btn" onclick="logout()">logout</button>
+        </div>
+        
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 20px;">
+          joined: ${new Date(currentUser.createdAt).toLocaleDateString()}
+        </p>
+      `;
+    }
+    
+    // Helper to escape HTML
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+    
+    // Tab switching
+    function showTab(tabName) {
+      const tabs = ['profile', 'login', 'register'];
+      tabs.forEach(tab => {
+        const content = document.getElementById(`${tab}Tab`);
+        const btn = document.querySelector(`.account-tab[data-tab="${tab}"]`);
+        if (content) content.style.display = tab === tabName ? 'block' : 'none';
+        if (btn) btn.classList.toggle('active', tab === tabName);
+      });
+    }
+    
+    // Event listeners
+    document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      const result = login(username, password);
+      const msgDiv = document.getElementById('loginMessage');
+      msgDiv.textContent = result.message;
+      msgDiv.className = `message ${result.success ? 'success' : 'error'}`;
+      if (result.success) {
+        setTimeout(() => showTab('profile'), 1000);
+      }
+    });
+    
+    document.getElementById('registerForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('regUsername').value;
+      const displayName = document.getElementById('regDisplayName').value;
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+      
+      if (password !== confirmPassword) {
+        const msgDiv = document.getElementById('registerMessage');
+        msgDiv.textContent = 'Passwords do not match!';
+        msgDiv.className = 'message error';
+        return;
+      }
+      
+      const result = register(username, displayName, password);
+      const msgDiv = document.getElementById('registerMessage');
+      msgDiv.textContent = result.message;
+      msgDiv.className = `message ${result.success ? 'success' : 'error'}`;
+      if (result.success) {
+        setTimeout(() => showTab('profile'), 1000);
+      }
+    });
+    
+    // Tab click hanlers
+    document.querySelectorAll('.account-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showTab(btn.dataset.tab);
+        if (btn.dataset.tab === 'profile') renderProfile();
+      });
+    });
+    
+    // Initial render
+    renderProfile();
+    updateAccountButton();
+  </script>
+</body>
+</html>
