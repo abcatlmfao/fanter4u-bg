@@ -12,95 +12,96 @@ document.addEventListener('DOMContentLoaded', function() {
     return JSON.parse(localStorage.getItem("favourites") || "[]");
   }
 
- function toggleFavourite(gameName) {
-  let favs = getFavourites();
-  let isAdding = false;
-  
-  if (favs.includes(gameName)) {
-    favs = favs.filter(f => f !== gameName);
-    isAdding = false;
-  } else {
-    favs.push(gameName);
-    isAdding = true;
-  }
-  localStorage.setItem("favourites", JSON.stringify(favs));
-  
-  syncFavoriteToAccount(gameName, isAdding);
-  const favBtn = document.querySelector(`.fav-btn[data-game="${gameName}"]`);
-  if (favBtn) {
-    favBtn.textContent = isAdding ? "★" : "☆";
+  function toggleFavourite(gameName) {
+    let favs = getFavourites();
+    let isAdding = false;
+    
+    if (favs.includes(gameName)) {
+      favs = favs.filter(f => f !== gameName);
+      isAdding = false;
+    } else {
+      favs.push(gameName);
+      isAdding = true;
+    }
+    localStorage.setItem("favourites", JSON.stringify(favs));
+    
+    // Sync to account if logged in
+    if (typeof syncFavoriteToAccount === 'function') {
+      syncFavoriteToAccount(gameName, isAdding);
+    }
+    
+    // Update the favorite button if it exists
+    const favBtn = document.querySelector(`.fav-btn[data-game="${gameName.replace(/['"]/g, '\\"')}"]`);
+    if (favBtn) {
+      favBtn.textContent = isAdding ? "★" : "☆";
+    }
   }
 
-   
-}
- function displayFilteredGames(filteredGames) {
-  const gamesContainer = document.getElementById("gamesContainer");
-  if (!gamesContainer) return;
-  gamesContainer.innerHTML = "";
-  filteredGames.forEach((game) => {
-    const gameDiv = document.createElement("div");
-    gameDiv.classList.add("game");
-    
-    const gameImage = document.createElement("img");
-    let imageSrc;
-    if (game.image.startsWith('http')) {
-      imageSrc = game.image;
-    } else {
-      imageSrc = `${serverUrl1}/${game.url}/${game.image}`;
-    }
-    gameImage.src = imageSrc;
-    gameImage.alt = game.name;
-    
-    // GAME CLICK HANDLER - Track plyed game
-    gameImage.onclick = () => {
-      // Track that this game was played (if logged in)
-      if (typeof trackPlayedGame === 'function') {
-        trackPlayedGame(game.name);
+  function displayFilteredGames(filteredGames) {
+    const gamesContainer = document.getElementById("gamesContainer");
+    if (!gamesContainer) return;
+    gamesContainer.innerHTML = "";
+    filteredGames.forEach((game) => {
+      const gameDiv = document.createElement("div");
+      gameDiv.classList.add("game");
+      
+      const gameImage = document.createElement("img");
+      let imageSrc;
+      if (game.image.startsWith('http')) {
+        imageSrc = game.image;
+      } else {
+        imageSrc = `${serverUrl1}/${game.url}/${game.image}`;
+      }
+      gameImage.src = imageSrc;
+      gameImage.alt = game.name;
+      
+      // GAME CLICK HANDLER - Track played game
+      gameImage.onclick = () => {
+        // Track that this game was played (if logged in)
+        if (typeof trackPlayedGame === 'function') {
+          trackPlayedGame(game.name);
+        }
+        
+        if (game.url.startsWith('http')) {
+          window.location.href = game.url;
+        } else {
+          window.location.href = `play.html?gameurl=${game.url}/`;
+        }
+      };
+      
+      const gameName = document.createElement("p");
+      gameName.textContent = game.name;
+      
+      // FAVORITE BUTTON
+      const favBtn = document.createElement("button");
+      favBtn.classList.add("fav-btn");
+      favBtn.setAttribute("data-game", game.name);
+      favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
+      favBtn.title = "favourite";
+      favBtn.onclick = (e) => {
+        e.stopPropagation();
+        toggleFavourite(game.name);
+        favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
+      };
+      
+      gameDiv.appendChild(gameImage);
+      gameDiv.appendChild(gameName);
+      gameDiv.appendChild(favBtn);
+      
+      // Add ratings if available
+      if (typeof createRatingHTML === 'function') {
+        const userVotesGlobal = JSON.parse(localStorage.getItem('userVotes') || '{}');
+        gameDiv.insertAdjacentHTML('beforeend', createRatingHTML(game.name, userVotesGlobal[game.name] || 0));
       }
       
-      if (game.url.startsWith('http')) {
-        window.location.href = game.url;
-      } else {
-        window.location.href = `play.html?gameurl=${game.url}/`;
-      }
-    };
+      gamesContainer.appendChild(gameDiv);
+    });
     
-    const gameName = document.createElement("p");
-    gameName.textContent = game.name;
-    
-    // FAVORITE BUTTON
-    const favBtn = document.createElement("button");
-    favBtn.classList.add("fav-btn");
-    favBtn.setAttribute("data-game", game.name);
-    favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
-    favBtn.title = "favourite";
-    favBtn.onclick = (e) => {
-      e.stopPropagation();
-      toggleFavourite(game.name);
-      favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
-    };
-    
-    gameDiv.appendChild(gameImage);
-    gameDiv.appendChild(gameName);
-    gameDiv.appendChild(favBtn);
-    
-   
-    if (typeof createRatingHTML === 'function') {
-      const userVotes = JSON.parse(localStorage.getItem('userVotes') || '{}');
-      gameDiv.insertAdjacentHTML('beforeend', createRatingHTML(game.name, userVotes[game.name] || 0));
+    // Attach rating listeners if available
+    if (typeof attachRatingListeners === 'function') {
+      attachRatingListeners();
     }
-    
-    gamesContainer.appendChild(gameDiv);
-  });
-  
-  
-  if (typeof attachRatingListeners === 'function') {
-    attachRatingListeners();
   }
-   
-}
-
-  
 
   function handleSearchInput() {
     const searchInput = document.getElementById("searchInput");
@@ -235,6 +236,11 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.textContent = "✕";
       }
       console.log(`✅ Loaded ${gamesData.length} games successfully!`);
+      
+      // Load user favorites after games are loaded
+      if (typeof loadUserFavorites === 'function') {
+        loadUserFavorites();
+      }
     })
     .catch((error) => console.error("Error fetching games:", error));
 
@@ -253,10 +259,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ===== GAME RATINGS SYSTEM (Global) =====
-const RATINGS_BIN_ID = "69e045ec856a6821893bc134"; // Replace with your JSONBin.io Bin ID
-const RATINGS_API_KEY = "$2a$10$2cPmKAGNYxPTRLV03OfVruvfhNpW/VHtJSzR.AVNHumZ7etLdT33."; // Replace with your JSONBin.io API Key
+const RATINGS_BIN_ID = "69e045ec856a6821893bc134";
+const RATINGS_API_KEY = "$2a$10$2cPmKAGNYxPTRLV03OfVruvfhNpW/VHtJSzR.AVNHumZ7etLdT33.";
 
-let globalRatings = {}; // Stores { "gameName": { average: 4.2, count: 15, total: 63 } }
+let globalRatings = {};
 let userVotes = JSON.parse(localStorage.getItem('userVotes') || '{}');
 
 // Load ratings from JSONBin
@@ -273,7 +279,6 @@ async function loadGlobalRatings() {
   } catch (error) {
     console.error('Failed to load ratings:', error);
   }
-  // Refresh all star displays after loading
   refreshAllRatings();
 }
 
@@ -296,32 +301,27 @@ async function saveGlobalRatings() {
 
 // Submit a rating for a game
 function submitRating(gameName, rating) {
-  // Initialize game entry if it doesn't exist
   if (!globalRatings[gameName]) {
     globalRatings[gameName] = { total: 0, count: 0, average: 0 };
   }
   
-  //  Track user rating count
+  // Track user rating count
   const currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
   if (currentUser) {
     currentUser.stats = currentUser.stats || { ratingsGiven: 0, favoritesCount: 0, gamesPlayed: 0 };
     currentUser.stats.ratingsGiven = (currentUser.stats.ratingsGiven || 0) + 1;
     localStorage.setItem('fanter_currentUser', JSON.stringify(currentUser));
     
-    // Update in users array
     let users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
     const userIndex = users.findIndex(u => u.id === currentUser.id);
     if (userIndex !== -1) {
       users[userIndex].stats = currentUser.stats;
       localStorage.setItem('fanter_users', JSON.stringify(users));
     }
-    
   }
-
   
   // Check if user already voted
   if (userVotes[gameName]) {
-    // Remove old vote
     const oldRating = userVotes[gameName];
     globalRatings[gameName].total -= oldRating;
     globalRatings[gameName].count -= 1;
@@ -332,17 +332,11 @@ function submitRating(gameName, rating) {
   globalRatings[gameName].count += 1;
   globalRatings[gameName].average = globalRatings[gameName].total / globalRatings[gameName].count;
   
-  // Save user's vote
   userVotes[gameName] = rating;
   localStorage.setItem('userVotes', JSON.stringify(userVotes));
   
-  // Save to cloud
   saveGlobalRatings();
-  
-  // Show toast notification
   showRatingToast(`You rated "${gameName}" ${rating}★!`);
-  
-  // Update the star display for this game
   updateStarDisplay(gameName, rating);
 }
 
@@ -360,7 +354,6 @@ function updateStarDisplay(gameName, userRating) {
     }
   });
   
-  // Update average display
   const avgDisplay = ratingContainer.querySelector('.rating-average');
   const gameRating = globalRatings[gameName];
   if (avgDisplay && gameRating) {
@@ -375,7 +368,6 @@ function refreshAllRatings() {
     const gameRating = globalRatings[gameName];
     const userRating = userVotes[gameName] || 0;
     
-    // Update stars based on user rating
     const stars = container.querySelectorAll('.star');
     stars.forEach((star, index) => {
       if (index < userRating) {
@@ -385,7 +377,6 @@ function refreshAllRatings() {
       }
     });
     
-    // Update average display
     const avgDisplay = container.querySelector('.rating-average');
     if (avgDisplay && gameRating) {
       avgDisplay.innerHTML = `<span class="star-small">★</span> ${gameRating.average.toFixed(1)} (${gameRating.count})`;
@@ -430,18 +421,16 @@ function createRatingHTML(gameName, currentRating = 0) {
   `;
 }
 
-// Attach rating event listeners (call after games are loaded)
+// Attach rating event listeners
 function attachRatingListeners() {
   document.querySelectorAll('.stars').forEach(starsContainer => {
     const gameName = starsContainer.getAttribute('data-game');
     
     starsContainer.querySelectorAll('.star').forEach(star => {
-      // Remove old listeners to avoid duplicates
       star.removeEventListener('click', star.clickHandler);
       star.removeEventListener('mouseenter', star.mouseEnterHandler);
       star.removeEventListener('mouseleave', star.mouseLeaveHandler);
       
-      // Create new handlers
       const ratingValue = parseInt(star.getAttribute('data-value'));
       
       star.clickHandler = () => submitRating(gameName, ratingValue);
@@ -465,16 +454,11 @@ function attachRatingListeners() {
   });
 }
 
-// Modify your existing displayFilteredGames function to include ratings
-// Find this function in your main.js and add the rating line
-// Inside the gameDiv creation, after adding the favBtn, add:
-// gameDiv.insertAdjacentHTML('beforeend', createRatingHTML(game.name, userVotes[game.name] || 0));
-
 // Load ratings when page loads
 loadGlobalRatings();
 
+
 // ===== ACCOUNT SYSTEM HELPER FUNCTIONS =====
-// These functions sync the account button across all pages
 
 function updateAccountButtonDisplay() {
   const currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
@@ -484,12 +468,10 @@ function updateAccountButtonDisplay() {
   }
 }
 
-// Update account button when page loads
 document.addEventListener('DOMContentLoaded', function() {
   updateAccountButtonDisplay();
 });
 
-// Also update when localStorage changes (for same-tab updates)
 window.addEventListener('storage', function(e) {
   if (e.key === 'fanter_currentUser') {
     updateAccountButtonDisplay();
@@ -499,17 +481,13 @@ window.addEventListener('storage', function(e) {
 
 // ===== ACCOUNT SYNC FUNCTIONS =====
 
-// Get current logged in user
 function getCurrentUser() {
   return JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
 }
 
-// Update user data in localStorage
 function updateUserInStorage(updatedUser) {
-  // Update current user
   localStorage.setItem('fanter_currentUser', JSON.stringify(updatedUser));
   
-  // Update in users array
   let users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
   const index = users.findIndex(u => u.id === updatedUser.id);
   if (index !== -1) {
@@ -518,24 +496,16 @@ function updateUserInStorage(updatedUser) {
   }
 }
 
-// Sync favorites from account to the global favorites system
 function syncFavoritesFromAccount() {
   const currentUser = getCurrentUser();
   if (!currentUser) return;
   
-  // Get account favorites
   const accountFavorites = currentUser.favorites || [];
-  
-  // Get local favorites
   let localFavorites = JSON.parse(localStorage.getItem("favourites") || "[]");
-  
-  // Merge: account favorites take priority
   const mergedFavorites = [...new Set([...accountFavorites, ...localFavorites])];
   
-  // Save merged favorites to localStorage
   localStorage.setItem("favourites", JSON.stringify(mergedFavorites));
   
-  // Update user's favorites array
   currentUser.favorites = mergedFavorites;
   currentUser.stats.favoritesCount = mergedFavorites.length;
   updateUserInStorage(currentUser);
@@ -543,7 +513,6 @@ function syncFavoritesFromAccount() {
   console.log(`✅ Synced ${mergedFavorites.length} favorites from account`);
 }
 
-// Sync local favorites to account (when user adds/removes a favorite)
 function syncFavoriteToAccount(gameName, isAdding) {
   const currentUser = getCurrentUser();
   if (!currentUser) return;
@@ -562,30 +531,25 @@ function syncFavoriteToAccount(gameName, isAdding) {
   currentUser.stats.favoritesCount = favorites.length;
   updateUserInStorage(currentUser);
   
-  // Also update the global localStorage
   localStorage.setItem("favourites", JSON.stringify(favorites));
   
   console.log(`✅ ${isAdding ? 'Added' : 'Removed'} ${gameName} from account favorites`);
 }
 
-// Track played gqme
 function trackPlayedGame(gameName) {
   const currentUser = getCurrentUser();
   if (!currentUser) return;
   
   let playedGames = currentUser.playedGames || [];
   
-  // Add to played games (avoid duplicates, add to front for recent)
   if (!playedGames.includes(gameName)) {
     playedGames.unshift(gameName);
   } else {
-    // Move to front if already exists
     const index = playedGames.indexOf(gameName);
     playedGames.splice(index, 1);
     playedGames.unshift(gameName);
   }
   
-  // Keep only last 50 played games
   if (playedGames.length > 50) playedGames.pop();
   
   currentUser.playedGames = playedGames;
@@ -595,7 +559,6 @@ function trackPlayedGame(gameName) {
   console.log(`✅ Tracked played game: ${gameName}`);
 }
 
-// Load user's favourites on page load
 function loadUserFavorites() {
   const currentUser = getCurrentUser();
   if (!currentUser) return;
@@ -603,7 +566,6 @@ function loadUserFavorites() {
   const favorites = currentUser.favorites || [];
   localStorage.setItem("favourites", JSON.stringify(favorites));
   
-  // Refresh the game dislay if handleSearchInput exists
   if (typeof handleSearchInput === 'function') {
     handleSearchInput();
   }
