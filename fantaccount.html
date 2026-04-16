@@ -9,7 +9,7 @@
   <script src="config/main.js"></script>
   <style>
     .account-container {
-      max-width: 500px;
+      max-width: 600px;
       margin: 100px auto;
       padding: 30px;
       background: rgba(20, 30, 50, 0.8);
@@ -84,6 +84,7 @@
       justify-content: center;
       gap: 30px;
       margin: 20px 0;
+      flex-wrap: wrap;
     }
     
     .stat {
@@ -99,6 +100,32 @@
     .stat-label {
       font-size: 12px;
       color: rgba(255,255,255,0.6);
+    }
+    
+    .profile-games-section {
+      margin-top: 25px;
+      text-align: left;
+    }
+    
+    .profile-games-section h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #ffcc00;
+      font-family: 'Orbitron', monospace;
+    }
+    
+    .profile-game-tag {
+      display: inline-block;
+      background: rgba(45, 90, 227, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin: 3px;
+    }
+    
+    .profile-game-tag.favorite {
+      background: rgba(255, 204, 0, 0.2);
+      color: #ffcc00;
     }
     
     .message {
@@ -127,6 +154,12 @@
     
     .logout-btn:hover {
       background: rgba(220, 50, 50, 0.4);
+    }
+    
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 20px 0;
     }
   </style>
 </head>
@@ -183,7 +216,7 @@
   </div>
 
   <script>
-    // ===== account sys =+===
+    // ===== ACCOUNT SYSTEM =====
     
     // Get logged in user from localStorage
     let currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
@@ -222,20 +255,20 @@
       }
       
       const newUser = {
-     id: Date.now(),
-     username: username,
-    displayName: displayName || username,
-       password: password,
-             createdAt: new Date().toISOString(),
-    favorites: [],           
-   playedGames: [],         // ← NEW: Array of game names played
-   stats: {
-    ratingsGiven: 0,
-      favoritesCount: 0,     // Wil be auto calculated
-    gamesPlayed: 0,        // Will be autocalculated
-    joinDate: new Date().toISOString()
-  }
-};
+        id: Date.now(),
+        username: username,
+        displayName: displayName || username,
+        password: password,
+        createdAt: new Date().toISOString(),
+        favorites: [],
+        playedGames: [],
+        stats: {
+          ratingsGiven: 0,
+          favoritesCount: 0,
+          gamesPlayed: 0,
+          joinDate: new Date().toISOString()
+        }
+      };
       
       users.push(newUser);
       saveUsers();
@@ -249,6 +282,13 @@
       const user = users.find(u => u.username === username && u.password === password);
       if (!user) {
         return { success: false, message: 'Invalid username or password!' };
+      }
+      
+      // Update stats from localStorage if needed
+      const localFavorites = JSON.parse(localStorage.getItem('favourites') || '[]');
+      if (localFavorites.length > (user.favorites || []).length) {
+        user.favorites = localFavorites;
+        user.stats.favoritesCount = localFavorites.length;
       }
       
       setCurrentUser(user);
@@ -277,7 +317,7 @@
       renderProfile();
     }
     
-    // Render profile tab
+    // Render profile tab with games sections
     function renderProfile() {
       const profileDiv = document.getElementById('profileContent');
       if (!profileDiv) return;
@@ -293,6 +333,36 @@
         return;
       }
       
+      // Get played games and favorites
+      const recentGames = (currentUser.playedGames || []).slice(0, 10);
+      const favGames = (currentUser.favorites || []).slice(0, 10);
+      
+      // Build recent games HTML
+      let recentGamesHtml = '';
+      if (recentGames.length > 0) {
+        recentGamesHtml = `
+          <div class="profile-games-section">
+            <h3>🎮 recently played</h3>
+            <div>
+              ${recentGames.map(game => `<span class="profile-game-tag">${escapeHtml(game)}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
+      // Build favorites HTML
+      let favGamesHtml = '';
+      if (favGames.length > 0) {
+        favGamesHtml = `
+          <div class="profile-games-section">
+            <h3>⭐ favorite games</h3>
+            <div>
+              ${favGames.map(game => `<span class="profile-game-tag favorite">${escapeHtml(game)}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
       profileDiv.innerHTML = `
         <div class="profile-info">
           <div class="profile-avatar">🎮</div>
@@ -306,14 +376,19 @@
             <div class="stat-label">ratings</div>
           </div>
           <div class="stat">
-            <div class="stat-number">${currentUser.stats?.favoritesCount || 0}</div>
+            <div class="stat-number">${currentUser.stats?.favoritesCount || (currentUser.favorites?.length || 0)}</div>
             <div class="stat-label">favorites</div>
           </div>
           <div class="stat">
-            <div class="stat-number">${currentUser.stats?.gamesPlayed || 0}</div>
+            <div class="stat-number">${currentUser.stats?.gamesPlayed || (currentUser.playedGames?.length || 0)}</div>
             <div class="stat-label">played</div>
           </div>
         </div>
+        
+        ${recentGamesHtml}
+        ${favGamesHtml}
+        
+        <div class="divider"></div>
         
         <div class="account-form">
           <input type="text" id="editDisplayName" placeholder="display name" value="${escapeHtml(currentUser.displayName || currentUser.username)}">
@@ -349,6 +424,16 @@
       });
     }
     
+    // Sync favorites from account to localStorage when viewing profile
+    function syncFavoritesToLocal() {
+      if (currentUser && currentUser.favorites) {
+        localStorage.setItem('favourites', JSON.stringify(currentUser.favorites));
+        if (typeof handleSearchInput === 'function') {
+          handleSearchInput();
+        }
+      }
+    }
+    
     // Event listeners
     document.getElementById('loginForm')?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -359,6 +444,7 @@
       msgDiv.textContent = result.message;
       msgDiv.className = `message ${result.success ? 'success' : 'error'}`;
       if (result.success) {
+        syncFavoritesToLocal();
         setTimeout(() => showTab('profile'), 1000);
       }
     });
@@ -386,7 +472,7 @@
       }
     });
     
-    // Tab click hanlers
+    // Tab click handlers
     document.querySelectorAll('.account-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         showTab(btn.dataset.tab);
