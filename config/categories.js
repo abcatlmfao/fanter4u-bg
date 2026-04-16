@@ -1,9 +1,9 @@
-// ===== FIXED CATEGORIES - SORTING, TAGS, DEFAULT ORDER =====
+// ===== DEBUGGED CATEGORIES - SORTING FIXED =====
 
 let currentCategory = 'all';
-let currentSort = 'default';  // 'default' keeps original JSON order
+let currentSort = 'default';
 let categoryOpen = false;
-let originalGamesArray = []; // Store original order from games.json
+let originalGamesArray = [];
 
 // Category data
 const CATEGORIES = {
@@ -23,27 +23,30 @@ const CATEGORIES = {
   'other': { icon: '🎮', name: 'Other', color: '#aaaaaa' }
 };
 
-// Store original order from DOM (preserves games.json order)
+// Store original order
 function storeOriginalOrder() {
   const container = document.getElementById('gamesContainer');
-  if (container && originalGamesArray.length === 0) {
+  if (container && originalGamesArray.length === 0 && container.children.length > 0) {
     originalGamesArray = Array.from(container.children);
+    console.log('📦 Stored original order:', originalGamesArray.length, 'games');
   }
 }
 
-// Reset to original games.json order
+// Reset to original order
 function resetToOriginalOrder() {
   const container = document.getElementById('gamesContainer');
   if (container && originalGamesArray.length > 0) {
     originalGamesArray.forEach(game => container.appendChild(game));
+    console.log('🔄 Reset to original order');
   }
 }
 
-// Add category tag to game cards (shows below game name)
+// Add category tags to game cards
 function addCategoryTags() {
   const games = document.querySelectorAll('.game');
+  console.log('🏷️ Adding tags to', games.length, 'games');
+  
   games.forEach(game => {
-    // Skip if already tagged
     if (game.getAttribute('data-tagged')) return;
     
     const gameName = game.querySelector('p')?.textContent;
@@ -52,7 +55,8 @@ function addCategoryTags() {
       const category = gameData?.category || 'other';
       const catInfo = CATEGORIES[category] || CATEGORIES.other;
       
-      // Create category tag
+      console.log(`  🎮 ${gameName} → ${catInfo.name}`);
+      
       const tag = document.createElement('div');
       tag.className = 'game-category';
       tag.style.cssText = `
@@ -64,11 +68,9 @@ function addCategoryTags() {
         color: ${catInfo.color};
         margin-top: 6px;
         font-family: monospace;
-        transition: all 0.2s ease;
       `;
       tag.innerHTML = `${catInfo.icon} ${catInfo.name}`;
       
-      // Insert after the game name (p tag)
       const pTag = game.querySelector('p');
       if (pTag) {
         pTag.insertAdjacentElement('afterend', tag);
@@ -82,67 +84,98 @@ function addCategoryTags() {
   });
 }
 
-// Filter and sort games
-function updateGames() {
+// Filter games by category
+function filterGamesByCategory() {
   const container = document.getElementById('gamesContainer');
   if (!container) return;
   
   const games = Array.from(container.children);
-  let visibleGames = [];
-  let hiddenGames = [];
+  let visibleCount = 0;
   
-  // First, filter by category
   games.forEach(game => {
-    const cat = game.getAttribute('data-category');
-    if (currentCategory === 'all' || cat === currentCategory) {
+    const gameCategory = game.getAttribute('data-category');
+    if (currentCategory === 'all' || gameCategory === currentCategory) {
       game.style.display = '';
-      visibleGames.push(game);
+      visibleCount++;
     } else {
       game.style.display = 'none';
-      hiddenGames.push(game);
     }
   });
   
-  // Then sort visible games
-  if (currentSort !== 'default') {
-    visibleGames.sort((a, b) => {
-      const aName = a.querySelector('p')?.textContent || '';
-      const bName = b.querySelector('p')?.textContent || '';
-      
-      if (currentSort === 'name-asc') {
-        return aName.localeCompare(bName);
-      }
-      if (currentSort === 'name-desc') {
-        return bName.localeCompare(aName);
-      }
-      
-      // Rating sorting
-      const aRatingEl = a.querySelector('.rating-average');
-      const bRatingEl = b.querySelector('.rating-average');
-      const aRating = aRatingEl ? parseFloat(aRatingEl.textContent?.match(/★ ([\d.]+)/)?.[1] || 0) : 0;
-      const bRating = bRatingEl ? parseFloat(bRatingEl.textContent?.match(/★ ([\d.]+)/)?.[1] || 0) : 0;
-      
-      if (currentSort === 'rating-desc') {
-        return bRating - aRating;
-      }
-      if (currentSort === 'rating-asc') {
-        return aRating - bRating;
-      }
-      return 0;
-    });
-  } else {
-    // Default: restore original games.json order
+  console.log(`🔍 Filtered to ${visibleCount} games (category: ${currentCategory})`);
+  return visibleCount;
+}
+
+// Sort visible games
+function sortVisibleGames() {
+  const container = document.getElementById('gamesContainer');
+  if (!container) return;
+  
+  const games = Array.from(container.children);
+  const visibleGames = games.filter(game => game.style.display !== 'none');
+  const hiddenGames = games.filter(game => game.style.display === 'none');
+  
+  if (currentSort === 'default') {
+    // Restore original order for visible games
     const originalVisible = originalGamesArray.filter(game => 
       visibleGames.includes(game)
     );
-    visibleGames = originalVisible;
+    originalVisible.forEach(game => container.appendChild(game));
+    hiddenGames.forEach(game => container.appendChild(game));
+    console.log('📋 Applied default sort');
+    return;
   }
   
-  // Reorder DOM: put visible sorted games first, then hidden games at the end
+  // Sort visible games
+  visibleGames.sort((a, b) => {
+    const aName = a.querySelector('p')?.textContent || '';
+    const bName = b.querySelector('p')?.textContent || '';
+    
+    if (currentSort === 'name-asc') {
+      return aName.localeCompare(bName);
+    }
+    if (currentSort === 'name-desc') {
+      return bName.localeCompare(aName);
+    }
+    
+    const aRatingEl = a.querySelector('.rating-average');
+    const bRatingEl = b.querySelector('.rating-average');
+    const aRating = aRatingEl ? parseFloat(aRatingEl.textContent?.match(/★ ([\d.]+)/)?.[1] || 0) : 0;
+    const bRating = bRatingEl ? parseFloat(bRatingEl.textContent?.match(/★ ([\d.]+)/)?.[1] || 0) : 0;
+    
+    if (currentSort === 'rating-desc') {
+      return bRating - aRating;
+    }
+    if (currentSort === 'rating-asc') {
+      return aRating - bRating;
+    }
+    return 0;
+  });
+  
+  // Reorder DOM
   visibleGames.forEach(game => container.appendChild(game));
   hiddenGames.forEach(game => container.appendChild(game));
   
-  // Update count display
+  console.log(`📊 Applied sort: ${currentSort}`);
+}
+
+// Update everything
+function updateGames() {
+  storeOriginalOrder();
+  filterGamesByCategory();
+  sortVisibleGames();
+  updateCountDisplay();
+}
+
+function updateCountDisplay() {
+  const container = document.getElementById('gamesContainer');
+  if (!container) return;
+  
+  const games = Array.from(container.children);
+  const visibleCount = games.filter(game => game.style.display !== 'none').length;
+  const totalGames = games.length;
+  const categoryName = currentCategory === 'all' ? 'All Games' : (CATEGORIES[currentCategory]?.name || currentCategory);
+  
   let countEl = document.getElementById('games-count');
   if (!countEl) {
     countEl = document.createElement('div');
@@ -150,9 +183,7 @@ function updateGames() {
     countEl.style.cssText = 'text-align:center;font-size:12px;color:rgba(255,255,255,0.5);margin:10px auto;font-family:monospace;';
     container.parentNode.insertBefore(countEl, container.nextSibling);
   }
-  const totalGames = games.length;
-  const categoryName = currentCategory === 'all' ? 'All Games' : (CATEGORIES[currentCategory]?.name || currentCategory);
-  countEl.innerHTML = `${categoryName}: ${visibleGames.length} of ${totalGames} games`;
+  countEl.textContent = `${categoryName}: ${visibleCount} of ${totalGames} games`;
 }
 
 // Create the category bar
@@ -161,9 +192,11 @@ function createCategoryBar() {
   
   const searchContainer = document.querySelector('.center');
   if (!searchContainer) {
-    console.log('Waiting for .center element...');
+    console.log('⏳ Waiting for .center element...');
     return;
   }
+  
+  console.log('🎨 Creating category bar...');
   
   const bar = document.createElement('div');
   bar.id = 'category-bar';
@@ -311,11 +344,8 @@ function createCategoryBar() {
       currentSort = s.value;
       updateGames();
       // Update button styles
-      sorts.forEach(ss => {
-        const btns = document.querySelectorAll('.sort-custom-btn');
-        btns.forEach(b => {
-          b.style.background = 'transparent';
-        });
+      document.querySelectorAll('.sort-custom-btn').forEach(b => {
+        b.style.background = 'transparent';
       });
       btn.style.background = 'rgba(45,90,227,0.5)';
     };
@@ -366,9 +396,9 @@ function createCategoryBar() {
   });
 }
 
-// Initialize everything
+// Initialize
 function init() {
-  console.log('Initializing categories...');
+  console.log('🚀 Initializing categories system...');
   storeOriginalOrder();
   createCategoryBar();
   addCategoryTags();
@@ -390,20 +420,14 @@ const waitForGames = setInterval(() => {
   attempts++;
   if (window.gamesData && window.gamesData.length > 0) {
     clearInterval(waitForGames);
+    console.log('✅ gamesData loaded:', window.gamesData.length, 'games');
     addCategoryTags();
     updateGames();
   }
-  if (attempts > 50) clearInterval(waitForGames);
+  if (attempts > 50) {
+    clearInterval(waitForGames);
+    console.log('⚠️ Timeout waiting for gamesData');
+  }
 }, 200);
 
-// Watch for new games being added
-const gameObserver = new MutationObserver(() => {
-  addCategoryTags();
-  storeOriginalOrder();
-});
-const gamesContainer = document.getElementById('gamesContainer');
-if (gamesContainer) {
-  gameObserver.observe(gamesContainer, { childList: true, subtree: true });
-}
-
-console.log('✅ Categories ready! Default order preserves games.json sequence');
+console.log('✅ Categories script loaded - check console for debug info');
