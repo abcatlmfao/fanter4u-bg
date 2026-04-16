@@ -84,3 +84,15 @@ more like game porters imma add later since fanter isnt in proper release yet
 known bugs:
 
 none that i know of rn but probably some lol
+
+
+
+
+Q: did you use ai to code this?
+A: yes, a bit: i used ai for bugfixes, and comments so when i edited it, it would be easier to fix any bugs that an ai couldnt find (i used deepseek because its so good).
+
+Q: why did you make fanter?
+A: i made fanter for fun originally; meant to be an unblocked games site ( i originally made this using google sites in 2024) for my friends. only having a few good games.
+
+Q: is coding this fun?
+A: yes, very: when i code for "10 minutes" 2 hours pass ;-; .
