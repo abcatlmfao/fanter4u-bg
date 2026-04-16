@@ -3,6 +3,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&family=Exo+2:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap");
 
+/* FORCE ALLOW OVERFLOW FOR CHINCHILLA */
+html, body {
+  overflow-x: visible !important;
+  overflow-y: auto !important;
+  max-width: 100%;
+}
+
+* {
+  max-width: 100%;
+}
+
+.chinchilla-container,
+.chinchilla-image {
+  max-width: none !important;
+  overflow: visible !important;
+}
+
 :root {
   --background-color: #1a1a2e !important;
   --text-color: #FFFFFF;
