@@ -33,53 +33,72 @@ document.addEventListener('DOMContentLoaded', function() {
 
    
 }
-  function displayFilteredGames(filteredGames) {
-    const gamesContainer = document.getElementById("gamesContainer");
-    if (!gamesContainer) return;
-    gamesContainer.innerHTML = "";
-    filteredGames.forEach((game) => {
-      const gameDiv = document.createElement("div");
-      gameDiv.classList.add("game");
-      const gameImage = document.createElement("img");
-      let imageSrc;
-      if (game.image.startsWith('http')) {
-        imageSrc = game.image;
-      } else {
-        imageSrc = `${serverUrl1}/${game.url}/${game.image}`;
-      }
-      gameImage.src = imageSrc;
-      gameImage.alt = game.name;
-      gameImage.onclick = () => {
-        if (game.url.startsWith('http')) {
-          window.location.href = game.url;
-        } else {
-          window.location.href = `play.html?gameurl=${game.url}/`;
-        }
-      };
-      const gameName = document.createElement("p");
-      gameName.textContent = game.name;
-      const favBtn = document.createElement("button");
-      favBtn.classList.add("fav-btn");
-      favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
-      favBtn.title = "favourite";
-      favBtn.onclick = (e) => {
-        e.stopPropagation();
-        toggleFavourite(game.name);
-        favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
-      };
-      gameDiv.appendChild(gameImage);
-      gameDiv.appendChild(gameName);
-      gameDiv.appendChild(favBtn);
-      
-      // THIS LINE FOR RATINGS
-      gameDiv.insertAdjacentHTML('beforeend', createRatingHTML(game.name, userVotes[game.name] || 0));
-      
-      gamesContainer.appendChild(gameDiv);
-    });
+ function displayFilteredGames(filteredGames) {
+  const gamesContainer = document.getElementById("gamesContainer");
+  if (!gamesContainer) return;
+  gamesContainer.innerHTML = "";
+  filteredGames.forEach((game) => {
+    const gameDiv = document.createElement("div");
+    gameDiv.classList.add("game");
     
-    // THIS LINE TO ATTACH RATING LISTENERS
+    const gameImage = document.createElement("img");
+    let imageSrc;
+    if (game.image.startsWith('http')) {
+      imageSrc = game.image;
+    } else {
+      imageSrc = `${serverUrl1}/${game.url}/${game.image}`;
+    }
+    gameImage.src = imageSrc;
+    gameImage.alt = game.name;
+    
+    // GAME CLICK HANDLER - Track plyed game
+    gameImage.onclick = () => {
+      // Track that this game was played (if logged in)
+      if (typeof trackPlayedGame === 'function') {
+        trackPlayedGame(game.name);
+      }
+      
+      if (game.url.startsWith('http')) {
+        window.location.href = game.url;
+      } else {
+        window.location.href = `play.html?gameurl=${game.url}/`;
+      }
+    };
+    
+    const gameName = document.createElement("p");
+    gameName.textContent = game.name;
+    
+    // FAVORITE BUTTON
+    const favBtn = document.createElement("button");
+    favBtn.classList.add("fav-btn");
+    favBtn.setAttribute("data-game", game.name);
+    favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
+    favBtn.title = "favourite";
+    favBtn.onclick = (e) => {
+      e.stopPropagation();
+      toggleFavourite(game.name);
+      favBtn.textContent = getFavourites().includes(game.name) ? "★" : "☆";
+    };
+    
+    gameDiv.appendChild(gameImage);
+    gameDiv.appendChild(gameName);
+    gameDiv.appendChild(favBtn);
+    
+   
+    if (typeof createRatingHTML === 'function') {
+      const userVotes = JSON.parse(localStorage.getItem('userVotes') || '{}');
+      gameDiv.insertAdjacentHTML('beforeend', createRatingHTML(game.name, userVotes[game.name] || 0));
+    }
+    
+    gamesContainer.appendChild(gameDiv);
+  });
+  
+  
+  if (typeof attachRatingListeners === 'function') {
     attachRatingListeners();
   }
+   
+}
 
   
 
