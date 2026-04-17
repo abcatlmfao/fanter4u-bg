@@ -325,6 +325,60 @@
   </script>
 
   <script src="config/simple-games.js"></script>
+  <script>
+// This will run after games are loaded and add click handlers directly
+function fixGameClicks() {
+  setTimeout(function() {
+    var games = document.querySelectorAll('.game img');
+    console.log("Found " + games.length + " game images to fix");
+    
+    for (var i = 0; i < games.length; i++) {
+      var img = games[i];
+      var gameName = img.alt;
+      
+      // Find the game in gamesData
+      var gameUrl = '';
+      if (window.gamesData) {
+        for (var j = 0; j < window.gamesData.length; j++) {
+          if (window.gamesData[j].name === gameName) {
+            gameUrl = window.gamesData[j].url;
+            break;
+          }
+        }
+      }
+      
+      console.log("Fixing:", gameName, "URL:", gameUrl);
+      
+      // Remove any existing click handlers
+      img.removeAttribute('onclick');
+      
+      // Add new click handler
+      img.onclick = (function(url, name) {
+        return function() {
+          var playUrl = 'play.html?gameurl=' + encodeURIComponent(url) + '&game=' + encodeURIComponent(name);
+          console.log("PLAYING:", name, "URL:", playUrl);
+          window.open(playUrl, '_blank');
+        };
+      })(gameUrl, gameName);
+    }
+  }, 1000);
+}
+
+// Run fix when page loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', fixGameClicks);
+} else {
+  fixGameClicks();
+}
+
+// Also run after any game updates (like search/filter)
+if (window.MutationObserver) {
+  var observer = new MutationObserver(function() {
+    fixGameClicks();
+  });
+  observer.observe(document.getElementById('gamesContainer'), { childList: true, subtree: true });
+}
+</script>
   
 </body>
 </html>
