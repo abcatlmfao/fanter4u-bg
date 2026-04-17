@@ -3,300 +3,363 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fanter | playing</title>
+  <title>fanter v0.3</title>
   <link rel="stylesheet" href="config/main.css" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: linear-gradient(135deg, #0a0a1a, #0f0f2a);
-      min-height: 100vh;
-      font-family: 'Ubuntu', sans-serif;
-    }
-
-    .game-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      width: 100%;
-    }
-
-    .top-bar {
-      background: rgba(10, 15, 30, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(45, 90, 227, 0.3);
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .game-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #ffcc00;
-      font-family: 'Orbitron', monospace;
-    }
-
-    .stats {
-      display: flex;
-      gap: 20px;
-    }
-
-    .stat {
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 18px;
-      font-weight: bold;
-      color: #2d5ae3;
-      font-family: 'Orbitron', monospace;
-    }
-
-    .stat-label {
-      font-size: 10px;
-      color: rgba(255,255,255,0.5);
-    }
-
-    .control-btn {
-      background: rgba(20,30,50,0.8);
-      border: 1px solid rgba(45,90,227,0.4);
-      border-radius: 30px;
-      padding: 8px 20px;
-      color: white;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .control-btn:hover {
-      border-color: #ffcc00;
-      transform: translateY(-2px);
-    }
-
-    .game-wrapper {
-      flex: 1;
-      background: rgba(0,0,0,0.3);
-      position: relative;
-    }
-
-    .game-frame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: white;
-    }
-
-    .back-link {
-      color: white;
-      text-decoration: none;
-      padding: 8px 16px;
-      background: rgba(45,90,227,0.2);
-      border-radius: 30px;
-      font-size: 13px;
-    }
-
-    .back-link:hover {
-      background: rgba(45,90,227,0.4);
-    }
-
-    .game-wrapper.fullscreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1000;
-    }
-
-    .fullscreen-active {
-      background: rgba(255,204,0,0.2);
-      border-color: #ffcc00;
-    }
-
-    /* External game notice */
-    .external-notice {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.7);
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-size: 10px;
-      color: rgba(255,255,255,0.5);
-      z-index: 10;
-    }
-  </style>
 </head>
+
 <body>
-  <div class="game-container">
-    <div class="top-bar">
-      <div class="game-title" id="gameTitle">Loading...</div>
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-value" id="coinAmount">0</div>
-          <div class="stat-label">🪙 coins</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="playtimeDisplay">00:00:00</div>
-          <div class="stat-label">played</div>
-        </div>
+  <!-- Loading Screen -->
+  <div id="loadingScreen">
+    <canvas id="matrixCanvas"></canvas>
+    <div class="matrix-scanlines"></div>
+    <div id="brokenWallContainer"></div>
+    <div class="loading-content">
+      <div class="loading-icon"></div>
+      <h1 class="loading-title">Loading fanter.OS</h1>
+      <div class="loading-progress">
+        <div class="loading-progress-bar"></div>
       </div>
-      <div style="display: flex; gap: 10px;">
-        <button class="control-btn" id="fullscreenBtn">🖥️ fullscreen</button>
-        <a href="index.html" class="back-link">← back</a>
-      </div>
-    </div>
-    
-    <div class="game-wrapper" id="gameWrapper">
-      <iframe class="game-frame" id="gameFrame" src="about:blank" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
-      <div class="external-notice" id="externalNotice" style="display: none;">⚠️ external site - may not load in iframe</div>
+      <p class="loading-status" id="loadingStatus">Initializing systems...</p>
     </div>
   </div>
 
+  <div id="whiteFlash"></div>
+  <div id="revealOverlay"></div>
+
+  <!-- Main Content - HIDDEN initially -->
+  <div id="mainContent" style="opacity: 0; visibility: hidden;">
+    <!-- Account Button -->
+    <div class="account-btn-container">
+      <button class="account-btn" id="accountBtn" onclick="window.location.href='fantaccount.html'">
+        <span class="account-icon">👤</span>
+        <span class="account-name" id="accountName">Guest</span>
+      </button>
+    </div>
+
+    <button class="fav-sidebar-btn" id="favSidebarBtn" onclick="window.toggleFavSidebar()">★</button>
+    
+    <div class="center">
+      <h1 id="title"></h1>
+      <p id="subtitle"></p>
+      <button class="settings-btn" onclick="window.location.href='settings.html'">⚙ Settings</button>
+    </div>
+    
+    <div class="center">
+      <input type="text" id="searchInput" placeholder="search 4 games" />
+    </div>
+    
+    <div id="gamesContainer"></div>
+    
+    <div class="footer">
+      <a style="font-weight: 700">a site created by abcatlmfao, / chipikipal800, / abcatlmfao69;</a>
+      <a style="font-weight: 700" class="link" href="https://dsc.gg/parcoil">parcoil network</a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="config/theme-loader.js"></script>
+  <script src="config/main.js"></script>
+  <script src="config/quicklaunch.js"></script>
+  <script src="config/categories.js"></script>
+  <script src="config/gamedetails.js"></script>
+
+  <!-- Safety Key Script -->
   <script>
-    // ===== GET GAME INFO FROM URL =====
-    const urlParams = new URLSearchParams(window.location.search);
-    let gameUrl = urlParams.get("gameurl");
-    let gameName = urlParams.get("game") || "Game";
-
-    console.log("🔍 Game URL param:", gameUrl);
-    console.log("📝 Game name:", gameName);
-
-    // Check if it's an external URL (starts with http)
-    const isExternal = gameUrl && (gameUrl.startsWith('http://') || gameUrl.startsWith('https://'));
-    
-    let embedUrl;
-    if (isExternal) {
-      embedUrl = gameUrl;
-      document.getElementById('externalNotice').style.display = 'block';
-      console.log("🌐 External game detected, loading directly");
-    } else if (gameUrl) {
-      embedUrl = `https://gms.parcoil.com/${gameUrl}`;
-      console.log("🎮 Internal game, loading from proxy");
-    } else {
-      embedUrl = 'about:blank';
-      alert('No game URL provided!');
-    }
-
-    console.log("🎮 Loading embed URL:", embedUrl);
-    
-    // Load the game in iframe
-    const gameFrame = document.getElementById('gameFrame');
-    if (gameFrame) {
-      gameFrame.src = embedUrl;
-    }
-    
-    document.getElementById('gameTitle').textContent = `🎮 ${decodeURIComponent(gameName)}`;
-
-    // ===== COIN SYSTEM =====
-    let sessionStartTime = Date.now();
-    let totalCoinsEarned = 0;
-    let coinInterval = null;
-    let currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
-    
-    function loadUserCoins() {
-      if (currentUser && currentUser.coins !== undefined) {
-        totalCoinsEarned = currentUser.coins;
+    let lastKeyTime = 0;
+    let lastKey = "";
+    document.addEventListener("keydown", (e) => {
+      const safetyKey = localStorage.getItem("safetyKey");
+      const safetyUrl = localStorage.getItem("safetyUrl");
+      if (!safetyKey || !safetyUrl) return;
+      const now = Date.now();
+      const pressedKey = e.key.toLowerCase();
+      const storedKey = safetyKey.toLowerCase();
+      if (pressedKey === storedKey && pressedKey === lastKey && now - lastKeyTime < 1000) {
+        e.preventDefault();
+        window.location.href = safetyUrl;
       }
-      updateCoinDisplay();
-    }
-    
-    function saveUserCoins() {
-      if (currentUser) {
-        currentUser.coins = totalCoinsEarned;
-        localStorage.setItem('fanter_currentUser', JSON.stringify(currentUser));
-        let users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
-        const userIndex = users.findIndex(u => u.id === currentUser.id);
-        if (userIndex !== -1) {
-          users[userIndex].coins = totalCoinsEarned;
-          localStorage.setItem('fanter_users', JSON.stringify(users));
+      lastKey = pressedKey;
+      lastKeyTime = now;
+    });
+  </script>
+
+  <!-- Loading Screen Script -->
+  <script>
+    // ===== LOADING SCREEN SYSTEM (WITH VISIT CHECK) =====
+    (function() {
+      // Check if this is the first visit or a return from settings
+      const hasLoadedBefore = sessionStorage.getItem('fanterLoaded');
+      
+      // If coming back from settings, skip loading screen
+      if (hasLoadedBefore === 'true') {
+        const mainContent = document.getElementById('mainContent');
+        const loadingScreen = document.getElementById('loadingScreen');
+        
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (mainContent) {
+          mainContent.style.opacity = '1';
+          mainContent.style.visibility = 'visible';
+        }
+        
+        // Still animate games and UI for fresh feel
+        setTimeout(() => {
+          if (typeof animateGamesRandomly === 'function') animateGamesRandomly();
+          if (typeof animateUIElements === 'function') animateUIElements();
+        }, 100);
+        
+        return;
+      }
+      
+      // Mark that we've loaded
+      sessionStorage.setItem('fanterLoaded', 'true');
+      
+      const loadingScreen = document.getElementById('loadingScreen');
+      const progressBar = document.querySelector('.loading-progress-bar');
+      const statusEl = document.getElementById('loadingStatus');
+      const whiteFlash = document.getElementById('whiteFlash');
+      const revealOverlay = document.getElementById('revealOverlay');
+      const brokenWallContainer = document.getElementById('brokenWallContainer');
+      const mainContent = document.getElementById('mainContent');
+      
+      // HIDE main content initially
+      if (mainContent) {
+        mainContent.style.opacity = '0';
+        mainContent.style.visibility = 'hidden';
+      }
+      
+      // Matrix Rain
+      const canvas = document.getElementById('matrixCanvas');
+      const ctx = canvas.getContext('2d');
+      let width, height, drops = [];
+      const fontSize = 16;
+      const chars = "01";
+      
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        const columns = Math.floor(width / fontSize);
+        drops = [];
+        for (let i = 0; i < columns; i++) {
+          drops.push(Math.random() * -height);
         }
       }
-    }
-    
-    function updateCoinDisplay() {
-      const coinEl = document.getElementById('coinAmount');
-      if (coinEl) {
-        coinEl.textContent = Math.floor(totalCoinsEarned * 100) / 100;
-      }
-    }
-    
-    function updatePlaytimeDisplay() {
-      const elapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
-      const hours = Math.floor(elapsedSeconds / 3600);
-      const minutes = Math.floor((elapsedSeconds % 3600) / 60);
-      const seconds = elapsedSeconds % 60;
-      const display = document.getElementById('playtimeDisplay');
-      if (display) {
-        display.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      }
-    }
-    
-    function startCoinEarning() {
-      if (coinInterval) clearInterval(coinInterval);
-      coinInterval = setInterval(() => {
-        if (!document.hidden) {
-          totalCoinsEarned += 0.01;
-          updateCoinDisplay();
-          saveUserCoins();
+      
+      function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = '#00ff88';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          const x = i * fontSize;
+          const y = drops[i] * fontSize;
+          ctx.fillText(text, x, y);
+          if (y > height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
         }
-      }, 1000);
-    }
-    
-    setInterval(updatePlaytimeDisplay, 1000);
-    
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (coinInterval) clearInterval(coinInterval);
-        coinInterval = null;
-      } else {
-        if (!coinInterval) startCoinEarning();
       }
-    });
-    
-    loadUserCoins();
-    startCoinEarning();
-    
-    window.addEventListener('beforeunload', () => {
-      saveUserCoins();
-    });
-    
-    // ===== FULLSCREEN TOGGLE =====
-    const gameWrapper = document.getElementById('gameWrapper');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    let isFullscreen = false;
-    
-    function toggleFullscreen() {
-      if (!isFullscreen) {
-        gameWrapper.classList.add('fullscreen');
-        fullscreenBtn.innerHTML = '⬛ exit';
-        fullscreenBtn.classList.add('fullscreen-active');
-        isFullscreen = true;
-      } else {
-        gameWrapper.classList.remove('fullscreen');
-        fullscreenBtn.innerHTML = '🖥️ fullscreen';
-        fullscreenBtn.classList.remove('fullscreen-active');
-        isFullscreen = false;
+      
+      resizeCanvas();
+      const matrixInterval = setInterval(drawMatrix, 50);
+      window.addEventListener('resize', resizeCanvas);
+      
+      // Falling code
+      function createFallingCode() {
+        const el = document.createElement('div');
+        el.className = 'falling-matrix';
+        let code = '';
+        for (let i = 0; i < 15; i++) code += Math.random() > 0.5 ? '1' : '0';
+        el.textContent = code;
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (Math.random() * 10 + 10) + 'px';
+        el.style.animationDuration = (Math.random() * 2 + 1) + 's';
+        const colors = ['#00ff88', '#ff4444', '#ffcc00'];
+        el.style.color = colors[Math.floor(Math.random() * colors.length)];
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3000);
       }
-    }
-    
-    fullscreenBtn.onclick = toggleFullscreen;
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isFullscreen) {
-        toggleFullscreen();
+      
+      // Broken wall
+      function createBrokenWall() {
+        const wall = document.createElement('div');
+        wall.className = 'broken-wall';
+        wall.style.left = Math.random() * 100 + '%';
+        wall.style.top = Math.random() * 100 + '%';
+        wall.style.width = (Math.random() * 200 + 80) + 'px';
+        wall.style.height = (Math.random() * 120 + 60) + 'px';
+        if (Math.random() > 0.5) wall.classList.add('cracked');
+        brokenWallContainer.appendChild(wall);
+        setTimeout(() => wall.remove(), 800);
       }
-    });
-    
-    console.log('✅ Game player ready!');
+      
+      let progress = 0;
+      
+      const messages = [
+        "Initializing fanter.OS...",
+        "Loading core modules...",
+        "Bypassing firewalls...",
+        "Decrypting database...",
+        "Loading games library...",
+        "Applying themes...",
+        "Hacking mainframe...",
+        "Almost there...",
+        "Starting fanter.OS..."
+      ];
+      let msgIndex = 0;
+      
+      // Random effects
+      const effectsInterval = setInterval(() => {
+        if (progress < 100) {
+          if (Math.random() > 0.7) createBrokenWall();
+          if (Math.random() > 0.8) createFallingCode();
+        }
+      }, 500);
+      
+      // Progress - SLOWER (takes about 5-6 seconds)
+      const progressInterval = setInterval(() => {
+        if (progress < 100) {
+          progress += Math.random() * 2 + 1;  // Slower: 1-3% per update
+          if (progress >= 100) {
+            progress = 100;
+            progressBar.style.width = '100%';
+            statusEl.textContent = "Complete! Loading games...";
+            clearInterval(progressInterval);
+            clearInterval(effectsInterval);
+            clearInterval(matrixInterval);
+            
+            // Wait for games to actually load
+            waitForGamesToLoad();
+          } else {
+            progressBar.style.width = progress + '%';
+            const newIndex = Math.floor(progress / 12);
+            if (newIndex > msgIndex && newIndex < messages.length) {
+              msgIndex = newIndex;
+              statusEl.textContent = messages[msgIndex];
+            }
+          }
+        }
+      }, 350);  // Update every 350ms
+      
+      function waitForGamesToLoad() {
+        let attempts = 0;
+        const maxAttempts = 100;
+        
+        const checkInterval = setInterval(() => {
+          attempts++;
+          const gamesContainer = document.getElementById('gamesContainer');
+          const hasGames = gamesContainer && gamesContainer.children.length > 0;
+          
+          console.log(`Waiting for games - Attempt ${attempts}: ${hasGames ? 'Games found!' : 'Waiting...'}`);
+          
+          if (hasGames) {
+            clearInterval(checkInterval);
+            setTimeout(() => startTransition(), 800);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            startTransition();
+          }
+        }, 100);
+      }
+      
+      function startTransition() {
+        whiteFlash.style.opacity = '1';
+        setTimeout(() => {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            revealOverlay.style.transform = 'scaleX(1)';
+            setTimeout(() => {
+              whiteFlash.style.opacity = '0';
+              
+              // SHOW main content
+              if (mainContent) {
+                mainContent.style.opacity = '1';
+                mainContent.style.visibility = 'visible';
+              }
+              
+              setTimeout(() => {
+                animateGamesRandomly();
+                animateUIElements();
+              }, 100);
+              
+              setTimeout(() => {
+                revealOverlay.style.transform = 'scaleX(0)';
+                setTimeout(() => {
+                  if (revealOverlay.parentNode) revealOverlay.remove();
+                  if (whiteFlash.parentNode) whiteFlash.remove();
+                }, 1200);
+              }, 500);
+            }, 300);
+          }, 400);
+        }, 300);
+      }
+      
+      function animateGamesRandomly() {
+        const games = document.querySelectorAll('.game');
+        const gameArray = Array.from(games);
+        
+        if (gameArray.length === 0) {
+          console.log("No games found to animate!");
+          return;
+        }
+        
+        console.log(`🎮 Animating ${gameArray.length} games`);
+        
+        gameArray.forEach(game => {
+          game.style.opacity = '0';
+          game.style.transform = 'scale(0)';
+          game.style.display = 'inline-block';
+          game.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+        });
+        
+        // Shuffle array for random appearance
+        for (let i = gameArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [gameArray[i], gameArray[j]] = [gameArray[j], gameArray[i]];
+        }
+        
+        gameArray.forEach((game, index) => {
+          setTimeout(() => {
+            game.style.opacity = '1';
+            game.style.transform = 'scale(1)';
+            game.style.animation = 'gamePop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+            setTimeout(() => {
+              game.style.animation = '';
+            }, 300);
+          }, index * 30);
+        });
+      }
+      
+      function animateUIElements() {
+        const elements = [
+          { el: document.getElementById('searchInput'), dir: 'left', delay: 50 },
+          { el: document.querySelector('.center .settings-btn'), dir: 'right', delay: 100 },
+          { el: document.querySelector('.center h1'), dir: 'up', delay: 80 },
+          { el: document.querySelector('.center p'), dir: 'up', delay: 120 },
+          { el: document.querySelector('.fav-sidebar-btn'), dir: 'left', delay: 150 },
+          { el: document.querySelector('.account-btn'), dir: 'right', delay: 60 }
+        ];
+        
+        elements.forEach(item => {
+          if (!item.el) return;
+          item.el.style.opacity = '0';
+          if (item.dir === 'left') item.el.style.transform = 'translateX(-100px)';
+          if (item.dir === 'right') item.el.style.transform = 'translateX(100px)';
+          if (item.dir === 'up') item.el.style.transform = 'translateY(-30px)';
+          item.el.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+          
+          setTimeout(() => {
+            item.el.style.opacity = '1';
+            item.el.style.transform = 'translateX(0) translateY(0)';
+          }, item.delay);
+        });
+      }
+      
+      loadingScreen.addEventListener('click', (e) => e.stopPropagation());
+      console.log('Loading screen active - first visit!');
+    })();
   </script>
 </body>
 </html>
