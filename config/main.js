@@ -59,18 +59,13 @@ window.displayFilteredGames = function(filteredGames) {
     gameImage.style.cursor = 'pointer';
     gameImage.style.width = '100%';
     
-    // THIS IS THE WORKING CLICK HANDLER FROM YOUR CONSOLE TEST
+    // THIS IS THE EXACT CODE THAT WORKED IN YOUR CONSOLE
     gameImage.onclick = function() {
-      const gameUrl = this.getAttribute('data-game-url') || game.url;
-      const gameName = this.alt;
-      const playUrl = 'play.html?gameurl=' + encodeURIComponent(gameUrl) + '&game=' + encodeURIComponent(gameName);
-      console.log("🔴 IMAGE CLICKED:", gameName);
+      console.log("CLICK DETECTED on:", this.alt);
+      const playUrl = 'play.html?gameurl=' + encodeURIComponent(game.url) + '&game=' + encodeURIComponent(this.alt);
       console.log("🚀 OPENING:", playUrl);
       window.open(playUrl, '_blank');
     };
-    
-    // Store the URL as a data attribute
-    gameImage.setAttribute('data-game-url', game.url);
     
     const gameNameElem = document.createElement("p");
     gameNameElem.textContent = game.name;
