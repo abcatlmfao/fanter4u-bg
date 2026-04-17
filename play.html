@@ -243,18 +243,15 @@
   </div>
 
   <script>
-    // Get game info from URL
     const urlParams = new URLSearchParams(window.location.search);
     let gameUrl = urlParams.get("gameurl");
     let gameName = urlParams.get("game") || "Game";
     const decodedGameName = decodeURIComponent(gameName);
     
-    // Update UI
     document.getElementById('gameTitle').textContent = decodedGameName;
     document.getElementById('gameNameDisplay').textContent = decodedGameName;
     
     if (!gameUrl || gameUrl === 'undefined' || gameUrl === 'null') {
-      // Show error if no game URL
       document.getElementById('gameContainer').innerHTML = `
         <div class="game-header">
           <span class="game-name">Error</span>
@@ -268,34 +265,22 @@
       `;
       document.getElementById('loadingOverlay').classList.add('hide');
     } else {
-      // Load the game
       const isExternal = gameUrl.startsWith('http://') || gameUrl.startsWith('https://');
-      let finalUrl;
-      
-      if (isExternal) {
-        finalUrl = gameUrl;
-      } else {
-        let cleanUrl = gameUrl.replace(/\/$/, '');
-        finalUrl = `https://gms.parcoil.com/${cleanUrl}`;
-      }
+      let finalUrl = isExternal ? gameUrl : `https://gms.parcoil.com/${gameUrl.replace(/\/$/, '')}`;
       
       const gameFrame = document.getElementById('gameFrame');
       const loadingOverlay = document.getElementById('loadingOverlay');
       
-      gameFrame.onload = () => {
-        loadingOverlay.classList.add('hide');
-      };
-      
+      gameFrame.onload = () => loadingOverlay.classList.add('hide');
       gameFrame.src = finalUrl;
       
-      // Timeout fallback
       setTimeout(() => {
         if (loadingOverlay && !loadingOverlay.classList.contains('hide')) {
           loadingOverlay.classList.add('hide');
         }
       }, 8000);
       
-      // Fullscreen toggle
+      // Fullscreen
       let isFullscreen = false;
       document.getElementById('fullscreenBtn').onclick = () => {
         const container = document.getElementById('gameContainer');
@@ -318,7 +303,6 @@
         }
       });
       
-      // Refresh button
       document.getElementById('refreshBtn').onclick = () => {
         loadingOverlay.classList.remove('hide');
         gameFrame.src = finalUrl;
@@ -385,4 +369,4 @@
     }
   </script>
 </body>
-</html>
+<html>
