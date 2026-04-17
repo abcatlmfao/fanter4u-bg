@@ -1939,3 +1939,186 @@ body.no-animations * {
     font-size: 12px;
   }
 }
+
+/* ===== NEW THEME STYLES ===== */
+
+/* Dark Mode */
+body.theme-dark {
+  --background-color: #1a1a1a !important;
+  --text-color: #cccccc !important;
+  --accent-color: #3a6ea5 !important;
+  filter: brightness(0.85) contrast(1.05);
+}
+
+body.theme-dark .game,
+body.theme-dark .settings-card,
+body.theme-dark .sidebar-card {
+  background: rgba(20, 20, 20, 0.9) !important;
+  border-color: #3a6ea5 !important;
+}
+
+/* Light Mode */
+body.theme-light {
+  --background-color: #f5f5f5 !important;
+  --text-color: #222222 !important;
+  --accent-color: #2d5ae3 !important;
+  filter: brightness(1) contrast(0.95);
+}
+
+body.theme-light .game,
+body.theme-light .settings-card,
+body.theme-light .sidebar-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #222 !important;
+  border-color: #2d5ae3 !important;
+}
+
+body.theme-light .game p,
+body.theme-light .settings-card h2,
+body.theme-light .settings-card p {
+  color: #222 !important;
+}
+
+/* Neon City - with floating neon buildings */
+body.theme-neon-city {
+  --accent-color: #00ffcc !important;
+}
+
+.neon-building {
+  position: fixed;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(180deg, #00ffcc, #0088aa);
+  border-radius: 5px 5px 0 0;
+  opacity: 0.6;
+  animation: neonPulse 2s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.neon-building::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #ffcc00;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 0 10px #ffcc00;
+  animation: windowGlow 1s step-end infinite;
+}
+
+@keyframes neonPulse {
+  0%, 100% { opacity: 0.4; box-shadow: 0 0 5px #00ffcc; }
+  50% { opacity: 0.8; box-shadow: 0 0 20px #00ffcc; }
+}
+
+@keyframes windowGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Color Blast - Rainbow theme */
+body.theme-color-blast {
+  animation: colorBlast 0.5s linear infinite !important;
+}
+
+@keyframes colorBlast {
+  0% { filter: hue-rotate(0deg) saturate(2); }
+  100% { filter: hue-rotate(360deg) saturate(2); }
+}
+
+/* Forest Night */
+body.theme-forest-night {
+  background: linear-gradient(135deg, #0a1a0a, #0d2a0d, #1a3a1a) !important;
+  position: relative;
+}
+
+body.theme-forest-night::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(circle at 20% 40%, rgba(0,50,0,0.3), transparent 50%);
+  animation: windBlow 8s ease-in-out infinite;
+}
+
+@keyframes windBlow {
+  0%, 100% { transform: translateX(0); opacity: 0.3; }
+  50% { transform: translateX(20px); opacity: 0.6; }
+}
+
+/* Deep Ocean */
+body.theme-deep-ocean {
+  background: linear-gradient(180deg, #0a1a3a, #0a2a5a, #0a1a3a) !important;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.ocean-fish {
+  position: fixed;
+  font-size: 24px;
+  pointer-events: none;
+  z-index: 0;
+  animation: swimFish 15s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes swimFish {
+  0% { transform: translateX(-100px) translateY(0); }
+  100% { transform: translateX(calc(100vw + 100px)) translateY(var(--y-offset)); }
+}
+
+.ocean-bubble {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: rgba(100, 200, 255, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: bubbleRise 8s linear infinite;
+  z-index: 0;
+}
+
+@keyframes bubbleRise {
+  0% { transform: translateY(100vh) scale(1); opacity: 0.5; }
+  100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+}
+
+/* Cool Blue Preset */
+body.preset-cool-blue {
+  filter: hue-rotate(200deg) saturate(1.3);
+}
+
+/* Warm Sunset Preset */
+body.preset-warm-sunset {
+  filter: hue-rotate(-20deg) saturate(1.2) brightness(1.05);
+}
+
+/* Purple Haze Preset */
+body.preset-purple-haze {
+  filter: hue-rotate(250deg) saturate(0.8) brightness(0.9);
+}
+
+/* RGB Preset - Slow rainbow cycle */
+@keyframes rgbCycle {
+  0% { filter: hue-rotate(0deg); text-shadow: 0 0 5px red; }
+  25% { filter: hue-rotate(90deg); text-shadow: 0 0 5px lime; }
+  50% { filter: hue-rotate(180deg); text-shadow: 0 0 5px blue; }
+  75% { filter: hue-rotate(270deg); text-shadow: 0 0 5px magenta; }
+  100% { filter: hue-rotate(360deg); text-shadow: 0 0 5px red; }
+}
+
+body.preset-rgb {
+  animation: rgbCycle 3s linear infinite;
+}
+
+body.preset-rgb .game,
+body.preset-rgb .settings-card,
+body.preset-rgb .sidebar-card {
+  animation: rgbCycle 3s linear infinite;
+}
