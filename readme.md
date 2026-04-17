@@ -1,73 +1,27 @@
 fanter.os
+what is it?
 
-what is ts?
-
-a clean, customizable unblocked games hub
-has themes, favorites, ratings, accounts, achievements, and a bunch of other stuff i kept adding because it was fun ( not even finished yet :3 )
-features so far:
-
-by the way, this was made for people with common sense so if something doesnt make sense; ask an ai like claude if you dont understand something , sorry.
-
-🎮 game library - loads from a json file, searchable, filterable by favorites
-
-
-🎨 theme system - backgrounds (chill, parallax, aurora, void, solid), fonts, accent colors, presets (dark/light/rainbow/neon); adding more later 
-
-
-⭐ favorites - star your favorite games, filter to show only them, syncs to your account if logged in
-
-
-🔑 safety key - double tap any key to instantly redirect to a safe url (for say when a teacher is walking by your table or so :/ )
-
-
-🌐 language - uses your browser's built in translation
- 
-🎲 random game - picks a random game from the library
-
-
-📊 game ratings - 1-5 star system, saves globally so everyone sees the same ratings
-
-
-👤 accounts - register/login, custom display names, tracks your favorites, played games, and ratings (leaderboards soon :D)
-
-
-🏆 achievements - 60 achievements across 6 categories (newbie, beginner, climbing, difficult, elite, secret), each with point values, most secret ones are hidden as "???" until unlocked
-
-
-⏱️ session timer - top left corner, tracks how long you've been actively using the site (pauses when tab is inactive)
-
-
-🎯 recently played - saves the last 10 games you clicked on (probably buggy rn)
-
-
-🎨 visual settings - accent color, blur intensity, card transparency, border styles, shadows, corner roundness
-
-🔊 audio settings - hover sounds, background music (working), click effects, mute all (work in progress but the ui is there)
-
-
-⚡ performance settings - low performance mode, lazy loading, disable shadows/animations
-
-
-🔒 privacy settings - incognito mode, clear history, reset all settings
-what i'm working on next:
-
-more secret achievements (easter eggs, hidden stuff)  
-
-quick launch bar (ctrl+k to search and launch games)
-
-game categories / tags
-
-game details modal (click a game for more info)
+a customizable unblocked games hub with "not enough features"
+main features:
+🎮 games - search, filter by favorites, random game picker
+👤 accounts - register/login, display names, saves your stuff
+🏆 achievements - 60 achievements across 6 categories, each gives coins
+🛒 shop - buy backgrounds, cursors, themes, presets with coins
+🪙 coins - earn 0.01/sec while playing, bonus from achievements
+🎨 themes - dark mode, light mode, neon city, deep ocean (with fish!), forest night, color blast
+🖱️ cursors - glow orb, gold star, pixel sword, dragon cursor, paperback
+🔑 safety key - double tap any key to escape to a safe url
+⏱️ session timer - tracks how long you've been active
+⌨️ quick launch - ctrl+k to search and launch games
+📊 ratings - 1-5 stars, saves globally
+🏷️ categories - filter games by genre
 
 how to run:
+put your games in config/games.json
+host anywhere (github pages works)
+optional: make a jsonbin account for global ratings
 
-fork the repo
 
-put your games in config/games.json (there's an example structure in the code)
-
-host it anywhere (github pages works great)
-
-if you want global ratings to work, make a free jsonbin account and add your api key/bin id to the main.js
 
 credits:
 
