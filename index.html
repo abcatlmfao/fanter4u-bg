@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fanter v0.02</title>
+  <title>fanter v0.3</title>
   <link rel="stylesheet" href="config/main.css" />
 </head>
 
@@ -20,11 +20,27 @@
         <div class="loading-progress-bar"></div>
       </div>
       <p class="loading-status" id="loadingStatus">Initializing systems...</p>
+      <div class="loading-commands" id="loadingCommands">
+        <p>>_ Loading kernel modules...</p>
+        <p>>_ Establishing secure connection...</p>
+        <p>>_ Decrypting game database...</p>
+      </div>
     </div>
   </div>
 
   <div id="whiteFlash"></div>
   <div id="revealOverlay"></div>
+
+  <!-- Daily Login Bonus Overlay -->
+  <div id="dailyBonusOverlay" class="daily-bonus-overlay">
+    <div class="daily-bonus-card">
+      <h2>🎁 DAILY REWARD!</h2>
+      <div class="daily-reward" id="dailyRewardAmount">+0 🪙</div>
+      <p>Come back tomorrow for more!</p>
+      <div class="daily-streak" id="dailyStreakText">Streak: 0 days</div>
+      <button class="settings-btn" onclick="closeDailyBonus()" style="margin-top: 20px;">Claim</button>
+    </div>
+  </div>
 
   <!-- Main Content -->
   <div id="mainContent" style="opacity: 0; visibility: hidden;">
@@ -35,6 +51,12 @@
         <span id="timerHours">00</span>:<span id="timerMinutes">00</span>:<span id="timerSeconds">00</span>
       </div>
       <div class="timer-label">session time</div>
+    </div>
+
+    <!-- Quick Theme Toggle (Bottom Left) -->
+    <div class="theme-quick-toggle" id="themeQuickToggle" onclick="quickToggleTheme()">
+      <span class="theme-toggle-icon">🌙</span>
+      <span>dark</span>
     </div>
 
     <!-- Account Button (Top Right) -->
@@ -57,12 +79,30 @@
     <div class="center">
       <h1 id="title"></h1>
       <p id="subtitle"></p>
-      <button class="settings-btn" onclick="window.location.href='settings.html'">⚙ Settings</button>
-      <button class="settings-btn" onclick="window.location.href='shop.html'">🛒 Shop</button>
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="settings-btn" onclick="window.location.href='settings.html'">⚙ Settings</button>
+        <button class="settings-btn" onclick="window.location.href='shop.html'">🛒 Shop</button>
+      </div>
     </div>
     
-    <div class="center">
+    <!-- Game of the Day -->
+    <div id="gameOfDay" class="game-of-day" style="display: none;">
+      <div class="game-of-day-label">
+        <span>🌟 GAME OF THE DAY</span>
+      </div>
+      <div class="game-of-day-name" id="gameOfDayName">Loading...</div>
+      <button class="game-of-day-play" id="gameOfDayPlay">Play Now →</button>
+    </div>
+    
+    <div class="center" style="position: relative;">
       <input type="text" id="searchInput" placeholder="search 4 games" />
+      <div id="searchHistory" class="search-history">
+        <div class="search-history-header">
+          <span>recent searches</span>
+          <span class="search-history-clear" onclick="clearSearchHistory()">clear all</span>
+        </div>
+        <div id="searchHistoryList"></div>
+      </div>
     </div>
     
     <div id="gamesContainer"></div>
@@ -88,7 +128,6 @@
       let pausedStart = null;
       let timerInterval = null;
       let isTabActive = true;
-      let isPageVisible = true;
 
       if (!sessionStart) {
         sessionStart = Date.now();
@@ -143,55 +182,229 @@
         }
       }
 
-      function handleVisibilityChange() {
-        if (document.hidden || !isTabActive) {
-          pauseTimer();
-        } else {
-          resumeTimer();
-        }
-      }
-
-      function handleWindowFocus() {
-        isTabActive = true;
-        if (!document.hidden) {
-          resumeTimer();
-        }
-      }
-
-      function handleWindowBlur() {
-        isTabActive = false;
-        pauseTimer();
-      }
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      window.addEventListener('focus', handleWindowFocus);
-      window.addEventListener('blur', handleWindowBlur);
-      
-      let idleTimer;
-      function resetIdleTimer() {
-        if (idleTimer) clearTimeout(idleTimer);
-        idleTimer = setTimeout(() => {
-          if (!document.hidden && isTabActive) {
-            pauseTimer();
-          }
-        }, 300000);
-      }
-      
-      document.addEventListener('mousemove', () => {
-        if (pausedStart !== null && !document.hidden && isTabActive) {
-          resumeTimer();
-        }
-        resetIdleTimer();
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) pauseTimer();
+        else resumeTimer();
       });
       
-      document.addEventListener('keydown', resetIdleTimer);
+      window.addEventListener('focus', () => {
+        isTabActive = true;
+        if (!document.hidden) resumeTimer();
+      });
+      
+      window.addEventListener('blur', () => {
+        isTabActive = false;
+        pauseTimer();
+      });
       
       startTimer();
-      
-      if (document.hidden) {
-        pauseTimer();
-      }
     })();
+  </script>
+
+  <!-- Quick Theme Toggle Script -->
+  <script>
+    function quickToggleTheme() {
+      const currentTheme = localStorage.getItem('quickTheme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('quickTheme', newTheme);
+      
+      if (newTheme === 'dark') {
+        document.body.classList.add('theme-dark');
+        document.body.classList.remove('theme-light');
+        document.querySelector('#themeQuickToggle .theme-toggle-icon').textContent = '🌙';
+        document.querySelector('#themeQuickToggle span:last-child').textContent = 'dark';
+      } else {
+        document.body.classList.add('theme-light');
+        document.body.classList.remove('theme-dark');
+        document.querySelector('#themeQuickToggle .theme-toggle-icon').textContent = '☀️';
+        document.querySelector('#themeQuickToggle span:last-child').textContent = 'light';
+      }
+    }
+    
+    // Load saved theme
+    const savedQuickTheme = localStorage.getItem('quickTheme');
+    if (savedQuickTheme === 'light') {
+      document.body.classList.add('theme-light');
+      document.querySelector('#themeQuickToggle .theme-toggle-icon').textContent = '☀️';
+      document.querySelector('#themeQuickToggle span:last-child').textContent = 'light';
+    }
+  </script>
+
+  <!-- Daily Bonus Script -->
+  <script>
+    function checkDailyBonus() {
+      const lastClaim = localStorage.getItem('lastDailyClaim');
+      const today = new Date().toDateString();
+      let streak = parseInt(localStorage.getItem('dailyStreak') || '0');
+      
+      if (lastClaim !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+        
+        if (lastClaim === yesterdayStr) {
+          streak++;
+        } else {
+          streak = 1;
+        }
+        
+        const baseReward = 50;
+        const streakBonus = Math.min(streak, 7) * 10;
+        const totalReward = baseReward + streakBonus;
+        
+        document.getElementById('dailyRewardAmount').textContent = `+${totalReward} 🪙`;
+        document.getElementById('dailyStreakText').textContent = `Streak: ${streak} day${streak !== 1 ? 's' : ''}`;
+        
+        window.pendingDailyReward = totalReward;
+        window.pendingDailyStreak = streak;
+        
+        document.getElementById('dailyBonusOverlay').classList.add('show');
+      }
+    }
+    
+    function closeDailyBonus() {
+      if (window.pendingDailyReward) {
+        let currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
+        if (currentUser) {
+          currentUser.coins = (currentUser.coins || 0) + window.pendingDailyReward;
+          localStorage.setItem('fanter_currentUser', JSON.stringify(currentUser));
+          
+          let users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
+          const userIndex = users.findIndex(u => u.id === currentUser.id);
+          if (userIndex !== -1) {
+            users[userIndex].coins = currentUser.coins;
+            localStorage.setItem('fanter_users', JSON.stringify(users));
+          }
+          
+          localStorage.setItem('lastDailyClaim', new Date().toDateString());
+          localStorage.setItem('dailyStreak', window.pendingDailyStreak);
+          
+          updateHeaderCoins();
+          showToastMessage(`🎁 You earned ${window.pendingDailyReward} coins!`, 'gold');
+        }
+      }
+      document.getElementById('dailyBonusOverlay').classList.remove('show');
+      window.pendingDailyReward = null;
+    }
+    
+    function showToastMessage(message, color = '#ffcc00') {
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.9);
+        color: ${color};
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        z-index: 10001;
+        animation: fadeOut 3s ease forwards;
+        font-family: 'Orbitron', monospace;
+        border: 1px solid ${color};
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+
+  <!-- Game of the Day Script -->
+  <script>
+    function updateGameOfDay() {
+      if (!window.gamesData || window.gamesData.length === 0) return;
+      
+      const lastGameOfDay = localStorage.getItem('gameOfDayDate');
+      const today = new Date().toDateString();
+      let gameOfDay;
+      
+      if (lastGameOfDay === today) {
+        const savedGame = localStorage.getItem('gameOfDay');
+        gameOfDay = window.gamesData.find(g => g.name === savedGame);
+      }
+      
+      if (!gameOfDay) {
+        const randomIndex = Math.floor(Math.random() * window.gamesData.length);
+        gameOfDay = window.gamesData[randomIndex];
+        localStorage.setItem('gameOfDay', gameOfDay.name);
+        localStorage.setItem('gameOfDayDate', today);
+      }
+      
+      if (gameOfDay) {
+        document.getElementById('gameOfDayName').textContent = gameOfDay.name;
+        document.getElementById('gameOfDay').style.display = 'flex';
+        document.getElementById('gameOfDayPlay').onclick = () => {
+          const playUrl = `play.html?gameurl=${encodeURIComponent(gameOfDay.url)}&game=${encodeURIComponent(gameOfDay.name)}`;
+          window.open(playUrl, '_blank');
+        };
+      }
+    }
+  </script>
+
+  <!-- Search History Script -->
+  <script>
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+    
+    function saveSearchHistory(term) {
+      if (!term.trim()) return;
+      searchHistory = searchHistory.filter(t => t !== term);
+      searchHistory.unshift(term);
+      if (searchHistory.length > 10) searchHistory.pop();
+      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+      updateSearchHistoryDisplay();
+    }
+    
+    function updateSearchHistoryDisplay() {
+      const list = document.getElementById('searchHistoryList');
+      if (!list) return;
+      
+      if (searchHistory.length === 0) {
+        list.innerHTML = '<div style="padding: 10px 15px; color: rgba(255,255,255,0.4);">no recent searches</div>';
+        return;
+      }
+      
+      list.innerHTML = searchHistory.map(term => `
+        <div class="search-history-item" onclick="document.getElementById('searchInput').value='${term.replace(/'/g, "\\'")}'; document.getElementById('searchInput').dispatchEvent(new Event('input')); document.getElementById('searchHistory').classList.remove('show');">
+          🔍 ${term}
+        </div>
+      `).join('');
+    }
+    
+    function clearSearchHistory() {
+      searchHistory = [];
+      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+      updateSearchHistoryDisplay();
+    }
+    
+    // Search input focus to show history
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('searchInput');
+      const searchHistoryDiv = document.getElementById('searchHistory');
+      
+      if (searchInput) {
+        searchInput.addEventListener('focus', () => {
+          updateSearchHistoryDisplay();
+          searchHistoryDiv.classList.add('show');
+        });
+        
+        searchInput.addEventListener('blur', () => {
+          setTimeout(() => searchHistoryDiv.classList.remove('show'), 200);
+        });
+        
+        // Override handleSearchInput to save history
+        const originalHandleSearch = window.handleSearchInput;
+        if (typeof originalHandleSearch === 'function') {
+          window.handleSearchInput = function() {
+            const value = searchInput.value;
+            if (value && value !== searchHistory[0]) {
+              saveSearchHistory(value);
+            }
+            originalHandleSearch();
+          };
+        }
+      }
+    });
   </script>
 
   <!-- Coin Display Update Script -->
@@ -204,11 +417,9 @@
       }
     }
     
-    // Update coins every second
     setInterval(updateHeaderCoins, 1000);
     updateHeaderCoins();
     
-    // Also update when storage changes
     window.addEventListener('storage', function(e) {
       if (e.key === 'fanter_currentUser') {
         updateHeaderCoins();
@@ -220,29 +431,40 @@
   <script>
   function fixGameClicks() {
     setTimeout(function() {
-      var games = document.querySelectorAll('.game img');
+      var games = document.querySelectorAll('.game');
       if (games.length === 0) return;
       
       for (var i = 0; i < games.length; i++) {
-        var img = games[i];
-        var gameName = img.alt;
-        var gameUrl = '';
+        var game = games[i];
+        var playBtn = game.querySelector('.game-play-btn');
+        var favBtn = game.querySelector('.game-fav-btn');
+        var gameName = game.querySelector('.game-name')?.textContent;
         
-        if (window.gamesData) {
-          for (var j = 0; j < window.gamesData.length; j++) {
-            if (window.gamesData[j].name === gameName) {
-              gameUrl = window.gamesData[j].url;
-              break;
-            }
+        if (playBtn && gameName && window.gamesData) {
+          var gameData = window.gamesData.find(g => g.name === gameName);
+          if (gameData) {
+            playBtn.onclick = (function(url, name) {
+              return function() {
+                var playUrl = 'play.html?gameurl=' + encodeURIComponent(url) + '&game=' + encodeURIComponent(name);
+                window.open(playUrl, '_blank');
+              };
+            })(gameData.url, gameName);
           }
         }
         
-        img.onclick = (function(url, name) {
-          return function() {
-            var playUrl = 'play.html?gameurl=' + encodeURIComponent(url) + '&game=' + encodeURIComponent(name);
-            window.open(playUrl, '_blank');
-          };
-        })(gameUrl, gameName);
+        if (favBtn && gameName) {
+          favBtn.onclick = (function(name) {
+            return function(e) {
+              e.stopPropagation();
+              if (typeof window.toggleFavourite === 'function') {
+                window.toggleFavourite(name);
+                const isFav = JSON.parse(localStorage.getItem("favourites") || "[]").includes(name);
+                e.target.textContent = isFav ? '★' : '☆';
+                e.target.classList.toggle('active', isFav);
+              }
+            };
+          })(gameName);
+        }
       }
     }, 500);
   }
@@ -296,6 +518,7 @@
           mainContent.style.opacity = '1';
           mainContent.style.visibility = 'visible';
         }
+        checkDailyBonus();
         return;
       }
       
@@ -308,6 +531,33 @@
       const revealOverlay = document.getElementById('revealOverlay');
       const brokenWallContainer = document.getElementById('brokenWallContainer');
       const mainContent = document.getElementById('mainContent');
+      const loadingCommands = document.getElementById('loadingCommands');
+      
+      const commands = [
+        ">_ Loading kernel modules...",
+        ">_ Establishing secure connection...",
+        ">_ Decrypting game database...",
+        ">_ Loading user preferences...",
+        ">_ Initializing game engine...",
+        ">_ Connecting to game servers...",
+        ">_ Verifying achievements...",
+        ">_ Loading shop inventory...",
+        ">_ Syncing cloud saves...",
+        ">_ Almost there...",
+        ">_ Starting fanter.OS..."
+      ];
+      let cmdIndex = 0;
+      
+      function updateCommands() {
+        if (cmdIndex < commands.length && loadingCommands) {
+          const p = document.createElement('p');
+          p.textContent = commands[cmdIndex];
+          loadingCommands.appendChild(p);
+          cmdIndex++;
+          setTimeout(updateCommands, 800);
+        }
+      }
+      updateCommands();
       
       if (mainContent) {
         mainContent.style.opacity = '0';
@@ -469,7 +719,8 @@
                   { el: document.querySelector('.center h1'), dir: 'up', delay: 80 },
                   { el: document.querySelector('.center p'), dir: 'up', delay: 120 },
                   { el: document.querySelector('.fav-sidebar-btn'), dir: 'left', delay: 150 },
-                  { el: document.querySelector('.account-btn'), dir: 'right', delay: 60 }
+                  { el: document.querySelector('.account-btn'), dir: 'right', delay: 60 },
+                  { el: document.querySelector('.theme-quick-toggle'), dir: 'up', delay: 40 }
                 ];
                 elements.forEach(item => {
                   if (!item.el) return;
