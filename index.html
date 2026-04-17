@@ -48,12 +48,6 @@
       <input type="text" id="searchInput" placeholder="search 4 games" />
     </div>
     
-    <!-- TEST BUTTON - This will help us debug -->
-    <div style="display: flex; justify-content: center; margin: 10px 0;">
-      <button id="testGameBtn" style="background: #2d5ae3; color: white; padding: 10px 20px; margin: 0 10px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">🎮 TEST OVO (Should open in iframe)</button>
-      <button id="testSpaceBtn" style="background: #ff4444; color: white; padding: 10px 20px; margin: 0 10px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">🌊 TEST Space Waves</button>
-    </div>
-    
     <div id="gamesContainer"></div>
     
     <div class="footer">
@@ -69,21 +63,55 @@
   <script src="config/categories.js"></script>
   <script src="config/gamedetails.js"></script>
 
-  <!-- Test Button Scripts -->
+  <!-- FIX GAME CLICKS - THIS MAKES IFRAMES WORK -->
   <script>
-    // Test button for OVO
-    document.getElementById('testGameBtn').onclick = function() {
-      var testUrl = 'play.html?gameurl=https://chipikipal800.github.io/OvO/&game=OVO';
-      console.log("🔵 TEST BUTTON - Opening:", testUrl);
-      window.open(testUrl, '_blank');
-    };
-    
-    // Test button for Space Waves
-    document.getElementById('testSpaceBtn').onclick = function() {
-      var testUrl = 'play.html?gameurl=https://nicksdumbsites.github.io/Space-Waves-Unblocked/&game=space%20wavez';
-      console.log("🔴 TEST BUTTON - Opening:", testUrl);
-      window.open(testUrl, '_blank');
-    };
+  function fixGameClicks() {
+    setTimeout(function() {
+      var games = document.querySelectorAll('.game img');
+      if (games.length === 0) return;
+      
+      console.log("🔧 Fixing " + games.length + " game clicks...");
+      
+      for (var i = 0; i < games.length; i++) {
+        var img = games[i];
+        var gameName = img.alt;
+        var gameUrl = '';
+        
+        if (window.gamesData) {
+          for (var j = 0; j < window.gamesData.length; j++) {
+            if (window.gamesData[j].name === gameName) {
+              gameUrl = window.gamesData[j].url;
+              break;
+            }
+          }
+        }
+        
+        img.onclick = (function(url, name) {
+          return function() {
+            var playUrl = 'play.html?gameurl=' + encodeURIComponent(url) + '&game=' + encodeURIComponent(name);
+            window.open(playUrl, '_blank');
+          };
+        })(gameUrl, gameName);
+      }
+    }, 500);
+  }
+
+  // Run when games are loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixGameClicks);
+  } else {
+    fixGameClicks();
+  }
+
+  // Watch for game updates (search/filter)
+  var gamesObserver = new MutationObserver(function() {
+    fixGameClicks();
+  });
+  
+  var gamesContainer = document.getElementById('gamesContainer');
+  if (gamesContainer) {
+    gamesObserver.observe(gamesContainer, { childList: true, subtree: true });
+  }
   </script>
 
   <!-- Safety Key Script -->
@@ -137,7 +165,6 @@
         mainContent.style.visibility = 'hidden';
       }
       
-      // Matrix Rain
       const canvas = document.getElementById('matrixCanvas');
       const ctx = canvas.getContext('2d');
       let width, height, drops = [];
@@ -323,62 +350,5 @@
       loadingScreen.addEventListener('click', (e) => e.stopPropagation());
     })();
   </script>
-
-  <script src="config/simple-games.js"></script>
-  <script>
-// This will run after games are loaded and add click handlers directly
-function fixGameClicks() {
-  setTimeout(function() {
-    var games = document.querySelectorAll('.game img');
-    console.log("Found " + games.length + " game images to fix");
-    
-    for (var i = 0; i < games.length; i++) {
-      var img = games[i];
-      var gameName = img.alt;
-      
-      // Find the game in gamesData
-      var gameUrl = '';
-      if (window.gamesData) {
-        for (var j = 0; j < window.gamesData.length; j++) {
-          if (window.gamesData[j].name === gameName) {
-            gameUrl = window.gamesData[j].url;
-            break;
-          }
-        }
-      }
-      
-      console.log("Fixing:", gameName, "URL:", gameUrl);
-      
-      // Remove any existing click handlers
-      img.removeAttribute('onclick');
-      
-      // Add new click handler
-      img.onclick = (function(url, name) {
-        return function() {
-          var playUrl = 'play.html?gameurl=' + encodeURIComponent(url) + '&game=' + encodeURIComponent(name);
-          console.log("PLAYING:", name, "URL:", playUrl);
-          window.open(playUrl, '_blank');
-        };
-      })(gameUrl, gameName);
-    }
-  }, 1000);
-}
-
-// Run fix when page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', fixGameClicks);
-} else {
-  fixGameClicks();
-}
-
-// Also run after any game updates (like search/filter)
-if (window.MutationObserver) {
-  var observer = new MutationObserver(function() {
-    fixGameClicks();
-  });
-  observer.observe(document.getElementById('gamesContainer'), { childList: true, subtree: true });
-}
-</script>
-  
 </body>
 </html>
