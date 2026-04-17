@@ -1,4 +1,4 @@
-// ===== MAIN.JS - COMPLETE FULL VERSION WITH ALL FIXES =====
+// ===== MAIN.JS - CLEAN CARD DESIGN =====
 
 // Make gamesData global
 window.gamesData = [];
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // MAIN DISPLAY FUNCTION
+  // CLEAN DISPLAY FUNCTION - NO LARGE DESCRIPTION, COMPACT CATEGORY
   window.displayFilteredGames = function(filteredGames) {
     var gamesContainer = document.getElementById("gamesContainer");
     if (!gamesContainer) return;
@@ -88,24 +88,23 @@ document.addEventListener('DOMContentLoaded', function() {
       var categoryColor = getCategoryColor(game.category);
       var categoryIcon = getCategoryIcon(game.category);
       
+      // Auto-fit game name (truncate with ellipsis if too long)
+      var shortName = game.name.length > 20 ? game.name.substring(0, 18) + '...' : game.name;
+      
       gameDiv.innerHTML = `
         <div class="game-image-container">
           <img src="${imageSrc}" alt="${escapeHtml(game.name)}" loading="lazy">
         </div>
         <div class="game-info">
           <div class="game-title-row">
-            <span class="game-name">${escapeHtml(game.name)}</span>
+            <span class="game-name" title="${escapeHtml(game.name)}">${escapeHtml(shortName)}</span>
             <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game="${escapeHtml(game.name)}">${isFav ? '★' : '☆'}</button>
           </div>
           <div class="game-category-tag" style="background: ${categoryColor}20; color: ${categoryColor}">${categoryIcon} ${game.category || 'other'}</div>
-          <div class="game-desc">${escapeHtml(game.desc || getDefaultDescription(game.category))}</div>
           <div class="game-stats-row">
-            <span>🎮 ${playCount} plays</span>
+            <span>🎮 ${playCount}</span>
             <span>🪙 ${Math.floor(earnedCoins * 100) / 100}</span>
-            <span>⏱️ ${game.loadTime || '1-3 sec'}</span>
-          </div>
-          <div class="game-meta">
-            <span class="game-dev">📅 ${game.releaseDate ? new Date(game.releaseDate).toLocaleDateString() : 'recent'}</span>
+            <span>⏱️ ${game.loadTime || '1-3s'}</span>
           </div>
           <div class="game-rating-row">
             <div class="game-stars">
@@ -113,9 +112,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return '<span class="game-star" data-value="' + s + '">★</span>';
               }).join('')}
             </div>
-            <span class="game-rating-text">⭐ ${avgRating} (${ratingCount})</span>
+            <span class="game-rating-text">${avgRating}</span>
           </div>
-          <button class="game-play-btn" data-game="${escapeHtml(game.name)}" data-url="${escapeHtml(game.url)}">🎮 PLAY NOW</button>
+          <button class="game-play-btn" data-game="${escapeHtml(game.name)}" data-url="${escapeHtml(game.url)}">🎮 PLAY</button>
         </div>
       `;
       
@@ -189,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           var ratingText = gameDiv.querySelector('.game-rating-text');
           if (ratingText && typeof globalRatings !== 'undefined' && globalRatings[gameName]) {
-            ratingText.innerHTML = '⭐ ' + globalRatings[gameName].average.toFixed(1) + ' (' + globalRatings[gameName].count + ')';
+            ratingText.innerHTML = globalRatings[gameName].average.toFixed(1);
           }
         }
       };
@@ -315,19 +314,19 @@ function getCategoryIcon(category) {
 
 function getDefaultDescription(category) {
   var desc = {
-    'action': 'fast-paced action game that\'ll keep you on the edge of your seat',
-    'puzzle': 'challenge your brain with tricky puzzles and mind-bending mechanics',
-    'racing': 'burn rubber and race to the finish line in high-speed competition',
-    'sports': 'compete in your favorite sports from basketball to soccer',
-    'adventure': 'embark on an epic journey through mysterious lands',
-    'platformer': 'jump, run, and dodge through challenging levels',
-    'strategy': 'plan your moves and outsmart your opponents',
-    'horror': 'survive the terror and uncover dark secrets',
-    'arcade': 'classic arcade action that never gets old',
-    'simulation': 'build, manage, and create your own world',
-    'sandbox': 'no rules, no limits - just pure creativity'
+    'action': 'fast-paced action game',
+    'puzzle': 'challenge your brain',
+    'racing': 'high-speed racing action',
+    'sports': 'competitive sports gameplay',
+    'adventure': 'epic adventure awaits',
+    'platformer': 'jump and run through levels',
+    'strategy': 'plan and outsmart opponents',
+    'horror': 'survive the terror',
+    'arcade': 'classic arcade fun',
+    'simulation': 'build and manage',
+    'sandbox': 'create and explore'
   };
-  return desc[category] || 'a fun game that\'ll keep you entertained for hours';
+  return desc[category] || 'fun game to play';
 }
 
 function escapeHtml(str) {
@@ -340,7 +339,7 @@ function escapeHtml(str) {
   });
 }
 
-// ===== GAME DETAILS MODAL =====
+// ===== GAME DETAILS MODAL (Keep as is) =====
 function showGameDetailsModal(gameName, gameUrl, gameImage, gameDescription, gameCategory, gameLoadTime, gameDeveloper, gameReleaseDate) {
   var existingModal = document.getElementById('gameModal');
   if (existingModal) existingModal.remove();
@@ -471,7 +470,6 @@ async function loadGlobalRatings() {
   } catch (error) {
     console.error('Failed to load ratings:', error);
   }
-  refreshAllRatings();
 }
 
 async function saveGlobalRatings() {
@@ -530,44 +528,6 @@ function submitRating(gameName, rating) {
   
   saveGlobalRatings();
   showRatingToast('You rated "' + gameName + '" ' + rating + '★!');
-  updateStarDisplay(gameName, rating);
-  
-  if (typeof checkAchievements === 'function') {
-    setTimeout(function() { checkAchievements(); }, 100);
-  }
-  if (typeof checkLoyalCustomer === 'function') {
-    setTimeout(function() { checkLoyalCustomer(); }, 100);
-  }
-}
-
-function updateStarDisplay(gameName, userRating) {
-  var gameCard = document.querySelector('.game[data-game-name="' + CSS.escape(gameName) + '"]');
-  if (gameCard) {
-    var stars = gameCard.querySelectorAll('.game-star');
-    for (var i = 0; i < stars.length; i++) {
-      if (i < userRating) {
-        stars[i].classList.add('active');
-      } else {
-        stars[i].classList.remove('active');
-      }
-    }
-    var ratingText = gameCard.querySelector('.game-rating-text');
-    if (ratingText && globalRatings[gameName]) {
-      ratingText.innerHTML = '⭐ ' + globalRatings[gameName].average.toFixed(1) + ' (' + globalRatings[gameName].count + ')';
-    }
-  }
-}
-
-function refreshAllRatings() {
-  document.querySelectorAll('.game').forEach(function(card) {
-    var gameName = card.getAttribute('data-game-name');
-    if (gameName && globalRatings[gameName]) {
-      var ratingText = card.querySelector('.game-rating-text');
-      if (ratingText) {
-        ratingText.innerHTML = '⭐ ' + globalRatings[gameName].average.toFixed(1) + ' (' + globalRatings[gameName].count + ')';
-      }
-    }
-  });
 }
 
 function showRatingToast(message) {
@@ -586,25 +546,7 @@ function showRatingToast(message) {
 
 loadGlobalRatings();
 
-// ===== ACCOUNT SYSTEM HELPER FUNCTIONS =====
-function updateAccountButtonDisplay() {
-  var currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
-  var accountNameSpan = document.getElementById('accountName');
-  if (accountNameSpan) {
-    accountNameSpan.textContent = currentUser ? (currentUser.displayName || currentUser.username) : 'Guest';
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  updateAccountButtonDisplay();
-});
-
-window.addEventListener('storage', function(e) {
-  if (e.key === 'fanter_currentUser') {
-    updateAccountButtonDisplay();
-  }
-});
-
+// ===== ACCOUNT FUNCTIONS =====
 function getCurrentUser() {
   return JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
 }
@@ -689,7 +631,7 @@ function trackPlayedGame(gameName) {
     }
   }
   
-  console.log('🎮 Played: ' + gameName + ' | +' + earned.toFixed(2) + '🪙 (' + multiplier + 'x multiplier)');
+  console.log('🎮 Played: ' + gameName + ' | +' + earned.toFixed(2) + '🪙');
   return earned;
 }
 
@@ -726,9 +668,22 @@ function updateHeaderCoins() {
   }
 }
 
+function updateAccountButtonDisplay() {
+  var currentUser = getCurrentUser();
+  var accountNameSpan = document.getElementById('accountName');
+  if (accountNameSpan) {
+    accountNameSpan.textContent = currentUser ? (currentUser.displayName || currentUser.username) : 'Guest';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateAccountButtonDisplay();
+  updateHeaderCoins();
+});
+
 setInterval(updateHeaderCoins, 1000);
 
-// ===== ACHIEVEMENT TRIGGERS =====
+// ===== ACHIEVEMENT TRIGGERS (Keep all) =====
 function trackGamePlayCount(gameName) {
   window.gamePlayCounts[gameName] = (window.gamePlayCounts[gameName] || 0) + 1;
   localStorage.setItem('gamePlayCounts', JSON.stringify(window.gamePlayCounts));
@@ -850,7 +805,6 @@ function checkTotalPlayTime() {
   }
 }
 
-// ===== ACHIEVEMENT UNLOCK WITH COIN REWARDS =====
 function checkAndUnlockAchievement(achievementId) {
   var currentUser = getCurrentUser();
   if (!currentUser) return;
