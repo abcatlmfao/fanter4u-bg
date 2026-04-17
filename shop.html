@@ -293,7 +293,6 @@
       opacity: 1;
     }
 
-    /* Test mode indicator */
     .test-mode-active {
       position: fixed;
       bottom: 20px;
@@ -356,7 +355,6 @@
   <div id="testModeIndicator" class="test-mode-active" style="display:none;">🔍 TEST MODE ACTIVE</div>
 
   <script>
-    // Store original background for test mode
     let originalBackground = '';
     let testTimeout = null;
     
@@ -374,12 +372,10 @@
       indicator.style.display = 'block';
       if (testTimeout) clearTimeout(testTimeout);
       
-      // Store original if not already stored
       if (!originalBackground) {
         originalBackground = document.body.className;
       }
       
-      // Apply test effect
       if (item.testApply) {
         item.testApply();
       } else if (item.apply) {
@@ -389,7 +385,6 @@
       showNotification(`🔍 Testing: ${item.name} for 10 seconds`);
       
       testTimeout = setTimeout(() => {
-        // Revert to original
         document.body.className = originalBackground;
         if (window.removeTestEffects) window.removeTestEffects();
         indicator.style.display = 'none';
@@ -428,7 +423,7 @@
         { id: "cur_gold", name: "Gold Star", desc: "Golden star cursor", icon: "⭐", price: 300, type: "cursor", value: "gold", 
           apply: function() { removeCustomCursor(); document.body.style.cursor = "url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"%3E%3Cpolygon points=\"12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9\" fill=\"%23ffcc00\" stroke=\"%23ffffff\" stroke-width=\"1\"/%3E%3C/svg%3E'), auto"; },
           testApply: function() { removeCustomCursor(); document.body.style.cursor = "url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"%3E%3Cpolygon points=\"12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9\" fill=\"%23ffcc00\" stroke=\"%23ffffff\" stroke-width=\"1\"/%3E%3C/svg%3E'), auto"; } },
-        { id: "cur_pixel", name: "Pixel Sword", desc: "Retro pixel sword", icon: "⚔️", price: 600, type: "cursor", value: "pixel", 
+        { id: "cur_sword", name: "Pixel Sword", desc: "Retro pixel sword", icon: "🗡️", price: 600, type: "cursor", value: "sword", 
           apply: function() { removeCustomCursor(); document.body.style.cursor = "url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"%3E%3Crect x=\"10\" y=\"2\" width=\"4\" height=\"20\" fill=\"%23ff44ff\"/%3E%3Crect x=\"6\" y=\"4\" width=\"4\" height=\"4\" fill=\"%23ff44ff\"/%3E%3Crect x=\"14\" y=\"4\" width=\"4\" height=\"4\" fill=\"%23ff44ff\"/%3E%3C/svg%3E'), auto"; },
           testApply: function() { removeCustomCursor(); document.body.style.cursor = "url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"%3E%3Crect x=\"10\" y=\"2\" width=\"4\" height=\"20\" fill=\"%23ff44ff\"/%3E%3Crect x=\"6\" y=\"4\" width=\"4\" height=\"4\" fill=\"%23ff44ff\"/%3E%3Crect x=\"14\" y=\"4\" width=\"4\" height=\"4\" fill=\"%23ff44ff\"/%3E%3C/svg%3E'), auto"; } },
         { id: "cur_dragon", name: "Dragon Cursor", desc: "Chinese dragon that follows your mouse", icon: "🐉", price: 800, type: "cursor", value: "dragon", 
@@ -448,7 +443,7 @@
         { id: "theme_neon_city", name: "Neon City", desc: "Cyberpunk neon", icon: "💚", price: 500, type: "theme", value: "neon_city", 
           apply: function() { removeAllThemes(); document.body.classList.add('theme-neon-city'); initNeonBuildings(); },
           testApply: function() { removeAllThemes(); document.body.classList.add('theme-neon-city'); initNeonBuildings(); } },
-        { id: "theme_color_blast", name: "Color Blast", desc: "Gentle rainbow cycle (slow)", icon: "🌈", price: 600, type: "theme", value: "color_blast", 
+        { id: "theme_color_blast", name: "Color Blast", desc: "Gentle rainbow cycle", icon: "🌈", price: 600, type: "theme", value: "color_blast", 
           apply: function() { removeAllThemes(); document.body.classList.add('theme-color-blast'); },
           testApply: function() { removeAllThemes(); document.body.classList.add('theme-color-blast'); } },
         { id: "theme_forest_night", name: "Forest Night", desc: "Dark green with wind", icon: "🌲", price: 350, type: "theme", value: "forest_night", 
@@ -473,23 +468,23 @@
           testApply: function() { removeAllPresets(); document.body.classList.add('preset-rgb'); } }
       ],
       pets: [
-        { id: "pet_chinchilla", name: "Sir Chinchilla", desc: "Your loyal guide", icon: "🐹", price: 500, type: "pet", value: "chinchilla", 
-          apply: function() { showNotification("🐹 Sir Chinchilla will appear on your homepage soon!"); },
+        { id: "pet_chinchilla", name: "Sir Chinchilla", desc: "Your loyal guide (1.0x coins)", icon: "🐹", price: 500, type: "pet", value: "chinchilla", multiplier: 1.0,
+          apply: function() { localStorage.setItem('equippedPet', 'chinchilla'); showNotification("🐹 Sir Chinchilla equipped! 1.0x coin multiplier"); },
           testApply: function() { showNotification("🐹 Sir Chinchilla says hello!"); } },
-        { id: "pet_dragon", name: "Baby Dragon", desc: "Fiery companion", icon: "🐉", price: 1000, type: "pet", value: "dragon", 
-          apply: function() { showNotification("🐉 Your Baby Dragon will follow you around!"); },
+        { id: "pet_dragon", name: "Baby Dragon", desc: "Fiery companion (1.5x coins)", icon: "🐉", price: 1000, type: "pet", value: "dragon", multiplier: 1.5,
+          apply: function() { localStorage.setItem('equippedPet', 'dragon'); showNotification("🐉 Baby Dragon equipped! 1.5x coin multiplier"); },
           testApply: function() { showNotification("🐉 The dragon breathes a small flame!"); } },
-        { id: "pet_cat", name: "Space Cat", desc: "Interstellar feline", icon: "🐱", price: 750, type: "pet", value: "cat", 
-          apply: function() { showNotification("🐱 Space Cat is now your companion!"); },
+        { id: "pet_cat", name: "Space Cat", desc: "Interstellar feline (1.2x coins)", icon: "🐱", price: 750, type: "pet", value: "cat", multiplier: 1.2,
+          apply: function() { localStorage.setItem('equippedPet', 'cat'); showNotification("🐱 Space Cat equipped! 1.2x coin multiplier"); },
           testApply: function() { showNotification("🐱 Space Cat purrs softly!"); } },
-        { id: "pet_dog", name: "Cyber Dog", desc: "Robotic pup", icon: "🐶", price: 750, type: "pet", value: "dog", 
-          apply: function() { showNotification("🐶 Cyber Dog is ready to play!"); },
+        { id: "pet_dog", name: "Cyber Dog", desc: "Robotic pup (1.2x coins)", icon: "🐶", price: 750, type: "pet", value: "dog", multiplier: 1.2,
+          apply: function() { localStorage.setItem('equippedPet', 'dog'); showNotification("🐶 Cyber Dog equipped! 1.2x coin multiplier"); },
           testApply: function() { showNotification("🐶 Cyber Dog wags its tail!"); } },
-        { id: "pet_owl", name: "Wise Owl", desc: "Ancient knowledge", icon: "🦉", price: 800, type: "pet", value: "owl", 
-          apply: function() { showNotification("🦉 The Wise Owl shares ancient secrets!"); },
+        { id: "pet_owl", name: "Wise Owl", desc: "Ancient knowledge (1.3x coins)", icon: "🦉", price: 800, type: "pet", value: "owl", multiplier: 1.3,
+          apply: function() { localStorage.setItem('equippedPet', 'owl'); showNotification("🦉 Wise Owl equipped! 1.3x coin multiplier"); },
           testApply: function() { showNotification("🦉 The owl hoots wisely!"); } },
-        { id: "pet_fox", name: "Fire Fox", desc: "Flame-tailed fox", icon: "🦊", price: 850, type: "pet", value: "fox", 
-          apply: function() { showNotification("🦊 Fire Fox leaves a trail of flames!"); },
+        { id: "pet_fox", name: "Fire Fox", desc: "Flame-tailed fox (1.4x coins)", icon: "🦊", price: 850, type: "pet", value: "fox", multiplier: 1.4,
+          apply: function() { localStorage.setItem('equippedPet', 'fox'); showNotification("🦊 Fire Fox equipped! 1.4x coin multiplier"); },
           testApply: function() { showNotification("🦊 The fox dashes by!"); } }
       ]
     };
@@ -497,16 +492,15 @@
     let currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
     let userInventory = JSON.parse(localStorage.getItem('fanter_inventory') || '{}');
     let equippedItems = JSON.parse(localStorage.getItem('fanter_equipped') || '{}');
+    let equippedPet = localStorage.getItem('equippedPet');
 
     // ===== CURSOR FUNCTIONS =====
-    let cursorInterval = null;
     let cursorElement = null;
     let dragonElement = null;
     
     function removeCustomCursor() {
       if (cursorElement) cursorElement.remove();
       if (dragonElement) dragonElement.remove();
-      if (cursorInterval) clearInterval(cursorInterval);
       cursorElement = null;
       dragonElement = null;
     }
@@ -516,7 +510,6 @@
       document.body.style.cursor = 'none';
       
       cursorElement = document.createElement('div');
-      cursorElement.className = 'glow-cursor';
       cursorElement.style.cssText = `
         width: 20px;
         height: 20px;
@@ -553,7 +546,6 @@
       document.body.style.cursor = 'none';
       
       dragonElement = document.createElement('div');
-      dragonElement.className = 'dragon-cursor';
       dragonElement.innerHTML = '🐉';
       dragonElement.style.cssText = `
         font-size: 28px;
@@ -595,11 +587,10 @@
       document.body.classList.remove('preset-cool-blue', 'preset-warm-sunset', 'preset-purple-haze', 'preset-rgb');
     }
     
-    // Neon buildings (subtle, not intrusive)
     function initNeonBuildings() {
       removeNeonBuildings();
       const buildings = document.querySelectorAll('.game, .settings-card, .sidebar-card');
-      buildings.forEach((building, index) => {
+      buildings.forEach((building) => {
         if (Math.random() > 0.7) {
           building.style.boxShadow = '0 0 15px #00ffcc';
           building.style.borderColor = '#00ffcc';
@@ -615,7 +606,6 @@
       });
     }
     
-    // Forest effects
     let windInterval = null;
     function initForestEffects() {
       removeForestEffects();
@@ -632,19 +622,15 @@
       document.body.style.transform = '';
     }
     
-    // Ocean theme (improved quality)
-    let oceanIntervalFish = null;
     let oceanIntervalBubbles = null;
     
     function initOceanTheme() {
       removeOceanEffects();
       
-      // High quality fish
       const fishTypes = ['🐟', '🐠', '🐡', '🐙', '🦑', '🐬', '🐳'];
       for (let i = 0; i < 12; i++) {
         setTimeout(() => {
           const fish = document.createElement('div');
-          fish.className = 'ocean-fish';
           fish.textContent = fishTypes[Math.floor(Math.random() * fishTypes.length)];
           fish.style.cssText = `
             position: fixed;
@@ -661,10 +647,8 @@
         }, i * 800);
       }
       
-      // Bubbles
       oceanIntervalBubbles = setInterval(() => {
         const bubble = document.createElement('div');
-        bubble.className = 'ocean-bubble';
         bubble.style.cssText = `
           position: fixed;
           width: ${4 + Math.random() * 8}px;
@@ -684,7 +668,6 @@
     
     function removeOceanEffects() {
       document.querySelectorAll('.ocean-fish, .ocean-bubble').forEach(el => el.remove());
-      if (oceanIntervalFish) clearInterval(oceanIntervalFish);
       if (oceanIntervalBubbles) clearInterval(oceanIntervalBubbles);
     }
 
@@ -736,11 +719,14 @@
       equippedItems[item.type] = item.value;
       localStorage.setItem('fanter_equipped', JSON.stringify(equippedItems));
       
-      if (item.apply) {
+      if (item.type === 'pet') {
+        localStorage.setItem('equippedPet', item.value);
+        showNotification(`✨ Equipped ${item.name}! ${item.multiplier}x coin multiplier active`);
+      } else if (item.apply) {
         item.apply();
+        showNotification(`✨ Equipped ${item.name}!`);
       }
       
-      showNotification(`✨ Equipped ${item.name}!`);
       renderShopItems(document.querySelector('.shop-tab.active').dataset.category);
     }
 
@@ -753,7 +739,13 @@
       
       items.forEach(item => {
         const owned = userInventory[item.id];
-        const isEquipped = equippedItems[item.type] === item.value;
+        let isEquipped = false;
+        
+        if (item.type === 'pet') {
+          isEquipped = localStorage.getItem('equippedPet') === item.value;
+        } else {
+          isEquipped = equippedItems[item.type] === item.value;
+        }
         
         const itemDiv = document.createElement('div');
         itemDiv.className = `shop-item ${owned ? 'owned' : ''} ${isEquipped ? 'equipped' : ''}`;
