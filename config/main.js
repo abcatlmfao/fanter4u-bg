@@ -1,12 +1,14 @@
-// ===== MAIN.JS - COMPLETE WITH ALL FEATURES =====
+// ===== MAIN.JS - COMPLETE REWRITE =====
 
 // Make gamesData global
 window.gamesData = [];
+window.gameEarnings = JSON.parse(localStorage.getItem('gameEarnings') || '{}');
+window.gamePlayCounts = JSON.parse(localStorage.getItem('gamePlayCounts') || '{}');
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
   var sitename = "fanter beta.";
-  var subtext = "v0.02, achievements added, bugfixes and more coming soon! :3";
+  var subtext = "v0.3, achievements added, shop, pets, and more! :3";
 
   var serverUrl1 = "https://gms.parcoil.com";
   var currentPageTitle = document.title;
@@ -29,74 +31,192 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     localStorage.setItem("favourites", JSON.stringify(favs));
     
-    var favBtn = document.querySelector('.fav-btn[data-game="' + gameName.replace(/['"]/g, '\\"') + '"]');
+    var favBtn = document.querySelector('.fav-btn[data-game="' + gameName.replace(/['"]/g, '\\"') + '"], .game-fav-btn[data-game="' + gameName.replace(/['"]/g, '\\"') + '"]');
     if (favBtn) {
       favBtn.textContent = isAdding ? "★" : "☆";
+      favBtn.classList.toggle('active', isAdding);
+    }
+    
+    if (typeof syncFavoriteToAccount === 'function') {
+      syncFavoriteToAccount(gameName, isAdding);
     }
   };
 
+  // Steam-like game card display
   window.displayFilteredGames = function(filteredGames) {
     var gamesContainer = document.getElementById("gamesContainer");
     if (!gamesContainer) return;
     gamesContainer.innerHTML = "";
+    
+    // Get coin multiplier from equipped pet
+    var coinMultiplier = getActiveCoinMultiplier();
     
     for (var i = 0; i < filteredGames.length; i++) {
       var game = filteredGames[i];
       var gameDiv = document.createElement("div");
       gameDiv.classList.add("game");
       
-      var gameImage = document.createElement("img");
-      var imageSrc;
-      if (game.image && game.image.indexOf('http') === 0) {
-        imageSrc = game.image;
-      } else if (game.image) {
-        imageSrc = serverUrl1 + "/" + game.url + "/" + game.image;
-      } else {
-        imageSrc = 'https://via.placeholder.com/200x200?text=No+Image';
-      }
-      gameImage.src = imageSrc;
-      gameImage.alt = game.name;
-      gameImage.style.cursor = 'pointer';
-      gameImage.style.width = '100%';
+      // Get game earnings
+      var earnedCoins = window.gameEarnings[game.name] || 0;
+      var playCount = window.gamePlayCounts[game.name] || 0;
       
-      gameImage.onclick = (function(url, name) {
-        return function() {
-          var playUrl = 'play.html?gameurl=' + encodeURIComponent(url) + '&game=' + encodeURIComponent(name);
-          window.open(playUrl, '_blank');
-        };
-      })(game.url, game.name);
+      // Estimate load time based on game type
+      var loadTime = game.url.startsWith('http') ? '2-4 seconds' : '1-2 seconds';
       
-      var gameNameElem = document.createElement("p");
-      gameNameElem.textContent = game.name;
+      // Release date (default to today if not set)
+      var releaseDate = game.releaseDate || new Date().toLocaleDateString();
       
-      var favBtn = document.createElement("button");
-      favBtn.classList.add("fav-btn");
-      favBtn.setAttribute("data-game", game.name);
-      var isFav = getFavourites().indexOf(game.name) !== -1;
-      favBtn.textContent = isFav ? "★" : "☆";
-      favBtn.onclick = (function(n) {
-        return function(e) {
-          e.stopPropagation();
-          window.toggleFavourite(n);
-          var nowFav = getFavourites().indexOf(n) !== -1;
-          e.target.textContent = nowFav ? "★" : "☆";
-        };
-      })(game.name);
+      // Game description (your typing style)
+      var gameDescription = game.description || getGameDescription(game.name, game.category);
       
-      gameDiv.appendChild(gameImage);
-      gameDiv.appendChild(gameNameElem);
-      gameDiv.appendChild(favBtn);
+      gameDiv.innerHTML = `
+        <div class="game-image-container">
+          <img src="${getGameImage(game)}" alt="${escapeHtml(game.name)}" loading="lazy">
+        </div>
+        <div class="game-info">
+          <div class="game-name">${escapeHtml(game.name)}</div>
+          <div class="game-details">${escapeHtml(gameDescription)}</div>
+          <div class="game-stats">
+            <span>⭐ ${getGameRating(game.name)}</span>
+            <span>🎮 ${playCount} plays</span>
+          </div>
+          <div class="game-category" style="background: ${getCategoryColor(game.category)}20; color: ${getCategoryColor(game.category)}">
+            ${getCategoryIcon(game.category)} ${game.category || 'other'}
+          </div>
+          <div class="game-release">📅 added: ${releaseDate}</div>
+          <div class="game-earnings">🪙 earned: ${Math.floor(earnedCoins * 100) / 100} coins</div>
+          <div class="game-load-time">⏱️ est. load time: ${loadTime}</div>
+          <div class="game-actions">
+            <button class="game-play-btn">🎮 play now</button>
+            <button class="game-fav-btn ${getFavourites().indexOf(game.name) !== -1 ? 'active' : ''}" data-game="${escapeHtml(game.name)}">${getFavourites().indexOf(game.name) !== -1 ? '★' : '☆'}</button>
+          </div>
+          <div class="game-rating" data-game="${escapeHtml(game.name)}">
+            <div class="stars">
+              ${[1,2,3,4,5].map(s => `<span class="star" data-value="${s}">★</span>`).join('')}
+            </div>
+            <div class="rating-average">⭐ ${getGameRating(game.name)}</div>
+          </div>
+        </div>
+      `;
       
       gamesContainer.appendChild(gameDiv);
     }
     
-    console.log("Displayed " + filteredGames.length + " games");
+    attachGameEvents();
+    if (typeof attachRatingListeners === 'function') attachRatingListeners();
+    
+    console.log("✅ Displayed " + filteredGames.length + " games");
   };
+  
+  function getGameImage(game) {
+    if (game.image && game.image.indexOf('http') === 0) return game.image;
+    if (game.image) return serverUrl1 + "/" + game.url + "/" + game.image;
+    return 'https://via.placeholder.com/200x200?text=No+Image';
+  }
+  
+  function getGameDescription(name, category) {
+    const descriptions = {
+      'action': 'fast-paced, intense gameplay that\'ll keep you on the edge of your seat',
+      'puzzle': 'challenge your brain with tricky puzzles and mind-bending mechanics',
+      'racing': 'burn rubber and race to the finish line in high-speed competition',
+      'sports': 'compete in your favorite sports from basketball to soccer',
+      'adventure': 'embark on an epic journey through mysterious lands',
+      'platformer': 'jump, run, and dodge through challenging levels',
+      'strategy': 'plan your moves and outsmart your opponents',
+      'horror': 'survive the terror and uncover dark secrets',
+      'arcade': 'classic arcade action that never gets old',
+      'simulation': 'build, manage, and create your own world',
+      'sandbox': 'no rules, no limits - just pure creativity'
+    };
+    return descriptions[category] || `a fun ${category || 'arcade'} game that'll keep you entertained for hours`;
+  }
+  
+  function getGameRating(gameName) {
+    if (typeof globalRatings !== 'undefined' && globalRatings[gameName]) {
+      return globalRatings[gameName].average.toFixed(1);
+    }
+    return '0.0';
+  }
+  
+  function getCategoryIcon(category) {
+    const icons = {
+      'action': '⚔️', 'puzzle': '🧩', 'racing': '🏎️', 'sports': '⚽',
+      'adventure': '🗺️', 'platformer': '🏃', 'strategy': '♟️',
+      'horror': '👻', 'arcade': '🕹️', 'simulation': '🏭', 'sandbox': '🎨'
+    };
+    return icons[category] || '🎮';
+  }
+  
+  function getCategoryColor(category) {
+    const colors = {
+      'action': '#ff4444', 'puzzle': '#44ff44', 'racing': '#ff8844',
+      'sports': '#44ff88', 'adventure': '#44aaff', 'platformer': '#ff44ff',
+      'strategy': '#88ff44', 'horror': '#aa44ff', 'arcade': '#ff44aa',
+      'simulation': '#44ffcc', 'sandbox': '#ff8844'
+    };
+    return colors[category] || '#aaaaaa';
+  }
+  
+  function attachGameEvents() {
+    document.querySelectorAll('.game-play-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        var gameDiv = btn.closest('.game');
+        var gameName = gameDiv.querySelector('.game-name')?.textContent;
+        if (gameName && window.gamesData) {
+          var game = window.gamesData.find(g => g.name === gameName);
+          if (game) {
+            trackGamePlay(game.name);
+            var playUrl = 'play.html?gameurl=' + encodeURIComponent(game.url) + '&game=' + encodeURIComponent(game.name);
+            window.open(playUrl, '_blank');
+          }
+        }
+      };
+    });
+    
+    document.querySelectorAll('.game-fav-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        var gameName = btn.getAttribute('data-game');
+        if (gameName) {
+          window.toggleFavourite(gameName);
+          var isFav = getFavourites().indexOf(gameName) !== -1;
+          btn.textContent = isFav ? '★' : '☆';
+          btn.classList.toggle('active', isFav);
+        }
+      };
+    });
+    
+    document.querySelectorAll('.star').forEach(star => {
+      star.onclick = (e) => {
+        e.stopPropagation();
+        var ratingDiv = star.closest('.game-rating');
+        var gameName = ratingDiv.getAttribute('data-game');
+        var value = parseInt(star.getAttribute('data-value'));
+        if (gameName && typeof submitRating === 'function') {
+          submitRating(gameName, value);
+          updateStarDisplayLocal(ratingDiv, value);
+        }
+      };
+    });
+  }
+  
+  function updateStarDisplayLocal(ratingDiv, userRating) {
+    var stars = ratingDiv.querySelectorAll('.star');
+    for (var i = 0; i < stars.length; i++) {
+      if (i < userRating) stars[i].classList.add('active');
+      else stars[i].classList.remove('active');
+    }
+  }
 
   function handleSearchInput() {
     var searchInput = document.getElementById("searchInput");
     if (!searchInput) return;
     var searchInputValue = searchInput.value.toLowerCase();
+    
+    if (typeof checkSecretNames === 'function') {
+      checkSecretNames(searchInputValue);
+    }
     
     var filteredGames;
     var favFilterOn = localStorage.getItem("favFilter") === "true";
@@ -140,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
       window.gamesData = data;
       handleSearchInput();
       console.log("✅ Loaded " + window.gamesData.length + " games successfully!");
+      if (typeof updateGameOfDay === 'function') updateGameOfDay();
     })
     .catch(function(error) { console.error("Error fetching games:", error); });
 
@@ -243,17 +364,14 @@ function updateStarDisplay(gameName, userRating) {
   
   var stars = ratingContainer.querySelectorAll('.star');
   for (var i = 0; i < stars.length; i++) {
-    if (i < userRating) {
-      stars[i].classList.add('active');
-    } else {
-      stars[i].classList.remove('active');
-    }
+    if (i < userRating) stars[i].classList.add('active');
+    else stars[i].classList.remove('active');
   }
   
   var avgDisplay = ratingContainer.querySelector('.rating-average');
   var gameRating = globalRatings[gameName];
   if (avgDisplay && gameRating) {
-    avgDisplay.innerHTML = '<span class="star-small">★</span> ' + gameRating.average.toFixed(1) + ' (' + gameRating.count + ')';
+    avgDisplay.innerHTML = '<span class="star-small">★</span> ' + gameRating.average.toFixed(1);
   }
 }
 
@@ -267,18 +385,13 @@ function refreshAllRatings() {
     
     var stars = container.querySelectorAll('.star');
     for (var s = 0; s < stars.length; s++) {
-      if (s < userRating) {
-        stars[s].classList.add('active');
-      } else {
-        stars[s].classList.remove('active');
-      }
+      if (s < userRating) stars[s].classList.add('active');
+      else stars[s].classList.remove('active');
     }
     
     var avgDisplay = container.querySelector('.rating-average');
     if (avgDisplay && gameRating) {
-      avgDisplay.innerHTML = '<span class="star-small">★</span> ' + gameRating.average.toFixed(1) + ' (' + gameRating.count + ')';
-    } else if (avgDisplay) {
-      avgDisplay.innerHTML = '<span class="star-small">★</span> 0.0 (0)';
+      avgDisplay.innerHTML = '<span class="star-small">★</span> ' + gameRating.average.toFixed(1);
     }
   }
 }
@@ -297,57 +410,22 @@ function showRatingToast(message) {
   }, 2000);
 }
 
-function createRatingHTML(gameName, currentRating) {
-  if (currentRating === undefined) currentRating = 0;
-  var gameRating = globalRatings[gameName];
-  var avgRating = gameRating ? gameRating.average.toFixed(1) : '0.0';
-  var ratingCount = gameRating ? gameRating.count : 0;
-  var starsHtml = '';
-  for (var i = 1; i <= 5; i++) {
-    starsHtml += '<span class="star ' + (currentRating >= i ? 'active' : '') + '" data-value="' + i + '">★</span>';
-  }
-  
-  return '<div class="game-rating" data-game="' + gameName.replace(/['"]/g, '&quot;') + '"><div class="stars" data-game="' + gameName.replace(/['"]/g, '&quot;') + '">' + starsHtml + '</div><div class="rating-average"><span class="star-small">★</span> ' + avgRating + ' (' + ratingCount + ')</div></div>';
-}
-
 function attachRatingListeners() {
-  var starsContainers = document.querySelectorAll('.stars');
-  for (var i = 0; i < starsContainers.length; i++) {
-    var starsContainer = starsContainers[i];
-    var gameName = starsContainer.getAttribute('data-game');
-    var stars = starsContainer.querySelectorAll('.star');
+  var ratingContainers = document.querySelectorAll('.game-rating');
+  for (var i = 0; i < ratingContainers.length; i++) {
+    var container = ratingContainers[i];
+    var gameName = container.getAttribute('data-game');
+    var stars = container.querySelectorAll('.star');
     
     for (var s = 0; s < stars.length; s++) {
       var star = stars[s];
       var ratingValue = parseInt(star.getAttribute('data-value'));
       
       star.removeEventListener('click', star.clickHandler);
-      star.removeEventListener('mouseenter', star.mouseEnterHandler);
-      star.removeEventListener('mouseleave', star.mouseLeaveHandler);
-      
       star.clickHandler = function(name, value) {
         return function() { submitRating(name, value); };
       }(gameName, ratingValue);
-      star.mouseEnterHandler = function(idx, val) {
-        return function() {
-          var parentStars = this.parentNode.querySelectorAll('.star');
-          for (var p = 0; p < parentStars.length; p++) {
-            if (p < val) {
-              parentStars[p].classList.add('hover');
-            }
-          }
-        }.bind(star);
-      }(s, ratingValue);
-      star.mouseLeaveHandler = function() {
-        var parentStars = this.parentNode.querySelectorAll('.star');
-        for (var p = 0; p < parentStars.length; p++) {
-          parentStars[p].classList.remove('hover');
-        }
-      }.bind(star);
-      
       star.addEventListener('click', star.clickHandler);
-      star.addEventListener('mouseenter', star.mouseEnterHandler);
-      star.addEventListener('mouseleave', star.mouseLeaveHandler);
     }
   }
 }
@@ -415,25 +493,70 @@ function syncFavoriteToAccount(gameName, isAdding) {
   localStorage.setItem("favourites", JSON.stringify(favorites));
 }
 
+// ===== GAME TRACKING WITH COIN MULTIPLIER =====
+function getActiveCoinMultiplier() {
+  var equippedPet = localStorage.getItem('equippedPet');
+  var petMultipliers = {
+    'chinchilla': 1.0,
+    'dragon': 1.5,
+    'cat': 1.2,
+    'dog': 1.2,
+    'owl': 1.3,
+    'fox': 1.4
+  };
+  return petMultipliers[equippedPet] || 1.0;
+}
+
 function trackPlayedGame(gameName) {
   var currentUser = getCurrentUser();
-  if (!currentUser) return;
   
-  var playedGames = currentUser.playedGames || [];
+  // Track play count
+  window.gamePlayCounts[gameName] = (window.gamePlayCounts[gameName] || 0) + 1;
+  localStorage.setItem('gamePlayCounts', JSON.stringify(window.gamePlayCounts));
   
-  if (playedGames.indexOf(gameName) === -1) {
-    playedGames.unshift(gameName);
-  } else {
-    var index = playedGames.indexOf(gameName);
-    playedGames.splice(index, 1);
-    playedGames.unshift(gameName);
+  // Track earnings with multiplier
+  var multiplier = getActiveCoinMultiplier();
+  var baseEarnings = 0.05;
+  var earned = baseEarnings * multiplier;
+  
+  window.gameEarnings[gameName] = (window.gameEarnings[gameName] || 0) + earned;
+  localStorage.setItem('gameEarnings', JSON.stringify(window.gameEarnings));
+  
+  if (currentUser) {
+    currentUser.coins = (currentUser.coins || 0) + earned;
+    
+    var playedGames = currentUser.playedGames || [];
+    if (playedGames.indexOf(gameName) === -1) {
+      playedGames.unshift(gameName);
+    } else {
+      var index = playedGames.indexOf(gameName);
+      playedGames.splice(index, 1);
+      playedGames.unshift(gameName);
+    }
+    if (playedGames.length > 50) playedGames.pop();
+    
+    currentUser.playedGames = playedGames;
+    currentUser.stats.gamesPlayed = playedGames.length;
+    updateUserInStorage(currentUser);
   }
   
-  if (playedGames.length > 50) playedGames.pop();
+  // Update UI
+  updateHeaderCoins();
   
-  currentUser.playedGames = playedGames;
-  currentUser.stats.gamesPlayed = playedGames.length;
-  updateUserInStorage(currentUser);
+  console.log(`🎮 Played: ${gameName} | +${earned.toFixed(2)}🪙 (${multiplier}x multiplier)`);
+  return earned;
+}
+
+function trackGamePlayCount(gameName) {
+  window.gamePlayCounts[gameName] = (window.gamePlayCounts[gameName] || 0) + 1;
+  localStorage.setItem('gamePlayCounts', JSON.stringify(window.gamePlayCounts));
+  
+  if (window.gamePlayCounts[gameName] >= 50) {
+    if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(59);
+  }
+  if (window.gamePlayCounts[gameName] >= 100) {
+    if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(60);
+  }
 }
 
 function loadUserFavorites() {
@@ -449,23 +572,8 @@ function loadUserFavorites() {
 }
 
 // ===== ACHIEVEMENT TRIGGERS =====
-var gamePlayCounts = JSON.parse(localStorage.getItem('gamePlayCounts') || '{}');
-
-function trackGamePlayCount(gameName) {
-  gamePlayCounts[gameName] = (gamePlayCounts[gameName] || 0) + 1;
-  localStorage.setItem('gamePlayCounts', JSON.stringify(gamePlayCounts));
-  
-  if (gamePlayCounts[gameName] >= 50) {
-    if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(59);
-  }
-  if (gamePlayCounts[gameName] >= 100) {
-    if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(60);
-  }
-}
-
-var themeChangeCount = parseInt(localStorage.getItem('themeChangeCount') || '0');
-
 function trackThemeChange() {
+  var themeChangeCount = parseInt(localStorage.getItem('themeChangeCount') || '0');
   themeChangeCount++;
   localStorage.setItem('themeChangeCount', themeChangeCount);
   if (themeChangeCount >= 10) {
@@ -584,16 +692,14 @@ function checkAndUnlockAchievement(achievementId) {
   achievements[achievementId] = true;
   localStorage.setItem('fanter_achievements', JSON.stringify(achievements));
   
-  // Coin rewards based on category
   var coinReward = 0;
-  if (achievementId <= 10) coinReward = 3;      // Newbie (0.1 each)
-  else if (achievementId <= 20) coinReward = 5; // Beginner (0.2 each)
-  else if (achievementId <= 30) coinReward = 10; // Climbing (0.4 each)
-  else if (achievementId <= 40) coinReward = 17.5; // Difficult (0.7 each)
-  else if (achievementId <= 50) coinReward = 25; // Elite (1.0 each)
-  else coinReward = 50; // Secret (2.0 each)
+  if (achievementId <= 10) coinReward = 3;
+  else if (achievementId <= 20) coinReward = 5;
+  else if (achievementId <= 30) coinReward = 10;
+  else if (achievementId <= 40) coinReward = 17.5;
+  else if (achievementId <= 50) coinReward = 25;
+  else coinReward = 50;
   
-  // Add coins to user
   if (coinReward > 0) {
     currentUser.coins = (currentUser.coins || 0) + coinReward;
     updateUserInStorage(currentUser);
@@ -615,6 +721,8 @@ function checkAndUnlockAchievement(achievementId) {
   
   showAchievementToastNotification(achievementNames[achievementId] || "Achievement Unlocked!", achievementIcons[achievementId] || "🏆", coinReward);
   console.log('🏆 Achievement Unlocked: ' + (achievementNames[achievementId] || "Unknown") + ' +' + coinReward + '🪙');
+  
+  if (typeof updateHeaderCoins === 'function') updateHeaderCoins();
 }
 
 function showAchievementToastNotification(name, icon, coins) {
@@ -625,7 +733,7 @@ function showAchievementToastNotification(name, icon, coins) {
     document.body.appendChild(toast);
   }
   
-  toast.innerHTML = '<span class="achievement-icon">' + icon + '</span><div class="achievement-content"><div class="achievement-title">ACHIEVEMENT UNLOCKED!</div><div class="achievement-name">' + name + '</div><div class="achievement-reward" style="color:#ffcc00; font-size:11px; margin-top:4px;">+' + coins + ' 🪙</div></div>';
+  toast.innerHTML = '<span class="achievement-icon">' + icon + '</span><div class="achievement-content"><div class="achievement-title">ACHIEVEMENT UNLOCKED!</div><div class="achievement-name">' + name + '</div><div class="achievement-reward">+' + coins + ' 🪙</div></div>';
   
   toast.classList.add('show');
   setTimeout(function() {
@@ -642,7 +750,7 @@ function triggerPageCrash() {
   crashOverlay.id = 'crash-overlay';
   crashOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000088;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Courier New",monospace;color:white;text-align:center;animation:fadeIn 0.3s ease;';
   
-  crashOverlay.innerHTML = '<div style="background:white;color:black;padding:20px;border:2px solid silver;max-width:500px;margin:20px;"><pre style="font-size:20px;margin:0;">😵</pre><h1 style="font-size:24px;margin:10px 0;">:(</h1><p style="font-size:16px;">Your Fanter ran into a problem and needs to restart. We\'re just collecting some error info, then we\'ll restart for you.</p><p style="font-size:14px;margin-top:20px;">*** STOP: 0x000000F4 (0x00000000, 0x00000000, 0x00000000, 0x00000000)</p><p style="font-size:12px;margin-top:30px;">*** fanter.sys - Address F4N73R base at F4N73R, DateStamp 4f75a7b3</p><p style="font-size:12px;">*** CHINCHILLA.exe - Address F4N73R base at F4N73R, DateStamp 4f75a7b3</p><div style="margin-top:30px;"><div style="display:inline-block;width:20px;height:20px;background:white;margin:0 5px;animation:blink 1s step-end infinite;"></div><span style="margin-left:10px;">Contact your system admin or abcatlmfao for support</span></div></div><p style="margin-top:20px;font-size:12px;">Restarting in <span id="crash-countdown">5</span> seconds...</p>';
+  crashOverlay.innerHTML = '<div style="background:white;color:black;padding:20px;border:2px solid silver;max-width:500px;margin:20px;"><pre style="font-size:20px;margin:0;">😵</pre><h1 style="font-size:24px;margin:10px 0;">:(</h1><p style="font-size:16px;">Your Fanter ran into a problem and needs to restart.</p><p style="font-size:14px;margin-top:20px;">*** STOP: 0x000000F4</p><div style="margin-top:30px;"><div style="display:inline-block;width:20px;height:20px;background:white;margin:0 5px;animation:blink 1s step-end infinite;"></div><span>Restarting in <span id="crash-countdown">5</span> seconds...</span></div></div>';
   
   document.body.appendChild(crashOverlay);
   
@@ -679,5 +787,23 @@ initAchievementTriggers();
 window.crashFanter = function() {
   triggerPageCrash();
 };
+
+function updateHeaderCoins() {
+  var currentUser = getCurrentUser();
+  var coinEl = document.getElementById('headerCoinAmount');
+  if (coinEl && currentUser) {
+    coinEl.textContent = Math.floor((currentUser.coins || 0) * 100) / 100;
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
 
 console.log('💀 Type "crashFanter()" for a surprise...');
