@@ -606,11 +606,19 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ===== SUPABASE CONFIG =====
-    const SUPABASE_URL = "https://gvzgnclowylrrpovdvtw.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2emduY2xvd3lscnJwb3ZkdnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjM5ODEsImV4cCI6MjA5MjAzOTk4MX0.p7oeYBVX870iSK-TLDRj6pfW7wLj7HJsTHjNWaNpL7o";
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+   // ===== SUPABASE CONFIG =====
+const SUPABASE_URL = "https://gvzgnclowylrrpovdvtw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2emduY2xvd3lscnJwb3ZkdnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjM5ODEsImV4cCI6MjA5MjAzOTk4MX0.p7oeYBVX870iSK-TLDRj6pfW7wLj7HJsTHjNWaNpL7o";
+
+// Use existing supabase from index.html or create new
+let supabase;
+if (window.supabase) {
+  supabase = window.supabase;
+} else {
+  supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.supabase = supabase;
+}
+console.log('✅ Supabase ready');
     
     // ===== COMPLETE ACHIEVEMENTS DATA =====
 const ACHIEVEMENTS_DATA = {
