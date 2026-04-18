@@ -6,15 +6,15 @@
   <title>fanter v0.05</title>
   <link rel="stylesheet" href="config/main.css" />
   
-<!-- Supabase SDK - MUST BE IN HEAD -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://gvzgnclowylrrpovdvtw.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2emduY2xvd3lscnJwb3ZkdnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjM5ODEsImV4cCI6MjA5MjAzOTk4MX0.p7oeYBVX870iSK-TLDRj6pfW7wLj7HJsTHjNWaNpL7o";
+  
+  // Make sure we create the client correctly
   window.supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log("✅ Supabase ready!");
+  console.log("✅ Supabase client created:", window.supabase);
 </script>
-
   
 </head>
 
