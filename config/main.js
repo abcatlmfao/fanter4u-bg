@@ -46,84 +46,79 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // CLEAN DISPLAY FUNCTION - NO LARGE DESCRIPTION, COMPACT CATEGORY
-  window.displayFilteredGames = function(filteredGames) {
-    var gamesContainer = document.getElementById("gamesContainer");
-    if (!gamesContainer) return;
-    gamesContainer.innerHTML = "";
+ window.displayFilteredGames = function(filteredGames) {
+  var gamesContainer = document.getElementById("gamesContainer");
+  if (!gamesContainer) return;
+  gamesContainer.innerHTML = "";
+  
+  if (!filteredGames || filteredGames.length === 0) {
+    gamesContainer.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">no games found 😔</div>';
+    return;
+  }
+  
+  var favourites = getFavourites();
+  
+  for (var i = 0; i < filteredGames.length; i++) {
+    var game = filteredGames[i];
+    var gameDiv = document.createElement("div");
+    gameDiv.className = "game";
+    gameDiv.setAttribute("data-game-name", game.name);
     
-    if (!filteredGames || filteredGames.length === 0) {
-      gamesContainer.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">no games found 😔</div>';
-      return;
+    var earnedCoins = window.gameEarnings[game.name] || 0;
+    var playCount = window.gamePlayCounts[game.name] || 0;
+    var isFav = favourites.indexOf(game.name) !== -1;
+    
+    var avgRating = '0.0';
+    if (typeof globalRatings !== 'undefined' && globalRatings[game.name]) {
+      avgRating = globalRatings[game.name].average.toFixed(1);
     }
     
-    var favourites = getFavourites();
-    
-    for (var i = 0; i < filteredGames.length; i++) {
-      var game = filteredGames[i];
-      var gameDiv = document.createElement("div");
-      gameDiv.className = "game";
-      gameDiv.setAttribute("data-game-name", game.name);
-      
-      var earnedCoins = window.gameEarnings[game.name] || 0;
-      var playCount = window.gamePlayCounts[game.name] || 0;
-      var isFav = favourites.indexOf(game.name) !== -1;
-      
-      var avgRating = '0.0';
-      var ratingCount = 0;
-      if (typeof globalRatings !== 'undefined' && globalRatings[game.name]) {
-        avgRating = globalRatings[game.name].average.toFixed(1);
-        ratingCount = globalRatings[game.name].count;
-      }
-      
-      var imageSrc;
-      if (game.image && game.image.indexOf('http') === 0) {
-        imageSrc = game.image;
-      } else if (game.image) {
-        imageSrc = serverUrl1 + "/" + game.url + "/" + game.image;
-      } else {
-        imageSrc = 'https://via.placeholder.com/300x169?text=No+Image';
-      }
-      
-      var categoryColor = getCategoryColor(game.category);
-      var categoryIcon = getCategoryIcon(game.category);
-      
-      // Auto-fit game name (truncate with ellipsis if too long)
-      var shortName = game.name.length > 20 ? game.name.substring(0, 18) + '...' : game.name;
-      
-      gameDiv.innerHTML = `
-        <div class="game-image-container">
-          <img src="${imageSrc}" alt="${escapeHtml(game.name)}" loading="lazy">
-        </div>
-        <div class="game-info">
-          <div class="game-title-row">
-            <span class="game-name" title="${escapeHtml(game.name)}">${escapeHtml(shortName)}</span>
-            <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game="${escapeHtml(game.name)}">${isFav ? '★' : '☆'}</button>
-          </div>
-          <div class="game-category-tag" style="background: ${categoryColor}20; color: ${categoryColor}">${categoryIcon} ${game.category || 'other'}</div>
-          <div class="game-stats-row">
-            <span>🎮 ${playCount}</span>
-            <span>🪙 ${Math.floor(earnedCoins * 100) / 100}</span>
-            <span>⏱️ ${game.loadTime || '1-3s'}</span>
-          </div>
-          <div class="game-rating-row">
-            <div class="game-stars">
-              ${[1,2,3,4,5].map(function(s) { 
-                return '<span class="game-star" data-value="' + s + '">★</span>';
-              }).join('')}
-            </div>
-            <span class="game-rating-text">${avgRating}</span>
-          </div>
-          <button class="game-play-btn" data-game="${escapeHtml(game.name)}" data-url="${escapeHtml(game.url)}">🎮 PLAY</button>
-        </div>
-      `;
-      
-      gamesContainer.appendChild(gameDiv);
+    var imageSrc;
+    if (game.image && game.image.indexOf('http') === 0) {
+      imageSrc = game.image;
+    } else if (game.image) {
+      imageSrc = serverUrl1 + "/" + game.url + "/" + game.image;
+    } else {
+      imageSrc = 'https://via.placeholder.com/200x113?text=No+Image';
     }
     
-    attachGameCardEvents();
-    updateStarDisplays();
-  };
+    var categoryColor = getCategoryColor(game.category);
+    var categoryIcon = getCategoryIcon(game.category);
+    var shortName = game.name.length > 18 ? game.name.substring(0, 16) + '...' : game.name;
+    
+    gameDiv.innerHTML = `
+      <div class="game-image-container">
+        <img src="${imageSrc}" alt="${escapeHtml(game.name)}" loading="lazy">
+      </div>
+      <div class="game-info">
+        <div class="game-title-row">
+          <span class="game-name" title="${escapeHtml(game.name)}">${escapeHtml(shortName)}</span>
+          <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game="${escapeHtml(game.name)}">${isFav ? '★' : '☆'}</button>
+        </div>
+        <div class="game-category-tag" style="background: ${categoryColor}20; color: ${categoryColor}">${categoryIcon} ${game.category || 'other'}</div>
+        <div class="game-stats-row">
+          <span>🎮 ${playCount}</span>
+          <span>🪙 ${Math.floor(earnedCoins * 100) / 100}</span>
+          <span>⏱️ ${game.loadTime || '1-3s'}</span>
+        </div>
+        <div class="game-rating-row">
+          <div class="game-stars">
+            ${[1,2,3,4,5].map(function(s) { 
+              return '<span class="game-star" data-value="' + s + '">★</span>';
+            }).join('')}
+          </div>
+          <span class="game-rating-text">${avgRating}</span>
+        </div>
+        <button class="game-play-btn" data-game="${escapeHtml(game.name)}" data-url="${escapeHtml(game.url)}">▶ PLAY</button>
+      </div>
+    `;
+    
+    gamesContainer.appendChild(gameDiv);
+  }
+  
+  attachGameCardEvents();
+  updateStarDisplays();
+};
   
   function updateStarDisplays() {
     document.querySelectorAll('.game').forEach(function(card) {
