@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="config/main.css" />
   <script src="config/theme-loader.js"></script>
   <style>
-    /* ALL YOUR STYLES - KEEP EXACTLY AS IS */
     .account-container { max-width: 1000px; margin: 100px auto; padding: 30px; background: rgba(20, 30, 50, 0.8); border-radius: 20px; border: 1px solid rgba(45, 90, 227, 0.4); }
     .account-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; flex-wrap: wrap; }
     .account-tab { background: none; border: none; color: rgba(255,255,255,0.6); padding: 10px 20px; cursor: pointer; font-size: 16px; transition: all 0.3s ease; border-radius: 8px; }
@@ -137,17 +136,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ===== SUPABASE SETUP =====
-    const SUPABASE_URL = "https://gvzgnclowylrrpovdvtw.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2emduY2xvd3lscnJwb3ZkdnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjM5ODEsImV4cCI6MjA5MjAzOTk4MX0.p7oeYBVX870iSK-TLDRj6pfW7wLj7HJsTHjNWaNpL7o";
-    
-    let supabase = window.supabase;
-    if (!supabase || !supabase.auth) {
-      supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      window.supabase = supabase;
-    }
-    console.log('✅ Supabase ready');
-
     // ===== ALL ACHIEVEMENTS (63 TOTAL) =====
     const ALL_ACHIEVEMENTS = [
       { id: 1, name: "Welcome Aboard", desc: "Create an account", icon: "🎉", coins: 3, req: "register", required: 1 },
@@ -237,17 +225,22 @@
         localStorage.setItem('fanter_currentUser', JSON.stringify(guestUser));
       }
 
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          currentUser = session.user;
-          syncStatus = 'online';
-          await loadSupabaseData();
-        } else {
+      // Try Supabase if available
+      if (window.supabase && window.supabase.auth) {
+        try {
+          const { data: { session } } = await window.supabase.auth.getSession();
+          if (session) {
+            currentUser = session.user;
+            syncStatus = 'online';
+            await loadSupabaseData();
+          } else {
+            loadLocalData();
+          }
+        } catch (e) {
+          console.log('Supabase error, using localStorage');
           loadLocalData();
         }
-      } catch (e) {
-        console.log('Supabase unavailable, using localStorage');
+      } else {
         loadLocalData();
       }
 
@@ -265,7 +258,7 @@
 
     async function loadSupabaseData() {
       try {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+        const { data: profile } = await window.supabase.from('profiles').select('*').eq('id', currentUser.id).single();
         if (profile) {
           localUser = {
             id: profile.id,
@@ -278,7 +271,7 @@
             playedGames: []
           };
         }
-        const { data: achievements } = await supabase.from('user_achievements').select('achievement_id').eq('user_id', currentUser.id);
+        const { data: achievements } = await window.supabase.from('user_achievements').select('achievement_id').eq('user_id', currentUser.id);
         userAchievements = {};
         achievements?.forEach(a => { userAchievements[a.achievement_id] = true; });
       } catch (error) {
@@ -289,8 +282,12 @@
 
     // ===== AUTH =====
     async function handleLogin(email, password) {
+      if (!window.supabase) {
+        showMessage('loginMessage', 'Supabase not available', 'error');
+        return;
+      }
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await window.supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         currentUser = data.user;
         syncStatus = 'online';
@@ -303,6 +300,10 @@
     }
 
     async function handleRegister(username, email, displayName, password) {
+      if (!window.supabase) {
+        showMessage('registerMessage', 'Supabase not available', 'error');
+        return;
+      }
       try {
         const localUsers = JSON.parse(localStorage.getItem('fanter_users') || '[]');
         if (localUsers.find(u => u.username && u.username.toLowerCase() === username.toLowerCase())) {
@@ -310,13 +311,13 @@
           return;
         }
 
-        const { data: existingUser } = await supabase.from('profiles').select('username').ilike('username', username).single();
+        const { data: existingUser } = await window.supabase.from('profiles').select('username').ilike('username', username).single();
         if (existingUser) {
           showMessage('registerMessage', '❌ Username already taken!', 'error');
           return;
         }
 
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await window.supabase.auth.signUp({
           email, password,
           options: { data: { username, display_name: displayName || username } }
         });
@@ -324,7 +325,7 @@
         if (error) throw error;
 
         if (data.user) {
-          await supabase.from('profiles').insert({
+          await window.supabase.from('profiles').insert({
             id: data.user.id,
             username: username,
             display_name: displayName || username,
@@ -342,7 +343,7 @@
     }
 
     async function handleLogout() {
-      await supabase.auth.signOut();
+      if (window.supabase) await window.supabase.auth.signOut();
       currentUser = null;
       syncStatus = 'offline';
       loadLocalData();
@@ -474,14 +475,16 @@
       container.innerHTML = '<div class="guest-message">loading leaderboard...</div>';
       let players = [];
 
-      try {
-        const orderCol = currentFilter === 'coins' ? 'coins' : currentFilter === 'games_played' ? 'games_played' : 'achievements_count';
-        const { data, error } = await supabase.from('profiles').select('id, username, display_name, coins, games_played, achievements_count').order(orderCol, { ascending: false }).limit(20);
-        if (!error && data) {
-          players = data.map(p => ({ id: p.id, displayName: p.display_name || p.username || 'Unknown', username: p.username || 'unknown', coins: p.coins || 0, gamesPlayed: p.games_played || 0, achievementsCount: p.achievements_count || 0, isLocal: false }));
+      if (window.supabase) {
+        try {
+          const orderCol = currentFilter === 'coins' ? 'coins' : currentFilter === 'games_played' ? 'games_played' : 'achievements_count';
+          const { data, error } = await window.supabase.from('profiles').select('id, username, display_name, coins, games_played, achievements_count').order(orderCol, { ascending: false }).limit(20);
+          if (!error && data) {
+            players = data.map(p => ({ id: p.id, displayName: p.display_name || p.username || 'Unknown', username: p.username || 'unknown', coins: p.coins || 0, gamesPlayed: p.games_played || 0, achievementsCount: p.achievements_count || 0, isLocal: false }));
+          }
+        } catch (e) {
+          console.warn('Using local fallback:', e);
         }
-      } catch (e) {
-        console.warn('Using local fallback:', e);
       }
 
       if (players.length === 0) {
