@@ -279,13 +279,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-  // ===== SUPABASE =====
-const SUPABASE_URL = "https://gvzgnclowylrrpovdvtw.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2emduY2xvd3lscnJwb3ZkdnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjM5ODEsImV4cCI6MjA5MjAzOTk4MX0.p7oeYBVX870iSK-TLDRj6pfW7wLj7HJsTHjNWaNpL7o";
-
-// Always create a fresh client to ensure auth is available
-window.supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-console.log('✅ Supabase client created');
+ // ===== SUPABASE =====
+// index.html already created window.supabase - just wait for it
+console.log('Waiting for Supabase...');
 
     // ===== ALL ACHIEVEMENTS =====
     const ALL_ACHIEVEMENTS = [
@@ -347,18 +343,21 @@ console.log('✅ Supabase client created');
         localStorage.setItem('fanter_currentUser', JSON.stringify(guestUser));
       }
 
-      // Check if auth is ready
-if (!window.supabase || !window.supabase.auth) {
-    console.log('Supabase not ready, using local storage');
-    loadLocalData();
-      setupTabs();
-      setupLeaderboardFilters();
-    updateUI();
+// Wait for Supabase to be ready
+let supabase = window.supabase;
+if (!supabase || !supabase.auth) {
+  console.log('Supabase not ready, falling back to localStorage');
+  loadLocalData();
+  setupTabs();
+  setupLeaderboardFilters();
+  updateUI();
   renderCurrentTab();
   return;
 }
 
-const { data: { session } } = await window.supabase.auth.getSession();
+const { data: { session } } = await supabase.auth.getSession();
+
+
       if (session) {
         currentUser = session.user;
         syncStatus = 'online';
