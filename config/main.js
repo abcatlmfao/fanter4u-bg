@@ -46,137 +46,137 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
- window.displayFilteredGames = function(filteredGames) {
-  var gamesContainer = document.getElementById("gamesContainer");
-  if (!gamesContainer) return;
-  gamesContainer.innerHTML = "";
-  
-  if (!filteredGames || filteredGames.length === 0) {
-    gamesContainer.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">no games found 😔</div>';
-    return;
-  }
-  
-  var favourites = getFavourites();
-  
-  for (var i = 0; i < filteredGames.length; i++) {
-    var game = filteredGames[i];
-    var gameDiv = document.createElement("div");
-    gameDiv.className = "game";
-    gameDiv.setAttribute("data-game-name", game.name);
+  window.displayFilteredGames = function(filteredGames) {
+    var gamesContainer = document.getElementById("gamesContainer");
+    if (!gamesContainer) return;
+    gamesContainer.innerHTML = "";
     
-    var earnedCoins = window.gameEarnings[game.name] || 0;
-    var playCount = window.gamePlayCounts[game.name] || 0;
-    var isFav = favourites.indexOf(game.name) !== -1;
-    
-    var avgRating = '0.0';
-    if (typeof globalRatings !== 'undefined' && globalRatings[game.name]) {
-      avgRating = globalRatings[game.name].average.toFixed(1);
+    if (!filteredGames || filteredGames.length === 0) {
+      gamesContainer.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">no games found 😔</div>';
+      return;
     }
     
-    var imageSrc;
-    if (game.image && game.image.indexOf('http') === 0) {
-      imageSrc = game.image;
-    } else if (game.image) {
-      imageSrc = serverUrl1 + "/" + game.url + "/" + game.image;
-    } else {
-      imageSrc = 'https://via.placeholder.com/200x113?text=No+Image';
-    }
+    var favourites = getFavourites();
     
-    var categoryColor = getCategoryColor(game.category);
-    var categoryIcon = getCategoryIcon(game.category);
-    var shortName = game.name.length > 18 ? game.name.substring(0, 16) + '...' : game.name;
-    
-    gameDiv.innerHTML = `
-      <div class="game-image-container">
-        <img src="${imageSrc}" alt="${escapeHtml(game.name)}" loading="lazy">
-      </div>
-      <div class="game-info">
-        <div class="game-title-row">
-          <span class="game-name" title="${escapeHtml(game.name)}">${escapeHtml(shortName)}</span>
-          <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game="${escapeHtml(game.name)}">${isFav ? '★' : '☆'}</button>
+    for (var i = 0; i < filteredGames.length; i++) {
+      var game = filteredGames[i];
+      var gameDiv = document.createElement("div");
+      gameDiv.className = "game";
+      gameDiv.setAttribute("data-game-name", game.name);
+      
+      var earnedCoins = window.gameEarnings[game.name] || 0;
+      var playCount = window.gamePlayCounts[game.name] || 0;
+      var isFav = favourites.indexOf(game.name) !== -1;
+      
+      var avgRating = '0.0';
+      if (typeof globalRatings !== 'undefined' && globalRatings[game.name]) {
+        avgRating = globalRatings[game.name].average.toFixed(1);
+      }
+      
+      var imageSrc;
+      if (game.image && game.image.indexOf('http') === 0) {
+        imageSrc = game.image;
+      } else if (game.image) {
+        imageSrc = serverUrl1 + "/" + game.url + "/" + game.image;
+      } else {
+        imageSrc = 'https://via.placeholder.com/200x113?text=No+Image';
+      }
+      
+      var categoryColor = getCategoryColor(game.category);
+      var categoryIcon = getCategoryIcon(game.category);
+      var shortName = game.name.length > 18 ? game.name.substring(0, 16) + '...' : game.name;
+      
+      gameDiv.innerHTML = `
+        <div class="game-image-container">
+          <img src="${imageSrc}" alt="${escapeHtml(game.name)}" loading="lazy">
         </div>
-        <div class="game-category-tag" style="background: ${categoryColor}20; color: ${categoryColor}">${categoryIcon} ${game.category || 'other'}</div>
-        <div class="game-stats-row">
-          <span>🎮 ${playCount}</span>
-          <span>🪙 ${Math.floor(earnedCoins * 100) / 100}</span>
-          <span>⏱️ ${game.loadTime || '1-3s'}</span>
-        </div>
-        <div class="game-rating-row">
-          <div class="game-stars">
-            ${[1,2,3,4,5].map(function(s) { 
-              return '<span class="game-star" data-value="' + s + '">★</span>';
-            }).join('')}
+        <div class="game-info">
+          <div class="game-title-row">
+            <span class="game-name" title="${escapeHtml(game.name)}">${escapeHtml(shortName)}</span>
+            <button class="game-fav-btn ${isFav ? 'active' : ''}" data-game="${escapeHtml(game.name)}">${isFav ? '★' : '☆'}</button>
           </div>
-          <span class="game-rating-text">${avgRating}</span>
+          <div class="game-category-tag" style="background: ${categoryColor}20; color: ${categoryColor}">${categoryIcon} ${game.category || 'other'}</div>
+          <div class="game-stats-row">
+            <span>🎮 ${playCount}</span>
+            <span>🪙 ${Math.floor(earnedCoins * 100) / 100}</span>
+            <span>⏱️ ${game.loadTime || '1-3s'}</span>
+          </div>
+          <div class="game-rating-row">
+            <div class="game-stars">
+              ${[1,2,3,4,5].map(function(s) { 
+                return '<span class="game-star" data-value="' + s + '">★</span>';
+              }).join('')}
+            </div>
+            <span class="game-rating-text">${avgRating}</span>
+          </div>
+          <button class="game-play-btn" data-game="${escapeHtml(game.name)}" data-url="${escapeHtml(game.url)}">▶ PLAY</button>
         </div>
-        <button class="game-play-btn" data-game="${escapeHtml(game.name)}" data-url="${escapeHtml(game.url)}">▶ PLAY</button>
-      </div>
-    `;
+      `;
+      
+      gamesContainer.appendChild(gameDiv);
+    }
     
-    gamesContainer.appendChild(gameDiv);
-  }
-  
-  attachGameCardEvents();
-  updateStarDisplays();
-};
-function updateStarDisplay(gameName, userRating) {
-  // Update game card stars and rating text
-  var gameCard = document.querySelector('.game[data-game-name="' + CSS.escape(gameName) + '"]');
-  if (gameCard) {
-    var stars = gameCard.querySelectorAll('.game-star');
-    for (var i = 0; i < stars.length; i++) {
-      if (i < userRating) {
-        stars[i].classList.add('active');
-      } else {
-        stars[i].classList.remove('active');
-      }
-    }
-    var ratingText = gameCard.querySelector('.game-rating-text');
-    if (ratingText && globalRatings[gameName]) {
-      ratingText.innerHTML = globalRatings[gameName].average.toFixed(1);
-    }
-  }
+    attachGameCardEvents();
+    updateStarDisplays(); // FIX: now defined below
+  };
+
+  // ===== FIX: updateStarDisplays — was called but never defined =====
   function updateStarDisplays() {
-  if (typeof globalRatings === 'undefined' || typeof userVotes === 'undefined') return;
-  
-  document.querySelectorAll('.game').forEach(function(gameCard) {
-    var gameName = gameCard.getAttribute('data-game-name');
-    if (!gameName) return;
+    if (typeof globalRatings === 'undefined' || typeof userVotes === 'undefined') return;
     
-    var userRating = userVotes[gameName] || 0;
-    var stars = gameCard.querySelectorAll('.game-star');
-    
-    for (var i = 0; i < stars.length; i++) {
-      if (i < userRating) {
-        stars[i].classList.add('active');
-      } else {
-        stars[i].classList.remove('active');
+    document.querySelectorAll('.game').forEach(function(gameCard) {
+      var gameName = gameCard.getAttribute('data-game-name');
+      if (!gameName) return;
+      
+      var userRating = userVotes[gameName] || 0;
+      var stars = gameCard.querySelectorAll('.game-star');
+      
+      for (var i = 0; i < stars.length; i++) {
+        if (i < userRating) {
+          stars[i].classList.add('active');
+        } else {
+          stars[i].classList.remove('active');
+        }
+      }
+      
+      var ratingText = gameCard.querySelector('.game-rating-text');
+      if (ratingText && globalRatings[gameName]) {
+        ratingText.textContent = globalRatings[gameName].average.toFixed(1);
+      }
+    });
+  }
+
+  // Make updateStarDisplays available globally so ratings.js / other scripts can call it too
+  window.updateStarDisplays = updateStarDisplays;
+
+  function updateStarDisplay(gameName, userRating) {
+    var gameCard = document.querySelector('.game[data-game-name="' + CSS.escape(gameName) + '"]');
+    if (gameCard) {
+      var stars = gameCard.querySelectorAll('.game-star');
+      for (var i = 0; i < stars.length; i++) {
+        if (i < userRating) {
+          stars[i].classList.add('active');
+        } else {
+          stars[i].classList.remove('active');
+        }
+      }
+      var ratingText = gameCard.querySelector('.game-rating-text');
+      if (ratingText && globalRatings[gameName]) {
+        ratingText.innerHTML = globalRatings[gameName].average.toFixed(1);
       }
     }
     
-    var ratingText = gameCard.querySelector('.game-rating-text');
-    if (ratingText && globalRatings[gameName]) {
-      ratingText.textContent = globalRatings[gameName].average.toFixed(1);
-    }
-  });
-}
-  
-  // Update modal stars if open
-  var modalStars = document.querySelectorAll('.modal-star');
-  if (modalStars.length > 0) {
-    for (var i = 0; i < modalStars.length; i++) {
-      if (i < userRating) {
-        modalStars[i].style.color = '#ffcc00';
-      } else {
-        modalStars[i].style.color = 'rgba(255,255,255,0.2)';
+    var modalStars = document.querySelectorAll('.modal-star');
+    if (modalStars.length > 0) {
+      for (var i = 0; i < modalStars.length; i++) {
+        if (i < userRating) {
+          modalStars[i].style.color = '#ffcc00';
+        } else {
+          modalStars[i].style.color = 'rgba(255,255,255,0.2)';
+        }
       }
-    }
-    var ratingDiv = document.querySelector('.modal-star')?.parentElement?.parentElement?.nextSibling;
-    if (ratingDiv) {
-      ratingDiv.innerHTML = 'your rating: ' + '★'.repeat(userRating) + '☆'.repeat(5 - userRating);
     }
   }
-}
   
   function attachGameCardEvents() {
     document.querySelectorAll('.game-play-btn').forEach(function(btn) {
@@ -375,7 +375,7 @@ function escapeHtml(str) {
   });
 }
 
-// ===== GAME DETAILS MODAL (Keep as is) =====
+// ===== GAME DETAILS MODAL =====
 function showGameDetailsModal(gameName, gameUrl, gameImage, gameDescription, gameCategory, gameLoadTime, gameDeveloper, gameReleaseDate) {
   var existingModal = document.getElementById('gameModal');
   if (existingModal) existingModal.remove();
@@ -425,7 +425,7 @@ function showGameDetailsModal(gameName, gameUrl, gameImage, gameDescription, gam
             <div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="font-size:12px;color:rgba(255,255,255,0.6);">🪙 EARNED</span><span style="font-size:12px;font-weight:bold;color:#ffcc00;">${Math.floor(gameEarned * 100) / 100}</span></div>
             <div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="font-size:12px;color:rgba(255,255,255,0.6);">⭐ RATING</span><span style="font-size:12px;font-weight:bold;color:#ffcc00;">${avgRating}/5</span></div>
             <div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="font-size:12px;color:rgba(255,255,255,0.6);">⏱️ LOAD TIME</span><span style="font-size:12px;font-weight:bold;color:#ffcc00;">${gameLoadTime || '1-3 sec'}</span></div>
-            ${gameDeveloper ? `<div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="font-size:12px;color:rgba(255,255,255,0.6);">👨‍💻 DEVELOPER</span><span style="font-size:12px;font-weight:bold;color:#ffcc00;">${escapeHtml(gameDeveloper)}</span></div>` : ''}
+            ${gameDeveloper ? `<div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="font-size:12px;color:rgba(255,255,255,0.6);">👨‍💻 DEV</span><span style="font-size:12px;font-weight:bold;color:#ffcc00;">${escapeHtml(gameDeveloper)}</span></div>` : ''}
           </div>
         </div>
         <div style="flex:1;">
@@ -477,10 +477,6 @@ function showGameDetailsModal(gameName, gameUrl, gameImage, gameDescription, gam
         for (var i = 0; i < stars.length; i++) {
           stars[i].style.color = i < value ? '#ffcc00' : 'rgba(255,255,255,0.2)';
         }
-        var ratingDiv = this.parentElement.parentElement.nextSibling;
-        if (ratingDiv) {
-          ratingDiv.innerHTML = 'your rating: ' + '★'.repeat(value) + '☆'.repeat(5-value);
-        }
       }
     };
   });
@@ -503,6 +499,10 @@ async function loadGlobalRatings() {
       globalRatings = data.record.ratings;
     }
     console.log('✅ Global ratings loaded:', Object.keys(globalRatings).length, 'games rated');
+    // FIX: re-sync stars after ratings load
+    if (typeof window.updateStarDisplays === 'function') {
+      window.updateStarDisplays();
+    }
   } catch (error) {
     console.error('Failed to load ratings:', error);
   }
@@ -510,7 +510,7 @@ async function loadGlobalRatings() {
 
 async function saveGlobalRatings() {
   try {
-    var response = await fetch('https://api.jsonbin.io/v3/b/' + RATINGS_BIN_ID, {
+    await fetch('https://api.jsonbin.io/v3/b/' + RATINGS_BIN_ID, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -538,10 +538,7 @@ function submitRating(gameName, rating) {
     var users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
     var userIndex = -1;
     for (var i = 0; i < users.length; i++) {
-      if (users[i].id === currentUser.id) {
-        userIndex = i;
-        break;
-      }
+      if (users[i].id === currentUser.id) { userIndex = i; break; }
     }
     if (userIndex !== -1) {
       users[userIndex].stats = currentUser.stats;
@@ -575,9 +572,7 @@ function showRatingToast(message) {
   }
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(function() {
-    toast.classList.remove('show');
-  }, 2000);
+  setTimeout(function() { toast.classList.remove('show'); }, 2000);
 }
 
 loadGlobalRatings();
@@ -593,14 +588,26 @@ function updateUserInStorage(updatedUser) {
   var users = JSON.parse(localStorage.getItem('fanter_users') || '[]');
   var index = -1;
   for (var i = 0; i < users.length; i++) {
-    if (users[i].id === updatedUser.id) {
-      index = i;
-      break;
-    }
+    if (users[i].id === updatedUser.id) { index = i; break; }
   }
   if (index !== -1) {
     users[index] = updatedUser;
     localStorage.setItem('fanter_users', JSON.stringify(users));
+  }
+
+  // FIX: Sync key stats to Supabase so leaderboard stays current
+  if (window.supabase && updatedUser.id && !updatedUser.id.startsWith('guest_')) {
+    window.supabase.from('profiles').update({
+      coins: updatedUser.coins || 0,
+      games_played: (updatedUser.stats && updatedUser.stats.gamesPlayed) || 0,
+      achievements_count: Object.keys(
+        JSON.parse(localStorage.getItem('fanter_achievements') || '{}')
+      ).length
+    }).eq('id', updatedUser.id).then(function() {
+      console.log('✅ Profile synced to Supabase');
+    }).catch(function(err) {
+      console.warn('Supabase sync failed (non-critical):', err);
+    });
   }
 }
 
@@ -609,11 +616,8 @@ function syncFavoriteToAccount(gameName, isAdding) {
   if (!currentUser) return;
   
   var favorites = currentUser.favorites || [];
-  
   if (isAdding) {
-    if (favorites.indexOf(gameName) === -1) {
-      favorites.push(gameName);
-    }
+    if (favorites.indexOf(gameName) === -1) favorites.push(gameName);
   } else {
     favorites = favorites.filter(function(f) { return f !== gameName; });
   }
@@ -621,7 +625,6 @@ function syncFavoriteToAccount(gameName, isAdding) {
   currentUser.favorites = favorites;
   currentUser.stats.favoritesCount = favorites.length;
   updateUserInStorage(currentUser);
-  
   localStorage.setItem("favourites", JSON.stringify(favorites));
 }
 
@@ -643,8 +646,8 @@ function trackPlayedGame(gameName) {
     if (playedGames.indexOf(gameName) === -1) {
       playedGames.unshift(gameName);
     } else {
-      var index = playedGames.indexOf(gameName);
-      playedGames.splice(index, 1);
+      var idx = playedGames.indexOf(gameName);
+      playedGames.splice(idx, 1);
       playedGames.unshift(gameName);
     }
     if (playedGames.length > 50) playedGames.pop();
@@ -674,12 +677,8 @@ function trackPlayedGame(gameName) {
 function getActiveCoinMultiplier() {
   var equippedPet = localStorage.getItem('equippedPet');
   var petMultipliers = {
-    'chinchilla': 1.0,
-    'dragon': 1.5,
-    'cat': 1.2,
-    'dog': 1.2,
-    'owl': 1.3,
-    'fox': 1.4
+    'chinchilla': 1.0, 'dragon': 1.5, 'cat': 1.2,
+    'dog': 1.2, 'owl': 1.3, 'fox': 1.4
   };
   return petMultipliers[equippedPet] || 1.0;
 }
@@ -687,13 +686,8 @@ function getActiveCoinMultiplier() {
 function loadUserFavorites() {
   var currentUser = getCurrentUser();
   if (!currentUser) return;
-  
   var favorites = currentUser.favorites || [];
   localStorage.setItem("favourites", JSON.stringify(favorites));
-  
-  if (typeof handleSearchInput === 'function') {
-    handleSearchInput();
-  }
 }
 
 function updateHeaderCoins() {
@@ -719,11 +713,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 setInterval(updateHeaderCoins, 1000);
 
-// ===== ACHIEVEMENT TRIGGERS (Keep all) =====
+// ===== ACHIEVEMENT TRIGGERS =====
 function trackGamePlayCount(gameName) {
   window.gamePlayCounts[gameName] = (window.gamePlayCounts[gameName] || 0) + 1;
   localStorage.setItem('gamePlayCounts', JSON.stringify(window.gamePlayCounts));
-  
   if (window.gamePlayCounts[gameName] >= 50) {
     if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(59);
   }
@@ -745,13 +738,8 @@ var idleAchievementGranted = false;
 
 function startIdleTracking() {
   if (idleAchievementGranted) return;
-  
   var lastActivity = Date.now();
-  
-  function resetIdleTimer() {
-    lastActivity = Date.now();
-  }
-  
+  function resetIdleTimer() { lastActivity = Date.now(); }
   function checkIdle() {
     if (!idleAchievementGranted) {
       var idleTime = (Date.now() - lastActivity) / 1000 / 60;
@@ -761,7 +749,6 @@ function startIdleTracking() {
       }
     }
   }
-  
   document.addEventListener('mousemove', resetIdleTimer);
   document.addEventListener('keydown', resetIdleTimer);
   document.addEventListener('click', resetIdleTimer);
@@ -784,9 +771,7 @@ function checkSecretNames(searchTerm) {
   var searchLower = searchTerm.toLowerCase();
   var foundCount = 0;
   for (var i = 0; i < SECRET_NAMES.length; i++) {
-    if (searchLower.indexOf(SECRET_NAMES[i].toLowerCase()) !== -1) {
-      foundCount++;
-    }
+    if (searchLower.indexOf(SECRET_NAMES[i].toLowerCase()) !== -1) foundCount++;
   }
   if (foundCount >= SECRET_NAMES.length) {
     if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(53);
@@ -796,9 +781,7 @@ function checkSecretNames(searchTerm) {
 var pageLoadTime = Date.now();
 window.addEventListener('beforeunload', function() {
   var timeOnPage = (Date.now() - pageLoadTime) / 1000;
-  if (timeOnPage <= 10) {
-    localStorage.setItem('pendingAltF4', 'true');
-  }
+  if (timeOnPage <= 10) localStorage.setItem('pendingAltF4', 'true');
 });
 
 function checkAltF4() {
@@ -822,9 +805,7 @@ function checkOGFanter() {
 function checkLoyalCustomer() {
   if (!window.gamesData) return;
   var ratedGames = 0;
-  for (var key in userVotes) {
-    ratedGames++;
-  }
+  for (var key in userVotes) { ratedGames++; }
   if (ratedGames >= window.gamesData.length) {
     if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(62);
   }
@@ -891,44 +872,26 @@ function showAchievementToastNotification(name, icon, coins) {
     toast.className = 'achievement-toast';
     document.body.appendChild(toast);
   }
-  
   toast.innerHTML = '<span class="achievement-icon">' + icon + '</span><div class="achievement-content"><div class="achievement-title">ACHIEVEMENT UNLOCKED!</div><div class="achievement-name">' + name + '</div><div class="achievement-reward" style="color:#ffcc00; font-size:11px; margin-top:4px;">+' + coins + ' 🪙</div></div>';
-  
   toast.classList.add('show');
-  setTimeout(function() {
-    toast.classList.remove('show');
-  }, 4000);
+  setTimeout(function() { toast.classList.remove('show'); }, 4000);
 }
 
 function triggerPageCrash() {
-  if (typeof checkAndUnlockAchievement === 'function') {
-    checkAndUnlockAchievement(63);
-  }
+  if (typeof checkAndUnlockAchievement === 'function') checkAndUnlockAchievement(63);
   
   var crashOverlay = document.createElement('div');
   crashOverlay.id = 'crash-overlay';
-  crashOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000088;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Courier New",monospace;color:white;text-align:center;animation:fadeIn 0.3s ease;';
-  
-  crashOverlay.innerHTML = '<div style="background:white;color:black;padding:20px;border:2px solid silver;max-width:500px;margin:20px;"><pre style="font-size:20px;margin:0;">😵</pre><h1 style="font-size:24px;margin:10px 0;">:(</h1><p style="font-size:16px;">Your Fanter ran into a problem and needs to restart.</p><p style="font-size:14px;margin-top:20px;">*** STOP: 0x000000F4</p><div style="margin-top:30px;"><div style="display:inline-block;width:20px;height:20px;background:white;margin:0 5px;animation:blink 1s step-end infinite;"></div><span>Restarting in <span id="crash-countdown">5</span> seconds...</span></div></div>';
-  
+  crashOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000088;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Courier New",monospace;color:white;text-align:center;';
+  crashOverlay.innerHTML = '<div style="background:white;color:black;padding:20px;border:2px solid silver;max-width:500px;margin:20px;"><pre style="font-size:20px;margin:0;">😵</pre><h1 style="font-size:24px;margin:10px 0;">:(</h1><p style="font-size:16px;">Your Fanter ran into a problem and needs to restart.</p><p style="font-size:14px;margin-top:20px;">*** STOP: 0x000000F4</p><div style="margin-top:30px;"><span>Restarting in <span id="crash-countdown">5</span> seconds...</span></div></div>';
   document.body.appendChild(crashOverlay);
-  
-  if (!document.querySelector('#crash-styles')) {
-    var style = document.createElement('style');
-    style.id = 'crash-styles';
-    style.textContent = '@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }';
-    document.head.appendChild(style);
-  }
   
   var seconds = 5;
   var countdownEl = document.getElementById('crash-countdown');
   var interval = setInterval(function() {
     seconds--;
     if (countdownEl) countdownEl.textContent = seconds;
-    if (seconds <= 0) {
-      clearInterval(interval);
-      window.location.reload();
-    }
+    if (seconds <= 0) { clearInterval(interval); window.location.reload(); }
   }, 1000);
 }
 
@@ -943,8 +906,6 @@ function initAchievementTriggers() {
 
 initAchievementTriggers();
 
-window.crashFanter = function() {
-  triggerPageCrash();
-};
+window.crashFanter = function() { triggerPageCrash(); };
 
 console.log('💀 Type "crashFanter()" for a surprise...');
