@@ -30,7 +30,6 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; }
     .status-dot.online { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
     .status-dot.offline { background: #666; }
-    .status-dot.away { background: #ffcc00; }
     
     /* Main Chat */
     .chat-main { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.2); }
@@ -38,21 +37,14 @@
     .chat-header h3 { font-family: 'Inter', sans-serif; font-weight: 700; color: #ffcc00; }
     .chat-header-info { color: rgba(255,255,255,0.5); font-size: 13px; }
     .messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .message { display: flex; align-items: flex-start; gap: 14px; position: relative; }
+    .message { display: flex; align-items: flex-start; gap: 14px; }
     .message:hover { background: rgba(255,255,255,0.02); }
-    .message:hover .message-reactions { opacity: 1; }
     .message-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #2d5ae3, #ffcc00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
     .message-content { flex: 1; }
     .message-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
     .message-name { font-weight: 700; color: #ffcc00; cursor: pointer; }
-    .message-name:hover { text-decoration: underline; }
     .message-time { font-size: 11px; color: rgba(255,255,255,0.4); }
     .message-text { color: rgba(255,255,255,0.95); word-break: break-word; line-height: 1.4; }
-    .message-reactions { display: flex; gap: 8px; margin-top: 6px; opacity: 0; transition: opacity 0.2s; }
-    .reaction { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px; border: 1px solid transparent; }
-    .reaction:hover { background: rgba(45,90,227,0.3); border-color: #ffcc00; }
-    .reaction.active { background: rgba(45,90,227,0.4); border-color: #ffcc00; }
-    .typing-indicator { padding: 8px 20px; color: rgba(255,255,255,0.4); font-size: 12px; font-style: italic; }
     .message-input-container { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; }
     #messageInput { flex: 1; padding: 14px 18px; border-radius: 30px; border: 1px solid rgba(45,90,227,0.4); background: rgba(0,0,0,0.3); color: white; font-size: 14px; outline: none; font-family: 'Inter', sans-serif; }
     #messageInput:focus { border-color: #ffcc00; }
@@ -78,24 +70,15 @@
 </head>
 <body>
   <div class="fantarena-container">
-    <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-header">
         <h2>🏟️ FANTARENA</h2>
       </div>
       <div class="server-list">
-        <div class="server-item active" data-channel="general">
-          <span>💬</span> general
-        </div>
-        <div class="server-item" data-channel="game-recs">
-          <span>🎮</span> game-recs
-        </div>
-        <div class="server-item" data-channel="lfg">
-          <span>👥</span> looking-for-group
-        </div>
-        <div class="server-item" data-channel="flex">
-          <span>🏆</span> achievement-flex
-        </div>
+        <div class="server-item active" data-channel="general"><span>💬</span> general</div>
+        <div class="server-item" data-channel="game-recs"><span>🎮</span> game-recs</div>
+        <div class="server-item" data-channel="lfg"><span>👥</span> looking-for-group</div>
+        <div class="server-item" data-channel="flex"><span>🏆</span> achievement-flex</div>
       </div>
       <div class="friends-header">
         <span>👥 friends</span>
@@ -107,7 +90,6 @@
       </div>
     </div>
     
-    <!-- Main Chat -->
     <div class="chat-main">
       <div class="chat-header">
         <h3 id="chatHeaderTitle"># general</h3>
@@ -116,14 +98,12 @@
       <div class="messages-container" id="messagesContainer">
         <div style="text-align:center; color:rgba(255,255,255,0.4);">loading messages...</div>
       </div>
-      <div class="typing-indicator" id="typingIndicator"></div>
       <div class="message-input-container">
         <input type="text" id="messageInput" placeholder="send a message..." onkeypress="if(event.key==='Enter')sendMessage()">
         <button class="send-btn" onclick="sendMessage()">send</button>
       </div>
     </div>
     
-    <!-- Members Sidebar -->
     <div class="members-sidebar">
       <div class="members-header">
         <span>👥 members</span>
@@ -133,7 +113,6 @@
     </div>
   </div>
 
-  <!-- Add Friend Modal -->
   <div class="modal-overlay" id="addFriendModal" onclick="if(event.target===this)closeAddFriendModal()">
     <div class="modal">
       <h3>add friend</h3>
@@ -144,31 +123,15 @@
       </div>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ===== SUPABASE SETUP =====
-    const SUPABASE_URL = "https://gvzgnclowylrrpovdvtw.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2emduY2xvd3lscnJwb3ZkdnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjM5ODEsImV4cCI6MjA5MjAzOTk4MX0.p7oeYBVX870iSK-TLDRj6pfW7wLj7HJsTHjNWaNpL7o";
+    // ===== NEW SUPABASE PROJECT - FRESH =====
+    const SUPABASE_URL = "https://luxutkabqgitoteosctr.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1eHV0a2FicWdpdG90ZW9zY3RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2Mjc5NjAsImV4cCI6MjA5MjIwMzk2MH0.7GjvQMZaujg0YFmTBr2wotGWCIUoBWCBplGocMo6TDM";
     
-    // Use fetch directly - bypass the broken cache
-    async function fetchAPI(endpoint, options = {}) {
-      const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
-      const headers = {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        ...options.headers
-      };
-      
-      const response = await fetch(url, { ...options, headers });
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
-      }
-      return response.json();
-    }
-    
-    console.log('✅ Fantarena API ready!');
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Fantarena Supabase ready!');
     
     // ===== STATE =====
     let currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
@@ -176,32 +139,37 @@
     let currentDM = null;
     let messages = [];
     let friends = [];
+    let channelSubscription = null;
     
     if (!currentUser || currentUser.username === 'Guest') {
       alert('please log in to use fantarena!');
       window.location.href = 'fantaccount.html';
     }
     
+    // ===== UPDATE PRESENCE =====
+    async function updatePresence() {
+      try {
+        await supabaseClient.from('fanter_presence').upsert({
+          user_id: currentUser.id,
+          username: currentUser.displayName || currentUser.username,
+          status: 'online',
+          last_seen: new Date()
+        });
+      } catch (e) {}
+    }
+    updatePresence();
+    setInterval(updatePresence, 30000);
+    
     // ===== LOAD MESSAGES =====
     async function loadMessages() {
-      console.log('📥 Loading messages...');
-      
-      let query = `fanter_chat?select=*&order=created_at.asc&limit=100`;
-      
+      let query = supabaseClient.from('fanter_chat').select('*').order('created_at', { ascending: true }).limit(100);
       if (currentDM) {
-        query += `&or=(user_id.eq.${currentUser.id},user_id.eq.${currentDM})`;
+        query = query.or(`user_id.eq.${currentUser.id},user_id.eq.${currentDM}`);
       } else {
-        query += `&channel_id=eq.${currentChannel}`;
+        query = query.eq('channel_id', currentChannel);
       }
-      
-      try {
-        const data = await fetchAPI(query);
-        messages = data;
-        console.log('✅ Loaded', messages.length, 'messages');
-        renderMessages();
-      } catch (error) {
-        console.error('❌ Load error:', error);
-      }
+      const { data } = await query;
+      if (data) { messages = data; renderMessages(); }
     }
     
     function renderMessages() {
@@ -210,27 +178,10 @@
         container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.4);">no messages yet. say something!</div>';
         return;
       }
-      
       container.innerHTML = messages.map(msg => `
-        <div class="message">
-          <div class="message-avatar">${msg.username[0].toUpperCase()}</div>
-          <div class="message-content">
-            <div class="message-header">
-              <span class="message-name">${escapeHtml(msg.username)}</span>
-              <span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span>
-            </div>
-            <div class="message-text">${escapeHtml(msg.message)}</div>
-          </div>
-        </div>
+        <div class="message"><div class="message-avatar">${msg.username[0].toUpperCase()}</div><div class="message-content"><div class="message-header"><span class="message-name">${msg.username}</span><span class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</span></div><div class="message-text">${msg.message}</div></div></div>
       `).join('');
-      
       container.scrollTop = container.scrollHeight;
-    }
-    
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
     }
     
     // ===== SEND MESSAGE =====
@@ -239,215 +190,84 @@
       const message = input.value.trim();
       if (!message) return;
       
-      const messageData = {
+      await supabaseClient.from('fanter_chat').insert({
         user_id: currentUser.id,
         username: currentUser.displayName || currentUser.username,
         message: message,
         channel_id: currentDM ? `dm_${[currentUser.id, currentDM].sort().join('_')}` : currentChannel
-      };
-      
-      console.log('📤 Sending message:', messageData);
-      
-      try {
-        await fetchAPI('fanter_chat', {
-          method: 'POST',
-          body: JSON.stringify(messageData)
-        });
-        
-        input.value = '';
-        
-        // Reload messages after a short delay
-        setTimeout(() => loadMessages(), 300);
-      } catch (error) {
-        console.error('❌ Send error:', error);
-        alert('failed to send: ' + error.message);
-      }
+      });
+      input.value = '';
+    }
+    
+    // ===== REALTIME =====
+    function setupRealtime() {
+      if (channelSubscription) supabaseClient.removeChannel(channelSubscription);
+      let filter = currentDM ? `channel_id=eq.dm_${[currentUser.id, currentDM].sort().join('_')}` : `channel_id=eq.${currentChannel}`;
+      channelSubscription = supabaseClient.channel('fanter-chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'fanter_chat', filter }, payload => { messages.push(payload.new); if (messages.length > 100) messages.shift(); renderMessages(); }).subscribe();
     }
     
     // ===== CHANNEL SWITCHING =====
-    document.querySelectorAll('.server-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.server-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        currentChannel = item.dataset.channel;
-        currentDM = null;
-        document.getElementById('chatHeaderTitle').textContent = `# ${currentChannel}`;
-        document.getElementById('chatHeaderInfo').textContent = '';
-        messages = [];
-        loadMessages();
-      });
-    });
+    document.querySelectorAll('.server-item').forEach(item => item.addEventListener('click', () => {
+      document.querySelectorAll('.server-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      currentChannel = item.dataset.channel;
+      currentDM = null;
+      document.getElementById('chatHeaderTitle').textContent = `# ${currentChannel}`;
+      messages = [];
+      loadMessages();
+      setupRealtime();
+    }));
     
-    // ===== MEMBERS LIST =====
+    // ===== MEMBERS =====
     async function loadMembers() {
-      try {
-        const data = await fetchAPI('fanter_presence?select=*&order=status.desc');
-        
-        const online = data.filter(m => m.status === 'online').length;
-        document.getElementById('onlineCount').textContent = `${online} online`;
-        
-        const container = document.getElementById('membersList');
-        container.innerHTML = `
-          <div class="member-category">online — ${online}</div>
-          ${data.filter(m => m.status === 'online').map(m => `
-            <div class="member-item">
-              <div class="member-avatar">${m.username[0].toUpperCase()}</div>
-              <span>${escapeHtml(m.username)}</span>
-            </div>
-          `).join('')}
-          <div class="member-category">offline</div>
-          ${data.filter(m => m.status !== 'online').map(m => `
-            <div class="member-item">
-              <div class="member-avatar">${m.username[0].toUpperCase()}</div>
-              <span>${escapeHtml(m.username)}</span>
-            </div>
-          `).join('')}
-        `;
-      } catch (error) {
-        console.error('Members error:', error);
-      }
-    }
-    
-    // ===== UPDATE PRESENCE =====
-    async function updatePresence() {
-      try {
-        await fetchAPI(`fanter_presence?user_id=eq.${currentUser.id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            user_id: currentUser.id,
-            username: currentUser.displayName || currentUser.username,
-            status: 'online',
-            last_seen: new Date()
-          })
-        });
-      } catch (e) {
-        // Try insert if patch fails
-        try {
-          await fetchAPI('fanter_presence', {
-            method: 'POST',
-            body: JSON.stringify({
-              user_id: currentUser.id,
-              username: currentUser.displayName || currentUser.username,
-              status: 'online',
-              last_seen: new Date()
-            })
-          });
-        } catch (e2) {
-          console.error('Presence error:', e2);
-        }
+      const { data } = await supabaseClient.from('fanter_presence').select('*').order('status', { ascending: false });
+      if (data) {
+        document.getElementById('onlineCount').textContent = `${data.filter(m => m.status === 'online').length} online`;
+        document.getElementById('membersList').innerHTML = `<div class="member-category">online — ${data.filter(m => m.status === 'online').length}</div>${data.filter(m => m.status === 'online').map(m => `<div class="member-item"><div class="member-avatar">${m.username[0].toUpperCase()}</div><span>${m.username}</span></div>`).join('')}<div class="member-category">offline</div>${data.filter(m => m.status !== 'online').map(m => `<div class="member-item"><div class="member-avatar">${m.username[0].toUpperCase()}</div><span>${m.username}</span></div>`).join('')}`;
       }
     }
     
     // ===== FRIENDS =====
     async function loadFriends() {
-      try {
-        const data = await fetchAPI(`fanter_friends?select=friend_id&user_id=eq.${currentUser.id}`);
-        
-        if (data && data.length > 0) {
-          const friendIds = data.map(f => f.friend_id).join(',');
-          const friendsData = await fetchAPI(`fanter_presence?select=*&user_id=in.(${friendIds})`);
-          friends = friendsData || [];
-        } else {
-          friends = [];
-        }
-        renderFriendsList();
-      } catch (error) {
-        console.error('Friends error:', error);
+      const { data } = await supabaseClient.from('fanter_friends').select('friend_id').eq('user_id', currentUser.id);
+      if (data?.length) {
+        const { data: friendsData } = await supabaseClient.from('fanter_presence').select('*').in('user_id', data.map(f => f.friend_id));
+        friends = friendsData || [];
       }
-    }
-    
-    function renderFriendsList() {
-      const container = document.getElementById('friendsList');
-      if (friends.length === 0) {
-        container.innerHTML = '<div style="padding:20px;color:rgba(255,255,255,0.4);text-align:center;">no friends yet</div>';
-        return;
-      }
-      
-      container.innerHTML = friends.map(f => `
-        <div class="friend-item" onclick="openDM('${f.user_id}', '${f.username}')">
-          <div class="friend-avatar">${f.username[0].toUpperCase()}</div>
-          <div class="friend-info">
-            <div class="friend-name">${escapeHtml(f.username)}</div>
-            <div class="friend-status">
-              <span class="status-dot ${f.status || 'offline'}"></span>
-              ${f.status || 'offline'}
-            </div>
-          </div>
-        </div>
-      `).join('');
+      document.getElementById('friendsList').innerHTML = friends.length ? friends.map(f => `<div class="friend-item" onclick="openDM('${f.user_id}','${f.username}')"><div class="friend-avatar">${f.username[0].toUpperCase()}</div><div class="friend-info"><div class="friend-name">${f.username}</div><div class="friend-status"><span class="status-dot ${f.status||'offline'}"></span>${f.status||'offline'}</div></div></div>`).join('') : '<div style="padding:20px;color:rgba(255,255,255,0.4);text-align:center;">no friends yet</div>';
     }
     
     function openDM(userId, username) {
-      currentDM = userId;
-      currentChannel = null;
+      currentDM = userId; currentChannel = null;
       document.getElementById('chatHeaderTitle').textContent = `@${username}`;
-      document.getElementById('chatHeaderInfo').textContent = 'direct message';
       document.querySelectorAll('.server-item').forEach(i => i.classList.remove('active'));
-      messages = [];
-      loadMessages();
+      messages = []; loadMessages(); setupRealtime();
     }
     
-    function showAddFriendModal() {
-      document.getElementById('addFriendModal').classList.add('show');
-    }
-    
-    function closeAddFriendModal() {
-      document.getElementById('addFriendModal').classList.remove('show');
-      document.getElementById('friendUsernameInput').value = '';
-    }
-    
+    function showAddFriendModal() { document.getElementById('addFriendModal').classList.add('show'); }
+    function closeAddFriendModal() { document.getElementById('addFriendModal').classList.remove('show'); }
     async function sendFriendRequest() {
       const username = document.getElementById('friendUsernameInput').value.trim();
       if (!username) return alert('enter a username');
-      
-      try {
-        const users = await fetchAPI(`fanter_presence?select=user_id,username&username=ilike.${username}`);
-        
-        if (!users || users.length === 0) {
-          alert('user not found');
-          return;
-        }
-        
-        const friend = users[0];
-        
-        await fetchAPI('fanter_friend_requests', {
-          method: 'POST',
-          body: JSON.stringify({
-            sender_id: currentUser.id,
-            receiver_id: friend.user_id,
-            status: 'pending'
-          })
-        });
-        
-        alert(`friend request sent to ${friend.username}!`);
-        closeAddFriendModal();
-      } catch (error) {
-        alert('failed to send request');
-      }
+      const { data: users } = await supabaseClient.from('fanter_presence').select('user_id,username').ilike('username', username);
+      if (!users?.length) return alert('user not found');
+      await supabaseClient.from('fanter_friend_requests').insert({ sender_id: currentUser.id, receiver_id: users[0].user_id });
+      alert(`friend request sent to ${users[0].username}!`);
+      closeAddFriendModal();
     }
     
-    function showProfile(userId) {
-      alert('Profile feature coming soon!');
-    }
-    
-    // Make functions global
     window.sendMessage = sendMessage;
     window.showAddFriendModal = showAddFriendModal;
     window.closeAddFriendModal = closeAddFriendModal;
     window.sendFriendRequest = sendFriendRequest;
-    window.showProfile = showProfile;
     window.openDM = openDM;
     
-    // ===== INIT =====
-    updatePresence();
     loadMessages();
+    setupRealtime();
     loadFriends();
     loadMembers();
     setInterval(loadMembers, 10000);
-    setInterval(updatePresence, 30000);
-    setInterval(loadMessages, 3000); // Poll for new messages
-    
-    console.log('🏟️ Fantarena loaded!');
+    console.log('🏟️ Fantarena ready!');
   </script>
 </body>
 </html>
