@@ -1165,5 +1165,60 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('✅ Fantarena ready!');
 });
 </script>
+  <script>
+// FIX THE ENTER BUTTON
+(function() {
+    console.log('🔧 Fixing enter button...');
+    
+    // Wait a bit for everything to load
+    setTimeout(function() {
+        var enterBtn = document.getElementById('enterBtn');
+        var welcomeScreen = document.getElementById('welcomeScreen');
+        var chatContainer = document.getElementById('chatContainer');
+        
+        if (enterBtn) {
+            console.log('✅ Enter button found! Attaching click handler...');
+            
+            // Remove any existing listeners and add new one
+            enterBtn.removeEventListener('click', enterFantarena);
+            enterBtn.addEventListener('click', function() {
+                console.log('🔥 ENTER CLICKED!');
+                if (welcomeScreen) welcomeScreen.style.display = 'none';
+                if (chatContainer) chatContainer.classList.add('active');
+                localStorage.setItem('fantarena_welcomed', 'true');
+                
+                // Try to initialize chat if function exists
+                if (typeof initChat === 'function') {
+                    initChat();
+                } else if (typeof window.initChat === 'function') {
+                    window.initChat();
+                } else {
+                    console.log('Chat init function not found, but chat container shown');
+                }
+            });
+        } else {
+            console.log('❌ Enter button NOT found! Check if element exists');
+        }
+        
+        // Also fix skip button if it exists
+        var skipBtn = document.getElementById('skipBtn');
+        if (skipBtn) {
+            skipBtn.onclick = function() {
+                console.log('Skip clicked!');
+                localStorage.setItem('fantarena_welcomed', 'true');
+                if (welcomeScreen) welcomeScreen.style.display = 'none';
+                if (chatContainer) chatContainer.classList.add('active');
+            };
+        }
+        
+        // Auto-enter if already welcomed
+        if (localStorage.getItem('fantarena_welcomed') === 'true') {
+            console.log('Already welcomed, auto-entering...');
+            if (welcomeScreen) welcomeScreen.style.display = 'none';
+            if (chatContainer) chatContainer.classList.add('active');
+        }
+    }, 500);
+})();
+</script>
 </body>
 </html>
