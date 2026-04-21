@@ -25,19 +25,44 @@
       min-height: 100vh;
     }
     
-    /* ===== TOP BAR ===== */
-    .top-bar {
+    /* ===== TOP LEFT STACK ===== */
+    .top-left-stack {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 70px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
+      top: 20px;
+      left: 20px;
       z-index: 100;
-      background: transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .session-timer {
+      background: rgba(20, 30, 50, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(45, 90, 227, 0.4);
+      border-radius: 30px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: white;
+      width: fit-content;
+    }
+    
+    .timer-icon {
+      font-size: 14px;
+    }
+    
+    .timer-display {
+      font-family: monospace;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    
+    .timer-label {
+      font-size: 10px;
+      opacity: 0.6;
     }
     
     .coin-display-header {
@@ -49,6 +74,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      width: fit-content;
     }
     
     .coin-icon {
@@ -58,6 +84,18 @@
     .coin-amount-header {
       font-weight: bold;
       color: #ffcc00;
+    }
+    
+    /* ===== TOP RIGHT ===== */
+    .top-right {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
     }
     
     .account-btn-container {
@@ -83,40 +121,35 @@
       transform: translateY(-2px);
     }
     
-    /* ===== SESSION TIMER ===== */
-    .session-timer {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: rgba(20, 30, 50, 0.8);
+    .menu-toggle-btn {
+      background: rgba(20, 30, 50, 0.9);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(45, 90, 227, 0.4);
-      border-radius: 30px;
-      padding: 8px 16px;
+      border: 1px solid rgba(45, 90, 227, 0.5);
+      border-radius: 15px;
+      color: white;
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      z-index: 100;
-      font-size: 14px;
-      color: white;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     
-    .timer-icon {
-      font-size: 14px;
+    .menu-toggle-btn:hover {
+      border-color: #ffcc00;
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(255, 204, 0, 0.3);
     }
     
-    .timer-display {
-      font-family: monospace;
-      font-weight: bold;
-      letter-spacing: 1px;
+    .menu-toggle-btn.active {
+      background: rgba(45, 90, 227, 0.5);
+      border-color: #ffcc00;
     }
     
-    .timer-label {
-      font-size: 10px;
-      opacity: 0.6;
-    }
-    
-    /* ===== FAV BUTTON ===== */
+    /* ===== FAV BUTTON BOTTOM RIGHT ===== */
     .fav-sidebar-btn {
       position: fixed;
       bottom: 20px;
@@ -137,39 +170,6 @@
     .fav-sidebar-btn:hover {
       border-color: #ffcc00;
       transform: scale(1.05);
-    }
-    
-    /* ===== MENU BUTTON ===== */
-    .menu-toggle-btn {
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      background: rgba(20, 30, 50, 0.9);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(45, 90, 227, 0.5);
-      border-radius: 15px;
-      color: white;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 101;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    .menu-toggle-btn:hover {
-      border-color: #ffcc00;
-      transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(255, 204, 0, 0.3);
-    }
-    
-    .menu-toggle-btn.active {
-      background: rgba(45, 90, 227, 0.5);
-      border-color: #ffcc00;
     }
     
     /* ===== SIDEBAR MENU ===== */
@@ -259,6 +259,10 @@
     }
     
     /* ===== MAIN CONTENT ===== */
+    .main-container {
+      padding-top: 20px;
+    }
+    
     .center {
       text-align: center;
       padding: 20px;
@@ -267,7 +271,7 @@
     #title {
       color: white;
       font-size: 2.5rem;
-      margin-top: 100px;
+      margin-top: 20px;
     }
     
     #subtitle {
@@ -384,14 +388,71 @@
       background: rgba(45, 90, 227, 0.2);
     }
     
+    /* GAMES CONTAINER - 5 per row */
     #gamesContainer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
       gap: 20px;
       padding: 20px;
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
+    }
+    
+    /* Make game cards larger */
+    #gamesContainer .game {
+      background: rgba(20, 30, 50, 0.8);
+      border-radius: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid rgba(45, 90, 227, 0.3);
+    }
+    
+    #gamesContainer .game:hover {
+      transform: translateY(-5px);
+      border-color: #ffcc00;
+      box-shadow: 0 10px 25px rgba(255, 204, 0, 0.2);
+    }
+    
+    #gamesContainer .game img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+    
+    #gamesContainer .game-info {
+      padding: 12px;
+    }
+    
+    #gamesContainer .game-title {
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    #gamesContainer .game-category {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 11px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      #gamesContainer {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    @media (max-width: 900px) {
+      #gamesContainer {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (max-width: 600px) {
+      #gamesContainer {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
     
     .footer {
@@ -571,33 +632,33 @@
 </div>
 
 <div id="mainContent">
-  <!-- TOP BAR with Coins and Account -->
-  <div class="top-bar">
+  <!-- TOP LEFT STACK: Timer + Coins below it -->
+  <div class="top-left-stack">
+    <div class="session-timer">
+      <div class="timer-icon">⏱️</div>
+      <div class="timer-display"><span id="timerHours">00</span>:<span id="timerMinutes">00</span>:<span id="timerSeconds">00</span></div>
+      <div class="timer-label">session time</div>
+    </div>
     <div class="coin-display-header">
       <span class="coin-icon">🪙</span>
       <span id="headerCoinAmount" class="coin-amount-header">0</span>
       <span>coins</span>
     </div>
+  </div>
+
+  <!-- TOP RIGHT STACK: Account + Menu below it -->
+  <div class="top-right">
     <div class="account-btn-container">
       <button class="account-btn" onclick="window.location.href='fantaccount.html'">
         <span>👤</span>
         <span class="account-name" id="accountName">Guest</span>
       </button>
     </div>
-  </div>
-
-  <!-- SESSION TIMER - Bottom Left -->
-  <div class="session-timer">
-    <div class="timer-icon">⏱️</div>
-    <div class="timer-display"><span id="timerHours">00</span>:<span id="timerMinutes">00</span>:<span id="timerSeconds">00</span></div>
-    <div class="timer-label">session time</div>
+    <div class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleMenu()">≡</div>
   </div>
 
   <!-- FAV BUTTON - Bottom Right -->
   <button class="fav-sidebar-btn" id="favSidebarBtn" onclick="window.toggleFavSidebar && window.toggleFavSidebar()">★</button>
-
-  <!-- MENU BUTTON - Top Right -->
-  <div class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleMenu()">≡</div>
   
   <!-- SIDEBAR MENU OVERLAY -->
   <div class="sidebar-menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
@@ -640,30 +701,32 @@
   </div>
 
   <!-- MAIN CONTENT -->
-  <div class="center">
-    <h1 id="title"></h1>
-    <p id="subtitle"></p>
-  </div>
-  
-  <div id="gameOfDay" class="game-of-day" style="display:none;">
-    <div class="game-of-day-label"><span>🌟 GAME OF THE DAY</span></div>
-    <div class="game-of-day-name" id="gameOfDayName">Loading...</div>
-    <button class="game-of-day-play" id="gameOfDayPlay">Play Now →</button>
-  </div>
-  
-  <div class="center" style="position:relative;">
-    <input type="text" id="searchInput" placeholder="search 4 games" />
-    <div id="searchHistory" class="search-history">
-      <div class="search-history-header"><span>recent searches</span><span class="search-history-clear" onclick="clearSearchHistory()">clear all</span></div>
-      <div id="searchHistoryList"></div>
+  <div class="main-container">
+    <div class="center">
+      <h1 id="title"></h1>
+      <p id="subtitle"></p>
     </div>
-  </div>
-  
-  <div id="gamesContainer"></div>
-  
-  <div class="footer">
-    <span>a site created by abcatlmfao</span>
-    <a class="link" href="https://dsc.gg/parcoil">parcoil network</a>
+    
+    <div id="gameOfDay" class="game-of-day" style="display:none;">
+      <div class="game-of-day-label"><span>🌟 GAME OF THE DAY</span></div>
+      <div class="game-of-day-name" id="gameOfDayName">Loading...</div>
+      <button class="game-of-day-play" id="gameOfDayPlay">Play Now →</button>
+    </div>
+    
+    <div class="center" style="position:relative;">
+      <input type="text" id="searchInput" placeholder="search 4 games" />
+      <div id="searchHistory" class="search-history">
+        <div class="search-history-header"><span>recent searches</span><span class="search-history-clear" onclick="clearSearchHistory()">clear all</span></div>
+        <div id="searchHistoryList"></div>
+      </div>
+    </div>
+    
+    <div id="gamesContainer"></div>
+    
+    <div class="footer">
+      <span>a site created by abcatlmfao</span>
+      <a class="link" href="https://dsc.gg/parcoil">parcoil network</a>
+    </div>
   </div>
 </div>
 
