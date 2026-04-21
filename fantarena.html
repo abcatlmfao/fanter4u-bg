@@ -945,92 +945,107 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // ============================================================
-  // SEND MESSAGE - FIXED
-  // ============================================================
-  async function sendMessage() {
-    let text = document.getElementById('messageInput').value.trim();
-    if (!text) return;
-    
-    const originalText = text;
-    document.getElementById('messageInput').value = '';
-    
-    if (globalSlowMode > 0 && !currentDMUserId && !currentGroupId) {
-      const now = Date.now();
-      if (now - lastMessageTime < globalSlowMode * 1000) {
-        toast(`⏸ Slow mode! Wait ${globalSlowMode}s`);
-        document.getElementById('messageInput').value = originalText;
-        return;
-      }
-      lastMessageTime = now;
+ // REPLACE the sendMessage function with this - it works with BOTH column names
+async function sendMessage() {
+  let text = document.getElementById('messageInput').value.trim();
+  if (!text) return;
+  
+  const originalText = text;
+  document.getElementById('messageInput').value = '';
+  
+  if (globalSlowMode > 0 && !currentDMUserId && !currentGroupId) {
+    const now = Date.now();
+    if (now - lastMessageTime < globalSlowMode * 1000) {
+      toast(`⏸ Slow mode! Wait ${globalSlowMode}s`);
+      document.getElementById('messageInput').value = originalText;
+      return;
+    }
+    lastMessageTime = now;
+  }
+  
+  // Handle commands
+  if (text.startsWith('/')) {
+    const parts = text.slice(1).split(' ');
+    const cmd = parts[0].toLowerCase();
+    if (cmd === 'roll') text = `🎲 ${currentUser.displayName} rolled ${Math.floor(Math.random()*100)+1}!`;
+    else if (cmd === '8ball') { const a=['Yes','No','Maybe','Definitely','Never','Probably']; text = `🎱 ${a[Math.floor(Math.random()*a.length)]}`; }
+    else if (cmd === 'flip') text = `🪙 ${Math.random()>0.5?'Heads':'Tails'}!`;
+    else if (cmd === 'help') { toast('Commands: /roll, /8ball, /flip, /nick [name]'); return; }
+    else if (cmd === 'nick' && parts[1]) {
+      currentUser.displayName = parts.slice(1).join(' ');
+      localStorage.setItem('fanter_currentUser', JSON.stringify(currentUser));
+      toast(`✅ Nickname: ${currentUser.displayName}`);
+      updatePresence();
+      return;
+    }
+    else { toast('Unknown command. Try /help'); return; }
+  }
+  
+  try {
+    let channelId;
+    if (currentDMUserId) {
+      channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
+    } else if (currentGroupId) {
+      channelId = `group_${currentGroupId}`;
+    } else {
+      channelId = currentChannel;
     }
     
-    // Handle commands
-    if (text.startsWith('/')) {
-      const parts = text.slice(1).split(' ');
-      const cmd = parts[0].toLowerCase();
-      if (cmd === 'roll') text = `🎲 ${currentUser.displayName} rolled ${Math.floor(Math.random()*100)+1}!`;
-      else if (cmd === '8ball') { const a=['Yes','No','Maybe','Definitely','Never','Probably']; text = `🎱 ${a[Math.floor(Math.random()*a.length)]}`; }
-      else if (cmd === 'flip') text = `🪙 ${Math.random()>0.5?'Heads':'Tails'}!`;
-      else if (cmd === 'help') { toast('Commands: /roll, /8ball, /flip, /nick [name]'); document.getElementById('messageInput').value = ''; return; }
-      else if (cmd === 'nick' && parts[1]) {
-        currentUser.displayName = parts.slice(1).join(' ');
-        localStorage.setItem('fanter_currentUser', JSON.stringify(currentUser));
-        toast(`✅ Nickname: ${currentUser.displayName}`);
-        updatePresence();
-        document.getElementById('messageInput').value = '';
-        return;
-      }
-      else { toast('Unknown command. Try /help'); document.getElementById('messageInput').value = ''; return; }
-    }
+    console.log('📤 Sending to channel:', channelId);
+    console.log('📤 Message:', text);
     
-    try {
-      let channelId;
-      if (currentDMUserId) {
-        channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
-      } else if (currentGroupId) {
-        channelId = `group_${currentGroupId}`;
+    // Try with nameColor first (camelCase), fallback to name_color if needed
+    const messageData = {
+      channel_id: channelId,
+      user_id: currentUser.id,
+      username: currentUser.displayName || currentUser.username,
+      message: text,
+      reply_to_id: replyingTo?.id || null,
+      reply_username: replyingTo?.username || null,
+      reply_preview: replyingTo?.preview || null,
+      is_voice_message: false
+    };
+    
+    // Add color - try both formats
+    messageData.nameColor = nameColor;
+    messageData.name_color = nameColor;  // Include both to be safe
+    
+    const { data, error } = await sb.from('fanter_chat').insert(messageData);
+    
+    if (error) {
+      console.error('Send error:', error);
+      // If error is about column, try without color first
+      if (error.message.includes('column')) {
+        delete messageData.nameColor;
+        delete messageData.name_color;
+        const { data: retryData, error: retryError } = await sb.from('fanter_chat').insert(messageData);
+        if (retryError) {
+          toast('❌ Failed to send: ' + retryError.message);
+          document.getElementById('messageInput').value = originalText;
+          return;
+        }
       } else {
-        channelId = currentChannel;
-      }
-      
-      console.log('📤 Sending to channel:', channelId);
-      console.log('📤 Message:', text);
-      
-      const { data, error } = await sb.from('fanter_chat').insert({
-        channel_id: channelId,
-        user_id: currentUser.id,
-        username: currentUser.displayName || currentUser.username,
-        message: text,
-        nameColor: nameColor,
-        reply_to_id: replyingTo?.id || null,
-        reply_username: replyingTo?.username || null,
-        reply_preview: replyingTo?.preview || null,
-        is_voice_message: false
-      });
-      
-      if (error) {
-        console.error('Send error:', error);
         toast('❌ Failed to send: ' + error.message);
         document.getElementById('messageInput').value = originalText;
         return;
       }
-      
-      console.log('📤 Send success!', data);
-      
-      replyingTo = null;
-      document.getElementById('replyBar').classList.remove('show');
-      messageCounts[currentUser.id] = (messageCounts[currentUser.id] || 0) + 1;
-      save();
-      addXP(5);
-      checkBadges();
-      
-    } catch(e) { 
-      console.error('Send exception:', e);
-      toast('❌ Failed to send');
-      document.getElementById('messageInput').value = originalText;
     }
+    
+    console.log('📤 Send success!');
+    
+    replyingTo = null;
+    document.getElementById('replyBar').classList.remove('show');
+    messageCounts[currentUser.id] = (messageCounts[currentUser.id] || 0) + 1;
+    save();
+    addXP(5);
+    checkBadges();
+    
+  } catch(e) { 
+    console.error('Send exception:', e);
+    toast('❌ Failed to send');
+    document.getElementById('messageInput').value = originalText;
   }
+}
 
   // ============================================================
   // REALTIME - FIXED
