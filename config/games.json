@@ -551,7 +551,7 @@
   },
   {
     "name": "bendy and the ink machine",
-    "image": "https://abcatlmfao.github.io/BATIMWeb/",
+    "image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/622650/header.jpg?t=1776173660",
     "url": "https://woahhcrackers.github.io/CupheadWeb/",
     "new": true,
     "category": "horror",
@@ -560,17 +560,7 @@
     "releaseDate": "tmrw",
     "developer": "woahhcrackers"
   },
-  {
-    "name": "bendy and the ink machine",
-    "image": "https://abcatlmfao.github.io/BATIMWeb/",
-    "url": "https://woahhcrackers.github.io/CupheadWeb/",
-    "new": true,
-    "category": "horror",
-    "desc": "start it up, run from the ink demon.",
-    "loadTime": "98-143 seconds",
-    "releaseDate": "tmrw",
-    "developer": "woahhcrackers"
-  },
+  
    {
     "name": "flying gorilla",
     "image": "https://i.ytimg.com/vi/NfbQoOWsH4A/maxresdefault.jpg",
