@@ -537,5 +537,60 @@
     "loadTime": "2-3 seconds",
     "releaseDate": "??",
     "developer": "POPCAP development"
-  }
+  },
+  {
+    "name": "cuphead",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9qSIX-nkzPX90AalYjAOofWbbOfNZUcrlyg&s",
+    "url": "https://woahhcrackers.github.io/CupheadWeb/",
+    "new": true,
+    "category": "platformer",
+    "desc": "dont ragequit, its worth it",
+    "loadTime": "98-143 seconds",
+    "releaseDate": "tmrw",
+    "developer": "woahhcrackerr"
+  },
+  {
+    "name": "bendy and the ink machine",
+    "image": "https://abcatlmfao.github.io/BATIMWeb/",
+    "url": "https://woahhcrackers.github.io/CupheadWeb/",
+    "new": true,
+    "category": "horror",
+    "desc": "start it up, run from the ink demon.",
+    "loadTime": "98-143 seconds",
+    "releaseDate": "tmrw",
+    "developer": "woahhcrackers"
+  },
+  {
+    "name": "bendy and the ink machine",
+    "image": "https://abcatlmfao.github.io/BATIMWeb/",
+    "url": "https://woahhcrackers.github.io/CupheadWeb/",
+    "new": true,
+    "category": "horror",
+    "desc": "start it up, run from the ink demon.",
+    "loadTime": "98-143 seconds",
+    "releaseDate": "tmrw",
+    "developer": "woahhcrackers"
+  },
+   {
+    "name": "flying gorilla",
+    "image": "https://i.ytimg.com/vi/NfbQoOWsH4A/maxresdefault.jpg",
+    "url": "https://abcatlmfao.github.io/flying-gorilla/",
+    "new": true,
+    "category": "arcade",
+    "desc": "fun but weird",
+    "loadTime": "2-5 seconds",
+    "releaseDate": "tmrw",
+    "developer": "98corbins"
+  },
+   {
+    "name": "lethal ape",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUYTtB2CV1mTTHa5lRP8khH0Tp1lmydWRCbQ&s",
+    "url": "https://abcatlmfao.github.io/lethal-ape/",
+    "new": true,
+    "category": "horror",
+    "desc": "fun but weird",
+    "loadTime": "2-5 seconds",
+    "releaseDate": "tmrw",
+    "developer": "98corbins"
+  },
 ]
