@@ -3,8 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>fanter | fantarena </title>
+<title>fanter | fantarena</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+  const SUPABASE_URL = "https://luxutkabqgitoteosctr.supabase.co";  
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1eHV0a2FicWdpdG90ZW9zY3RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2Mjc5NjAsImV4cCI6MjA5MjIwMzk2MH0.7GjvQMZaujg0YFmTBr2wotGWCIUoBWCBplGocMo6TDM";  
+  
+  
+  
+  window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log("✅ Supabase client initialized");
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -189,7 +200,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .badge{background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--gold)}
 .profile-actions{display:flex;gap:8px}
 
-/* PANELS - Owner, Moderator, Group Host */
+/* PANELS */
 .mod-panel{position:fixed;bottom:20px;right:20px;z-index:5000;display:none;flex-direction:column;align-items:flex-end;gap:10px}
 .mod-panel.visible{display:flex}
 .mod-panel-btn{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#ffaa00);border:none;cursor:pointer;font-size:22px;box-shadow:0 4px 18px rgba(255,204,0,0.35);display:flex;align-items:center;justify-content:center}
@@ -306,287 +317,99 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- OWNER PANEL -->
-<!-- ============================================================ -->
+<!-- PANELS -->
 <div class="mod-panel" id="ownerPanel">
   <div class="mod-panel-content" id="ownerPanelContent">
-    <div class="mod-panel-header">
-      <span>👑 OWNER PANEL</span>
-      <button class="mod-panel-close" id="ownerPanelClose">✕</button>
-    </div>
+    <div class="mod-panel-header"><span>👑 OWNER PANEL</span><button class="mod-panel-close" id="ownerPanelClose">✕</button></div>
     <div id="ownerSection">
-      <div class="mod-section">
-        <div class="mod-section-title">🎨 APPEARANCE</div>
-        <div class="mod-row">
-          <select class="mod-select" id="bgPresetSelect">
-            <option value="default">🌙 Default</option><option value="ocean">🌊 Ocean</option><option value="sunset">🌅 Sunset</option>
-          </select>
-          <button class="btn-mod-action" id="applyBgBtn">Apply</button>
-        </div>
-        <div class="mod-row">
-          <select class="mod-select" id="eventSelect">
-            <option value="confetti">🎉 Confetti</option><option value="fireworks">🎆 Fireworks</option>
-          </select>
-          <button class="btn-mod-action" id="triggerEventBtn">Trigger</button>
-        </div>
+      <div class="mod-section"><div class="mod-section-title">🎨 APPEARANCE</div>
+        <div class="mod-row"><select class="mod-select" id="bgPresetSelect"><option value="default">🌙 Default</option><option value="ocean">🌊 Ocean</option><option value="sunset">🌅 Sunset</option></select><button class="btn-mod-action" id="applyBgBtn">Apply</button></div>
+        <div class="mod-row"><select class="mod-select" id="eventSelect"><option value="confetti">🎉 Confetti</option><option value="fireworks">🎆 Fireworks</option></select><button class="btn-mod-action" id="triggerEventBtn">Trigger</button></div>
       </div>
-      <div class="mod-section">
-        <div class="mod-section-title">💰 REWARDS</div>
-        <div class="mod-row">
-          <select class="mod-select" id="targetUserSelect"><option value="">select user</option></select>
-          <input type="number" class="mod-input" id="coinAmount" placeholder="Coins" style="max-width:80px">
-          <button class="btn-mod-action" id="giveCoinsBtn">Give 🪙</button>
-        </div>
-        <div class="mod-row">
-          <select class="mod-select" id="xpTargetSelect"><option value="">select user</option></select>
-          <input type="number" class="mod-input" id="xpAmount" placeholder="XP" style="max-width:80px">
-          <button class="btn-mod-action" id="giveXPBtn">Give XP</button>
-        </div>
+      <div class="mod-section"><div class="mod-section-title">💰 REWARDS</div>
+        <div class="mod-row"><select class="mod-select" id="targetUserSelect"><option value="">select user</option></select><input type="number" class="mod-input" id="coinAmount" placeholder="Coins"><button class="btn-mod-action" id="giveCoinsBtn">Give 🪙</button></div>
+        <div class="mod-row"><select class="mod-select" id="xpTargetSelect"><option value="">select user</option></select><input type="number" class="mod-input" id="xpAmount" placeholder="XP"><button class="btn-mod-action" id="giveXPBtn">Give XP</button></div>
       </div>
-      <div class="mod-section">
-        <div class="mod-section-title">👥 MODERATORS</div>
-        <div class="mod-row">
-          <select class="mod-select" id="modUserSelect"><option value="">select user</option></select>
-          <button class="btn-mod-action" id="makeModBtn">Make Mod</button>
-          <button class="btn-danger-action" id="revokeModBtn">Revoke</button>
-        </div>
+      <div class="mod-section"><div class="mod-section-title">👥 MODERATORS</div>
+        <div class="mod-row"><select class="mod-select" id="modUserSelect"><option value="">select user</option></select><button class="btn-mod-action" id="makeModBtn">Make Mod</button><button class="btn-danger-action" id="revokeModBtn">Revoke</button></div>
         <div id="moderatorList" style="font-size:11px;margin-top:6px;color:var(--muted)">no moderators</div>
       </div>
-      <div class="mod-section">
-        <div class="mod-section-title">⚙️ CHAT CONTROLS</div>
-        <div class="mod-row">
-          <input type="number" class="mod-input" id="globalSlowModeSec" placeholder="Slow mode (sec)">
-          <button class="btn-mod-action" id="applySlowModeBtn">Set</button>
-        </div>
+      <div class="mod-section"><div class="mod-section-title">⚙️ CHAT CONTROLS</div>
+        <div class="mod-row"><input type="number" class="mod-input" id="globalSlowModeSec" placeholder="Slow mode (sec)"><button class="btn-mod-action" id="applySlowModeBtn">Set</button></div>
       </div>
-      <div class="mod-section">
-        <div class="mod-section-title">🔨 USER ACTIONS</div>
-        <div class="mod-row">
-          <select class="mod-select" id="actionUserSelect"><option value="">select user</option></select>
-          <input type="number" class="mod-input" id="timeoutMinutes" placeholder="Minutes" style="max-width:70px">
-          <button class="btn-warning-action" id="timeoutUserBtn">Timeout</button>
-        </div>
-        <div class="mod-row">
-          <select class="mod-select" id="kickUserSelect"><option value="">select user</option></select>
-          <button class="btn-warning-action" id="kickUserBtn">Kick (close tab)</button>
-        </div>
-        <div class="mod-row">
-          <select class="mod-select" id="muteUserSelect"><option value="">select user</option></select>
-          <input type="number" class="mod-input" id="muteMinutes" placeholder="Minutes" style="max-width:70px">
-          <button class="btn-warning-action" id="muteUserBtn">Mute</button>
-        </div>
-        <div class="mod-row">
-          <select class="mod-select" id="warnUserSelect"><option value="">select user</option></select>
-          <input type="text" class="mod-input" id="warnReason" placeholder="Reason">
-          <button class="btn-warning-action" id="warnUserBtn">Warn</button>
-        </div>
+      <div class="mod-section"><div class="mod-section-title">🔨 USER ACTIONS</div>
+        <div class="mod-row"><select class="mod-select" id="actionUserSelect"><option value="">select user</option></select><input type="number" class="mod-input" id="timeoutMinutes" placeholder="Minutes"><button class="btn-warning-action" id="timeoutUserBtn">Timeout</button></div>
+        <div class="mod-row"><select class="mod-select" id="kickUserSelect"><option value="">select user</option></select><button class="btn-warning-action" id="kickUserBtn">Kick</button></div>
+        <div class="mod-row"><select class="mod-select" id="muteUserSelect"><option value="">select user</option></select><input type="number" class="mod-input" id="muteMinutes" placeholder="Minutes"><button class="btn-warning-action" id="muteUserBtn">Mute</button></div>
+        <div class="mod-row"><select class="mod-select" id="warnUserSelect"><option value="">select user</option></select><input type="text" class="mod-input" id="warnReason" placeholder="Reason"><button class="btn-warning-action" id="warnUserBtn">Warn</button></div>
       </div>
     </div>
   </div>
   <button class="mod-panel-btn" id="ownerPanelBtn">👑</button>
 </div>
 
-<!-- ============================================================ -->
-<!-- MODERATOR PANEL -->
-<!-- ============================================================ -->
 <div class="mod-panel" id="moderatorPanel">
   <div class="mod-panel-content" id="moderatorPanelContent">
-    <div class="mod-panel-header">
-      <span>🛡️ MODERATOR PANEL</span>
-      <button class="mod-panel-close" id="moderatorPanelClose">✕</button>
-    </div>
-    <div class="mod-section">
-      <div class="mod-section-title">🔨 USER ACTIONS</div>
-      <div class="mod-row">
-        <select class="mod-select" id="modActionUserSelect"><option value="">select user</option></select>
-        <input type="number" class="mod-input" id="modTimeoutMinutes" placeholder="Minutes" style="max-width:70px">
-        <button class="btn-warning-action" id="modTimeoutUserBtn">Timeout</button>
-      </div>
-      <div class="mod-row">
-        <select class="mod-select" id="modKickUserSelect"><option value="">select user</option></select>
-        <button class="btn-warning-action" id="modKickUserBtn">Kick (close tab)</button>
-      </div>
-      <div class="mod-row">
-        <select class="mod-select" id="modMuteUserSelect"><option value="">select user</option></select>
-        <input type="number" class="mod-input" id="modMuteMinutes" placeholder="Minutes" style="max-width:70px">
-        <button class="btn-warning-action" id="modMuteUserBtn">Mute</button>
-      </div>
-      <div class="mod-row">
-        <select class="mod-select" id="modWarnUserSelect"><option value="">select user</option></select>
-        <input type="text" class="mod-input" id="modWarnReason" placeholder="Reason">
-        <button class="btn-warning-action" id="modWarnUserBtn">Warn</button>
-      </div>
-    </div>
-    <div class="mod-section">
-      <div class="mod-section-title">📋 ACTION LOGS</div>
-      <div id="modActionLogs" style="font-size:11px;max-height:150px;overflow-y:auto;color:var(--muted)">loading...</div>
+    <div class="mod-panel-header"><span>🛡️ MODERATOR PANEL</span><button class="mod-panel-close" id="moderatorPanelClose">✕</button></div>
+    <div class="mod-section"><div class="mod-section-title">🔨 USER ACTIONS</div>
+      <div class="mod-row"><select class="mod-select" id="modActionUserSelect"><option value="">select user</option></select><input type="number" class="mod-input" id="modTimeoutMinutes" placeholder="Minutes"><button class="btn-warning-action" id="modTimeoutUserBtn">Timeout</button></div>
+      <div class="mod-row"><select class="mod-select" id="modKickUserSelect"><option value="">select user</option></select><button class="btn-warning-action" id="modKickUserBtn">Kick</button></div>
+      <div class="mod-row"><select class="mod-select" id="modMuteUserSelect"><option value="">select user</option></select><input type="number" class="mod-input" id="modMuteMinutes" placeholder="Minutes"><button class="btn-warning-action" id="modMuteUserBtn">Mute</button></div>
+      <div class="mod-row"><select class="mod-select" id="modWarnUserSelect"><option value="">select user</option></select><input type="text" class="mod-input" id="modWarnReason" placeholder="Reason"><button class="btn-warning-action" id="modWarnUserBtn">Warn</button></div>
     </div>
   </div>
   <button class="mod-panel-btn" id="moderatorPanelBtn" style="background:linear-gradient(135deg,var(--blue),#1a3bc0);">🛡️</button>
 </div>
 
-<!-- ============================================================ -->
-<!-- GROUP HOST PANEL -->
-<!-- ============================================================ -->
 <div class="mod-panel" id="hostPanel">
   <div class="mod-panel-content" id="hostPanelContent">
-    <div class="mod-panel-header">
-      <span>👥 GROUP HOST PANEL - <span id="currentGroupName">No Group</span></span>
-      <button class="mod-panel-close" id="hostPanelClose">✕</button>
-    </div>
+    <div class="mod-panel-header"><span>👥 GROUP HOST PANEL - <span id="currentGroupName">No Group</span></span><button class="mod-panel-close" id="hostPanelClose">✕</button></div>
     <div id="hostSection">
-      <div class="mod-section">
-        <div class="mod-section-title">👋 INVITE MEMBERS</div>
-        <div class="mod-row">
-          <select class="mod-select" id="inviteFriendSelect"><option value="">select friend</option></select>
-          <button class="btn-mod-action" id="inviteToGroupBtn">Invite to Group</button>
-        </div>
-        <div class="mod-row">
-          <button class="btn-mod-action" id="createInviteLinkBtn">🔗 Create Invite Link</button>
-          <input type="text" class="mod-input" id="inviteLinkDisplay" placeholder="Invite link" readonly style="font-size:10px">
-        </div>
+      <div class="mod-section"><div class="mod-section-title">👋 INVITE MEMBERS</div>
+        <div class="mod-row"><select class="mod-select" id="inviteFriendSelect"><option value="">select friend</option></select><button class="btn-mod-action" id="inviteToGroupBtn">Invite to Group</button></div>
+        <div class="mod-row"><button class="btn-mod-action" id="createInviteLinkBtn">🔗 Create Invite Link</button><input type="text" class="mod-input" id="inviteLinkDisplay" placeholder="Invite link" readonly style="font-size:10px"></div>
       </div>
-      <div class="mod-section">
-        <div class="mod-section-title">👥 GROUP MEMBERS</div>
-        <div id="groupMembersList" style="font-size:12px;max-height:150px;overflow-y:auto"></div>
-      </div>
-      <div class="mod-section">
-        <div class="mod-section-title">👑 GROUP HOSTS</div>
-        <div class="mod-row">
-          <select class="mod-select" id="hostUserSelect"><option value="">select member</option></select>
-          <button class="btn-mod-action" id="addHostBtn">Make Host</button>
-          <button class="btn-danger-action" id="removeHostBtn">Remove Host</button>
-        </div>
+      <div class="mod-section"><div class="mod-section-title">👥 GROUP MEMBERS</div><div id="groupMembersList" style="font-size:12px;max-height:150px;overflow-y:auto"></div></div>
+      <div class="mod-section"><div class="mod-section-title">👑 GROUP HOSTS</div>
+        <div class="mod-row"><select class="mod-select" id="hostUserSelect"><option value="">select member</option></select><button class="btn-mod-action" id="addHostBtn">Make Host</button><button class="btn-danger-action" id="removeHostBtn">Remove Host</button></div>
         <div id="groupHostsList" style="font-size:11px;margin-top:6px;color:var(--muted)">no hosts</div>
       </div>
-      <div class="mod-section">
-        <div class="mod-section-title">🚫 GROUP ACTIONS</div>
-        <div class="mod-row">
-          <select class="mod-select" id="kickMemberSelect"><option value="">select member</option></select>
-          <button class="btn-warning-action" id="kickMemberBtn">Kick from Group</button>
-        </div>
+      <div class="mod-section"><div class="mod-section-title">🚫 GROUP ACTIONS</div>
+        <div class="mod-row"><select class="mod-select" id="kickMemberSelect"><option value="">select member</option></select><button class="btn-warning-action" id="kickMemberBtn">Kick from Group</button></div>
       </div>
     </div>
   </div>
   <button class="mod-panel-btn" id="hostPanelBtn" style="background:linear-gradient(135deg,var(--orange),#cc6600);">👥</button>
 </div>
 
-<!-- PROFILE OVERLAY -->
-<div class="overlay" id="profileOverlay">
-  <div class="profile-card">
-    <div class="profile-banner"></div>
-    <div class="profile-avatar-big" id="profileAvatar">?</div>
-    <input type="file" id="avatarUpload" accept="image/*" style="display:none">
-    <div class="profile-info-section">
-      <div class="profile-name-big" id="profileName">Username</div>
-      <div class="profile-username" id="profileUsername">@username</div>
-      <div class="profile-bio-text" id="profileBio"></div>
-      <div class="profile-stats-row">
-        <div class="profile-stat"><div class="stat-val" id="profileMessages">0</div><div class="stat-lbl">msgs</div></div>
-        <div class="profile-stat"><div class="stat-val" id="profileLevel">1</div><div class="stat-lbl">level</div></div>
-        <div class="profile-stat"><div class="stat-val" id="profileXP">0</div><div class="stat-lbl">xp</div></div>
-        <div class="profile-stat"><div class="stat-val" id="profileCoins">0</div><div class="stat-lbl">coins</div></div>
-      </div>
-      <div class="badges-row" id="profileBadges"></div>
-      <div class="profile-actions">
-        <button class="btn-primary" id="dmFromProfileBtn">💬 Message</button>
-        <button class="btn-cancel" id="closeProfileBtn">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- SETTINGS -->
-<div class="overlay" id="settingsOverlay">
-  <div class="modal-card">
-    <div class="modal-title">⚙️ Settings</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <label style="font-size:12px">Name color</label>
-      <input type="color" id="nameColor" value="#ffcc00">
-    </div>
-    <input type="text" class="modal-input" id="customActivity" placeholder="Activity">
-    <textarea class="modal-input" id="userBio" rows="2" placeholder="Bio..."></textarea>
-    <div class="modal-buttons">
-      <button class="btn-cancel" id="closeSettingsModal">cancel</button>
-      <button class="btn-primary" id="saveSettings">save</button>
-    </div>
-  </div>
-</div>
-
-<!-- DAILY -->
-<div class="overlay" id="dailyOverlay">
-  <div class="modal-card" style="text-align:center">
-    <div class="modal-title">🎁 Daily Reward</div>
-    <div style="font-size:40px;color:var(--gold);margin:15px 0" id="dailyAmount">+50 🪙</div>
-    <div id="dailyStreakText" style="margin-bottom:15px">streak: 1 day</div>
-    <div class="modal-buttons" style="justify-content:center">
-      <button class="btn-cancel" id="closeDailyModal">close</button>
-      <button class="btn-primary" id="claimDaily">claim</button>
-    </div>
-  </div>
-</div>
-
-<!-- SHOP -->
-<div class="overlay" id="shopOverlay">
-  <div class="modal-card">
-    <div class="modal-title">🏪 Shop <span style="font-size:12px">🪙 <span id="shopCoinDisplay">0</span></span></div>
-    <div class="shop-grid" id="shopGrid"></div>
-  </div>
-</div>
-
-<!-- ADD FRIEND -->
-<div class="overlay" id="addFriendOverlay">
-  <div class="modal-card">
-    <div class="modal-title">➕ Add Friend</div>
-    <input type="text" class="modal-input" id="friendUsername" placeholder="Username">
-    <div class="modal-buttons">
-      <button class="btn-cancel" id="closeAddFriendModal">cancel</button>
-      <button class="btn-primary" id="confirmAddFriend">send</button>
-    </div>
-  </div>
-</div>
-
-<!-- CREATE GROUP -->
-<div class="overlay" id="createGroupOverlay">
-  <div class="modal-card">
-    <div class="modal-title">👥 Create Group</div>
-    <input type="text" class="modal-input" id="groupName" placeholder="Group name">
-    <div class="modal-buttons">
-      <button class="btn-cancel" id="closeCreateGroupModal">cancel</button>
-      <button class="btn-primary" id="confirmCreateGroup">create</button>
-    </div>
-  </div>
-</div>
-
-<!-- DM -->
-<div class="overlay" id="dmOverlay">
-  <div class="modal-card" style="max-width:460px;height:460px;display:flex;flex-direction:column;padding:0;overflow:hidden">
-    <div style="padding:13px 16px;border-bottom:1px solid var(--blue-border);display:flex;align-items:center">
-      <div style="font-weight:700;color:var(--gold)">💬 <span id="dmWithName">-</span></div>
-      <div style="margin-left:auto"><button class="btn-cancel" id="closeDmModal" style="padding:5px 12px">close</button></div>
-    </div>
-    <div id="dmMessages" style="flex:1;overflow-y:auto;padding:12px"></div>
-    <div style="padding:10px;border-top:1px solid var(--blue-border);display:flex;gap:8px">
-      <input type="text" class="modal-input" id="dmInput" placeholder="Message..." style="margin-bottom:0">
-      <button class="btn-primary" id="dmSend">send</button>
-    </div>
-  </div>
-</div>
+<!-- MODALS -->
+<div class="overlay" id="profileOverlay"><div class="profile-card"><div class="profile-banner"></div><div class="profile-avatar-big" id="profileAvatar">?</div><input type="file" id="avatarUpload" accept="image/*" style="display:none"><div class="profile-info-section"><div class="profile-name-big" id="profileName">Username</div><div class="profile-username" id="profileUsername">@username</div><div class="profile-bio-text" id="profileBio"></div><div class="profile-stats-row"><div class="profile-stat"><div class="stat-val" id="profileMessages">0</div><div class="stat-lbl">msgs</div></div><div class="profile-stat"><div class="stat-val" id="profileLevel">1</div><div class="stat-lbl">level</div></div><div class="profile-stat"><div class="stat-val" id="profileXP">0</div><div class="stat-lbl">xp</div></div><div class="profile-stat"><div class="stat-val" id="profileCoins">0</div><div class="stat-lbl">coins</div></div></div><div class="badges-row" id="profileBadges"></div><div class="profile-actions"><button class="btn-primary" id="dmFromProfileBtn">💬 Message</button><button class="btn-cancel" id="closeProfileBtn">Close</button></div></div></div></div>
+<div class="overlay" id="settingsOverlay"><div class="modal-card"><div class="modal-title">⚙️ Settings</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><label style="font-size:12px">Name color</label><input type="color" id="nameColor" value="#ffcc00"></div><input type="text" class="modal-input" id="customActivity" placeholder="Activity"><textarea class="modal-input" id="userBio" rows="2" placeholder="Bio..."></textarea><div class="modal-buttons"><button class="btn-cancel" id="closeSettingsModal">cancel</button><button class="btn-primary" id="saveSettings">save</button></div></div></div>
+<div class="overlay" id="dailyOverlay"><div class="modal-card" style="text-align:center"><div class="modal-title">🎁 Daily Reward</div><div style="font-size:40px;color:var(--gold);margin:15px 0" id="dailyAmount">+50 🪙</div><div id="dailyStreakText" style="margin-bottom:15px">streak: 1 day</div><div class="modal-buttons" style="justify-content:center"><button class="btn-cancel" id="closeDailyModal">close</button><button class="btn-primary" id="claimDaily">claim</button></div></div></div>
+<div class="overlay" id="shopOverlay"><div class="modal-card"><div class="modal-title">🏪 Shop <span style="font-size:12px">🪙 <span id="shopCoinDisplay">0</span></span></div><div class="shop-grid" id="shopGrid"></div></div></div>
+<div class="overlay" id="addFriendOverlay"><div class="modal-card"><div class="modal-title">➕ Add Friend</div><input type="text" class="modal-input" id="friendUsername" placeholder="Username"><div class="modal-buttons"><button class="btn-cancel" id="closeAddFriendModal">cancel</button><button class="btn-primary" id="confirmAddFriend">send</button></div></div></div>
+<div class="overlay" id="createGroupOverlay"><div class="modal-card"><div class="modal-title">👥 Create Group</div><input type="text" class="modal-input" id="groupName" placeholder="Group name"><div class="modal-buttons"><button class="btn-cancel" id="closeCreateGroupModal">cancel</button><button class="btn-primary" id="confirmCreateGroup">create</button></div></div></div>
+<div class="overlay" id="dmOverlay"><div class="modal-card" style="max-width:460px;height:460px;display:flex;flex-direction:column;padding:0;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid var(--blue-border);display:flex;align-items:center"><div style="font-weight:700;color:var(--gold)">💬 <span id="dmWithName">-</span></div><div style="margin-left:auto"><button class="btn-cancel" id="closeDmModal" style="padding:5px 12px">close</button></div></div><div id="dmMessages" style="flex:1;overflow-y:auto;padding:12px"></div><div style="padding:10px;border-top:1px solid var(--blue-border);display:flex;gap:8px"><input type="text" class="modal-input" id="dmInput" placeholder="Message..." style="margin-bottom:0"><button class="btn-primary" id="dmSend">send</button></div></div></div>
 
 <div id="toastContainer"></div>
 
 <script>
-// ============================================================
-// FANTARENA - COMPLETE WITH OWNER/MOD/HOST PANELS
-// ============================================================
+
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🔥 Fantarena Loading...');
 
-  const SUPABASE_URL = "https://luxutkabqgitoteosctr.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1eHV0a2FicWdpdG90ZW9zY3RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2Mjc5NjAsImV4cCI6MjA5MjIwMzk2MH0.7GjvQMZaujg0YFmTBr2wotGWCIUoBWCBplGocMo6TDM";
-  const GIPHY_API_KEY = "PmyjdmHi6rRNGecMM9OaNhQ0dnt2mQfg";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ 
+  const SUPABASE_URL = "https://luxutkabqgitoteosctr.supabase.co"; 
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1eHV0a2FicWdpdG90ZW9zY3RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2Mjc5NjAsImV4cCI6MjA5MjIwMzk2MH0.7GjvQMZaujg0YFmTBr2wotGWCIUoBWCBplGocMo6TDM";  
+ 
+  
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  // Test connection
+  sb.from('fanter_presence').select('count').then(r => {
+    if (r.error) console.error('❌ Supabase connection error:', r.error);
+    else console.log('✅ Supabase connected!');
+  });
 
   // OWNER USERNAMES
   const OWNER_USERNAMES = ['abcatlmfao', 'abcatlmfao1'];
@@ -595,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentUser = JSON.parse(localStorage.getItem('fanter_currentUser') || 'null');
   if (!currentUser || !currentUser.id) {
     currentUser = { 
-      id: 'guest_' + Math.random().toString(36).slice(2,10), 
+      id: 'user_' + Math.random().toString(36).slice(2,10) + Date.now(), 
       username: 'Guest' + Math.floor(Math.random()*9999),
       displayName: 'Guest' + Math.floor(Math.random()*9999), 
       coins: 100 
@@ -604,102 +427,26 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  // VOICE MESSAGES
+  // STORAGE HELPERS
   // ============================================================
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let isRecording = false;
-  let recordingStartTime = null;
-  let currentStream = null;
-  
-  async function startVoiceRecording() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      currentStream = stream;
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
-      recordingStartTime = Date.now();
-      
-      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
-      
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        const duration = Math.round((Date.now() - recordingStartTime) / 1000);
-        const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
-        reader.onloadend = async () => {
-          const base64Audio = reader.result;
-          const channelId = currentDMUserId ? `dm_${[currentUser.id, currentDMUserId].sort().join('_')}` : currentGroupId ? `group_${currentGroupId}` : currentChannel;
-          await sb.from('fanter_chat').insert({
-            channel_id: channelId, user_id: currentUser.id,
-            username: currentUser.displayName || currentUser.username,
-            message: `[VOICE]${base64Audio}`, nameColor: nameColor,
-            is_voice_message: true, voice_duration: duration, voice_url: base64Audio
-          });
-          toast('✅ Voice message sent!');
-        };
-        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
-        document.querySelector('.voice-recording-indicator')?.remove();
-      };
-      mediaRecorder.start();
-      isRecording = true;
-      const indicator = document.createElement('div');
-      indicator.className = 'voice-recording-indicator';
-      indicator.innerHTML = '🔴 Recording... click to stop';
-      indicator.onclick = stopVoiceRecording;
-      document.body.appendChild(indicator);
-      toast('🔴 Recording... click to stop');
-    } catch(e) { toast('❌ Microphone access denied'); }
+  function safeJSON(key, fallback) {
+    try { 
+      const val = localStorage.getItem(key);
+      return val ? JSON.parse(val) : fallback;
+    } catch(e) { return fallback; }
   }
   
-  function stopVoiceRecording() {
-    if (mediaRecorder && isRecording) { mediaRecorder.stop(); isRecording = false; }
-    document.querySelector('.voice-recording-indicator')?.remove();
-  }
-  
-  window.playVoiceMessage = function(base64Data, btn) {
-    const audio = new Audio(base64Data);
-    const wave = btn.parentElement.querySelector('.voice-wave');
-    audio.onplay = () => { if(wave) wave.style.display = 'flex'; };
-    audio.onended = () => { if(wave) wave.style.display = 'none'; };
-    audio.play();
-  };
-
-  // ============================================================
-  // STATE
-  // ============================================================
-  let currentChannel = 'general';
-  let currentGroupId = null;
-  let currentDMUserId = null;
-  let channelSub = null;
-  let nameColor = localStorage.getItem('fanter_nameColor') || '#ffcc00';
-  let customActivity = localStorage.getItem('fanter_activity') || '🎮 gaming';
-  let userBio = localStorage.getItem('fanter_bio') || '';
   let messageCounts = safeJSON('messageCounts', {});
   let userXP = safeJSON('userXP', {});
   let userBadges = safeJSON('userBadges', {});
   let userAvatars = safeJSON('userAvatars', {});
   let userCoinsMap = safeJSON('userCoinsMap', {});
-  let dailyStreak = parseInt(localStorage.getItem('dailyStreak') || '0');
-  let lastDailyClaim = localStorage.getItem('lastDailyClaim') || '';
-  let globalSlowMode = 0;
-  let lastMessageTime = 0;
-  let allUsersList = [];
   let moderatorsList = safeJSON('fanter_moderators', []);
-  let groupHostsList = [];
-  let replyingTo = null;
-  let mutedUsers = {};
-  let timedOutUsers = {};
-
+  
   if (!userXP[currentUser.id]) userXP[currentUser.id] = 0;
   if (!messageCounts[currentUser.id]) messageCounts[currentUser.id] = 0;
   if (!userBadges[currentUser.id]) userBadges[currentUser.id] = [];
   if (!userCoinsMap[currentUser.id]) userCoinsMap[currentUser.id] = currentUser.coins || 0;
-
-  function safeJSON(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) || fallback; }
-    catch(e) { return fallback; }
-  }
   
   function save() {
     localStorage.setItem('userXP', JSON.stringify(userXP));
@@ -752,28 +499,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (newLv > oldLv) {
       document.getElementById('levelBadge').textContent = `Lv ${newLv}`;
       toast(`🎉 Level up! Level ${newLv}!`);
-      if (newLv >= 10) awardBadge('Level 10');
-      if (newLv >= 20) awardBadge('Max Level');
     }
     document.getElementById('levelBadge').textContent = `Lv ${getLevel(userXP[currentUser.id])}`;
-  }
-
-  function awardBadge(name) {
-    if (!userBadges[currentUser.id]?.includes(name)) {
-      userBadges[currentUser.id] = [...(userBadges[currentUser.id] || []), name];
-      save();
-      toast(`🏆 Badge: ${name}!`);
-    }
-  }
-  
-  function checkBadges() {
-    const c = messageCounts[currentUser.id] || 0;
-    if (c >= 1) awardBadge('First Message');
-    if (c >= 50) awardBadge('Regular');
-    if (c >= 100) awardBadge('Chatterbox');
-    if (c >= 500) awardBadge('Veteran');
-    if (dailyStreak >= 7) awardBadge('Week Streak');
-    if ((currentUser.coins || 0) >= 1000) awardBadge('Rich');
   }
 
   // ============================================================
@@ -782,126 +509,73 @@ document.addEventListener('DOMContentLoaded', function() {
   function isOwner() { return OWNER_USERNAMES.includes(currentUser.displayName || currentUser.username); }
   function isModerator() { return moderatorsList.includes(currentUser.displayName || currentUser.username) || isOwner(); }
   
-  async function isGroupOwner() {
-    if (!currentGroupId) return false;
-    const { data } = await sb.from('fanter_groups').select('owner_id').eq('id', currentGroupId).single();
-    return data?.owner_id === currentUser.id;
-  }
-  
-  async function isGroupHost() {
-    if (!currentGroupId) return false;
-    if (await isGroupOwner()) return true;
-    const { data } = await sb.from('fanter_group_hosts').select('*').eq('group_id', currentGroupId).eq('user_id', currentUser.id);
-    return data && data.length > 0;
-  }
-
   // ============================================================
-  // MODERATOR ACTIONS
+  // MODERATOR ACTIONS - FIXED
   // ============================================================
   async function timeoutUser(userId, minutes, reason = '') {
-    if (!isModerator()) return toast('❌ Only moderators can timeout');
+    if (!isModerator()) { toast('❌ Only moderators can timeout'); return false; }
     const until = new Date(Date.now() + minutes * 60 * 1000).toISOString();
-    timedOutUsers[userId] = until;
-    await sb.from('fanter_presence').update({ timeout_until: until }).eq('user_id', userId);
-    await sb.from('fanter_timeout_logs').insert({ user_id: userId, moderator_id: currentUser.id, duration: minutes, reason });
-    toast(`⏰ User timed out for ${minutes} minutes`);
-    if (userId === currentUser.id) setTimeout(() => location.reload(), 1000);
+    try {
+      const { error } = await sb.from('fanter_presence').update({ timeout_until: until }).eq('user_id', userId);
+      if (error) throw error;
+      await sb.from('fanter_timeout_logs').insert({ 
+        user_id: userId, 
+        moderator_id: currentUser.id, 
+        duration: minutes, 
+        reason: reason || 'No reason provided' 
+      });
+      toast(`⏰ User timed out for ${minutes} minutes`);
+      return true;
+    } catch(e) { toast('❌ Failed to timeout user'); return false; }
   }
   
   async function kickUser(userId) {
-    if (!isModerator()) return toast('❌ Only moderators can kick');
-    await sb.from('fanter_kick_logs').insert({ user_id: userId, moderator_id: currentUser.id, reason: 'Kicked by moderator' });
-    toast(`👢 User kicked`);
-    if (userId === currentUser.id) { toast('You were kicked!'); setTimeout(() => location.reload(), 500); }
+    if (!isModerator()) { toast('❌ Only moderators can kick'); return false; }
+    try {
+      await sb.from('fanter_kick_logs').insert({ 
+        user_id: userId, 
+        moderator_id: currentUser.id, 
+        reason: 'Kicked by moderator' 
+      });
+      toast(`👢 User kicked`);
+      return true;
+    } catch(e) { toast('❌ Failed to kick user'); return false; }
   }
   
   async function muteUser(userId, minutes, reason = '') {
-    if (!isModerator()) return toast('❌ Only moderators can mute');
+    if (!isModerator()) { toast('❌ Only moderators can mute'); return false; }
     const until = new Date(Date.now() + minutes * 60 * 1000).toISOString();
-    mutedUsers[userId] = until;
-    await sb.from('fanter_presence').update({ is_muted: true, muted_until: until }).eq('user_id', userId);
-    toast(`🔇 User muted for ${minutes} minutes`);
+    try {
+      const { error } = await sb.from('fanter_presence').update({ is_muted: true, muted_until: until }).eq('user_id', userId);
+      if (error) throw error;
+      toast(`🔇 User muted for ${minutes} minutes`);
+      return true;
+    } catch(e) { toast('❌ Failed to mute user'); return false; }
   }
   
-  async function warnUser(userId, reason) {
-    if (!isModerator()) return toast('❌ Only moderators can warn');
-    toast(`⚠️ User warned: ${reason}`);
+  async function warnUser(username, reason) {
+    if (!isModerator()) { toast('❌ Only moderators can warn'); return false; }
+    toast(`⚠️ User ${username} warned: ${reason || 'No reason'}`);
+    return true;
   }
 
   // ============================================================
-  // GROUP HOST ACTIONS
+  // GLOBAL VARIABLES
   // ============================================================
-  async function inviteToGroup(userId) {
-    if (!await isGroupHost()) return toast('❌ Only group hosts can invite');
-    const { data: group } = await sb.from('fanter_groups').select('members').eq('id', currentGroupId).single();
-    let members = group?.members || [];
-    if (!members.includes(userId)) {
-      members.push(userId);
-      await sb.from('fanter_groups').update({ members }).eq('id', currentGroupId);
-      toast('✅ User invited to group!');
-      loadGroups();
-    } else toast('User already in group');
-  }
-  
-  async function kickFromGroup(userId) {
-    if (!await isGroupHost()) return toast('❌ Only group hosts can kick');
-    const { data: group } = await sb.from('fanter_groups').select('members, owner_id').eq('id', currentGroupId).single();
-    if (group?.owner_id === userId) return toast('❌ Cannot kick group owner');
-    let members = group?.members || [];
-    members = members.filter(m => m !== userId);
-    await sb.from('fanter_groups').update({ members }).eq('id', currentGroupId);
-    toast('✅ User kicked from group');
-    loadGroups();
-    if (currentGroupId && userId === currentUser.id) { currentGroupId = null; loadMessages(); }
-  }
-  
-  async function addGroupHost(userId) {
-    if (!await isGroupOwner()) return toast('❌ Only group owner can add hosts');
-    await sb.from('fanter_group_hosts').insert({ group_id: currentGroupId, user_id: userId, assigned_by: currentUser.id });
-    toast('✅ Added as group host');
-    loadGroupHosts();
-  }
-  
-  async function removeGroupHost(userId) {
-    if (!await isGroupOwner()) return toast('❌ Only group owner can remove hosts');
-    await sb.from('fanter_group_hosts').delete().eq('group_id', currentGroupId).eq('user_id', userId);
-    toast('✅ Removed group host');
-    loadGroupHosts();
-  }
-  
-  async function loadGroupHosts() {
-    if (!currentGroupId) return;
-    const { data } = await sb.from('fanter_group_hosts').select('*').eq('group_id', currentGroupId);
-    groupHostsList = data || [];
-    const usernames = await Promise.all(groupHostsList.map(async h => {
-      const { data: u } = await sb.from('fanter_presence').select('display_name').eq('user_id', h.user_id).single();
-      return u?.display_name || h.user_id.slice(0,8);
-    }));
-    document.getElementById('groupHostsList').innerHTML = usernames.map(u => `<div>👑 ${esc(u)}</div>`).join('') || 'no hosts';
-  }
-
-  // ============================================================
-  // EVENTS
-  // ============================================================
-  function triggerConfetti() {
-    for (let i = 0; i < 150; i++) {
-      const c = document.createElement('div');
-      c.style.cssText = `position:fixed;left:${Math.random()*100}%;top:-10px;width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;background:hsl(${Math.random()*360},100%,50%);border-radius:50%;animation:confettiFall ${Math.random()*2+2}s linear forwards;z-index:9999;pointer-events:none`;
-      document.body.appendChild(c);
-      setTimeout(() => c.remove(), 3000);
-    }
-    toast('🎉 Confetti!');
-  }
-  
-  function triggerFireworks() {
-    for (let i = 0; i < 60; i++) {
-      const f = document.createElement('div');
-      f.style.cssText = `position:fixed;left:${Math.random()*100}%;top:${Math.random()*100}%;width:4px;height:4px;background:radial-gradient(circle,#ff0,#f00);border-radius:50%;animation:firework 1s ease-out forwards;z-index:9999;pointer-events:none`;
-      document.body.appendChild(f);
-      setTimeout(() => f.remove(), 1000);
-    }
-    toast('🎆 Fireworks!');
-  }
+  let currentChannel = 'general';
+  let currentGroupId = null;
+  let currentDMUserId = null;
+  let channelSub = null;
+  let nameColor = localStorage.getItem('fanter_nameColor') || '#ffcc00';
+  let customActivity = localStorage.getItem('fanter_activity') || '🎮 gaming';
+  let userBio = localStorage.getItem('fanter_bio') || '';
+  let dailyStreak = parseInt(localStorage.getItem('dailyStreak') || '0');
+  let lastDailyClaim = localStorage.getItem('lastDailyClaim') || '';
+  let globalSlowMode = 0;
+  let lastMessageTime = 0;
+  let allUsersList = [];
+  let replyingTo = null;
+  let groupHostsList = [];
 
   // ============================================================
   // RENDER MESSAGE
@@ -911,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const avatarUrl = userAvatars[msg.user_id];
     const isMod = moderatorsList.includes(msg.username);
     const isOwnr = OWNER_USERNAMES.includes(msg.username);
-    const nameColorStyle = msg.nameColor || '#ffcc00';
+    const nameColorStyle = msg.name_color || '#ffcc00';
     let nameClass = '';
     if (nameColorStyle === '#ff4444') nameClass = 'fire';
     else if (nameColorStyle === '#9f5ae3') nameClass = 'purple';
@@ -920,20 +594,24 @@ document.addEventListener('DOMContentLoaded', function() {
     let messageContent = esc(msg.message);
     const canDelete = (msg.user_id === currentUser.id) || isModerator();
     
-    if (msg.is_voice_message || (msg.message && msg.message.startsWith('[VOICE]'))) {
-      let base64Data = msg.voice_url || msg.message.replace('[VOICE]', '');
+    if (msg.is_voice_message && msg.voice_url) {
       const duration = msg.voice_duration || 5;
-      messageContent = `<div class="voice-message"><button class="voice-play-btn" onclick="playVoiceMessage('${base64Data}', this)">🔊</button><div class="voice-wave" style="display:none"><span></span><span></span><span></span><span></span><span></span></div><span class="voice-duration">${duration}s</span></div>`;
+      const voiceId = 'voice_' + msg.id;
+      messageContent = `<div class="voice-message" id="${voiceId}_container">
+        <button class="voice-play-btn" onclick="window.playVoiceMessage('${msg.voice_url}', this)">🔊</button>
+        <div class="voice-wave" style="display:none"><span></span><span></span><span></span><span></span><span></span></div>
+        <span class="voice-duration">${duration}s</span>
+      </div>`;
     } else {
       const gifMatch = msg.message.match(/\[GIF\]\s*(https?:\/\/[^\s]+)/i);
-      if (gifMatch) messageContent = `<img src="${gifMatch[1]}" onclick="window.open('${gifMatch[1]}')">`;
+      if (gifMatch) messageContent = `<img src="${gifMatch[1]}" onclick="window.open('${gifMatch[1]}')" style="max-width:200px;border-radius:8px;cursor:pointer">`;
     }
     
     return `<div class="message" id="msg-${msg.id}">
-      <div class="msg-avatar" onclick="showProfile('${esc(msg.user_id)}')">${avatarUrl ? `<img src="${avatarUrl}">` : (msg.username?.[0]?.toUpperCase() || 'U')}</div>
+      <div class="msg-avatar" onclick="window.showProfile('${esc(msg.user_id)}')">${avatarUrl ? `<img src="${avatarUrl}">` : (msg.username?.[0]?.toUpperCase() || 'U')}</div>
       <div class="msg-body">
         <div class="msg-meta">
-          <span class="msg-name ${nameClass}" onclick="showProfile('${esc(msg.user_id)}')" style="color:${nameColorStyle}">${esc(msg.username)}</span>
+          <span class="msg-name ${nameClass}" onclick="window.showProfile('${esc(msg.user_id)}')" style="color:${nameColorStyle}">${esc(msg.username)}</span>
           <span class="msg-lv">Lv${lv}</span>
           ${isOwnr ? '<span class="owner-badge">OWNER</span>' : ''}
           ${isMod && !isOwnr ? '<span class="mod-badge">MOD</span>' : ''}
@@ -943,324 +621,26 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="msg-reactions" id="reactions-${msg.id}"></div>
       </div>
       <div class="msg-actions">
-        <div class="reaction-picker" id="rp-${msg.id}">${['👍','❤️','😂','🔥','💀','🏆'].map(e => `<span class="react-btn" onclick="addReaction('${msg.id}','${e}')">${e}</span>`).join('')}</div>
-        <button class="msg-action-btn" onclick="toggleReactionPicker('${msg.id}')">😊</button>
-        <button class="msg-action-btn" onclick="startReply(${msg.id},'${esc(msg.username)}','${esc((msg.message||'').slice(0,50))}')">↩</button>
-        ${msg.user_id === currentUser.id ? `<button class="msg-action-btn" onclick="editMessage('${msg.id}')">✏️</button>` : ''}
-        ${canDelete ? `<button class="msg-action-btn" onclick="deleteMsg('${msg.id}')" style="color:var(--red)">🗑</button>` : ''}
-        ${isModerator() && msg.user_id !== currentUser.id ? `<button class="msg-action-btn" onclick="modActions('${msg.user_id}','${esc(msg.username)}')" style="color:var(--orange)">🛡️</button>` : ''}
+        <div class="reaction-picker" id="rp-${msg.id}">${['👍','❤️','😂','🔥','💀','🏆'].map(e => `<span class="react-btn" onclick="window.addReaction('${msg.id}','${e}')">${e}</span>`).join('')}</div>
+        <button class="msg-action-btn" onclick="window.toggleReactionPicker('${msg.id}')">😊</button>
+        <button class="msg-action-btn" onclick="window.startReply(${msg.id},'${esc(msg.username)}','${esc((msg.message||'').slice(0,50))}')">↩</button>
+        ${msg.user_id === currentUser.id ? `<button class="msg-action-btn" onclick="window.editMessage('${msg.id}')">✏️</button>` : ''}
+        ${canDelete ? `<button class="msg-action-btn" onclick="window.deleteMsg('${msg.id}')" style="color:var(--red)">🗑</button>` : ''}
+        ${isModerator() && msg.user_id !== currentUser.id ? `<button class="msg-action-btn" onclick="window.modActions('${msg.user_id}','${esc(msg.username)}')" style="color:var(--orange)">🛡️</button>` : ''}
       </div>
     </div>`;
   }
 
-  window.modActions = function(userId, username) {
-    const action = prompt(`Actions for ${username}:\n1 - Timeout\n2 - Kick\n3 - Mute\n4 - Warn\nEnter number:`);
-    if (action === '1') { const mins = prompt('Minutes to timeout:'); if(mins) timeoutUser(userId, parseInt(mins)); }
-    else if (action === '2') { if(confirm(`Kick ${username}?`)) kickUser(userId); }
-    else if (action === '3') { const mins = prompt('Minutes to mute:'); if(mins) muteUser(userId, parseInt(mins)); }
-    else if (action === '4') { const reason = prompt('Warning reason:'); if(reason) warnUser(userId, reason); }
+  // Make functions global
+  window.playVoiceMessage = function(base64Data, btn) {
+    const audio = new Audio(base64Data);
+    const container = btn.parentElement;
+    const wave = container.querySelector('.voice-wave');
+    audio.onplay = () => { if(wave) wave.style.display = 'flex'; };
+    audio.onended = () => { if(wave) wave.style.display = 'none'; };
+    audio.play();
   };
 
-  async function loadReactions(msgId) {
-    try {
-      const { data } = await sb.from('fanter_reactions').select('*').eq('message_id', msgId);
-      if (!data) return;
-      const grouped = {};
-      data.forEach(r => { if (!grouped[r.emoji]) grouped[r.emoji] = []; grouped[r.emoji].push(r.user_id); });
-      const container = document.getElementById(`reactions-${msgId}`);
-      if (container) container.innerHTML = Object.entries(grouped).map(([emoji, users]) => `<div class="reaction-chip" onclick="addReaction('${msgId}','${emoji}')">${emoji} ${users.length}</div>`).join('');
-    } catch(e) {}
-  }
-
-  window.addReaction = async function(msgId, emoji) {
-    try {
-      const { data: existing } = await sb.from('fanter_reactions').select('id').eq('message_id', msgId).eq('user_id', currentUser.id).eq('emoji', emoji);
-      if (existing && existing.length) await sb.from('fanter_reactions').delete().eq('id', existing[0].id);
-      else { await sb.from('fanter_reactions').insert({ message_id: msgId, user_id: currentUser.id, emoji }); addXP(1); }
-      loadReactions(msgId);
-    } catch(e) {}
-  };
-
-  window.toggleReactionPicker = function(msgId) {
-    const picker = document.getElementById(`rp-${msgId}`);
-    if (!picker) return;
-    document.querySelectorAll('.reaction-picker.open').forEach(p => p.classList.remove('open'));
-    picker.classList.add('open');
-  };
-  document.addEventListener('click', e => { if (!e.target.closest('.msg-actions')) document.querySelectorAll('.reaction-picker.open').forEach(p => p.classList.remove('open')); });
-
-  window.startReply = function(id, username, preview) {
-    replyingTo = { id, username, preview };
-    document.getElementById('replyBarText').innerHTML = `↩ replying to <strong>${esc(username)}</strong>: ${esc(preview)}`;
-    document.getElementById('replyBar').classList.add('show');
-    document.getElementById('messageInput').focus();
-  };
-  document.getElementById('replyCancel').onclick = () => { replyingTo = null; document.getElementById('replyBar').classList.remove('show'); };
-  
-  window.editMessage = async function(msgId) {
-    const msgEl = document.getElementById(`msg-${msgId}`);
-    const textEl = msgEl?.querySelector('.msg-text');
-    if (!textEl) return;
-    const original = textEl.textContent.replace('(edited)', '').trim();
-    const newText = prompt('Edit:', original);
-    if (newText && newText !== original) {
-      await sb.from('fanter_chat').update({ message: newText, edited: true }).eq('id', msgId);
-      loadMessages();
-      toast('✅ Edited');
-    }
-  };
-  
-  window.deleteMsg = async function(msgId) {
-    if (confirm('Delete?')) {
-      await sb.from('fanter_chat').delete().eq('id', msgId);
-      document.getElementById(`msg-${msgId}`)?.remove();
-      toast('🗑 Deleted');
-    }
-  };
-
-  // ============================================================
-  // LOAD MESSAGES
-  // ============================================================
-  async function loadMessages() {
-    try {
-      let channelId;
-      if (currentDMUserId) channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
-      else if (currentGroupId) channelId = `group_${currentGroupId}`;
-      else channelId = currentChannel;
-      
-      const { data, error } = await sb.from('fanter_chat').select('*').eq('channel_id', channelId).order('created_at', { ascending: true }).limit(100);
-      if (error) throw error;
-      const container = document.getElementById('messages');
-      if (!data || !data.length) { container.innerHTML = '<div class="hint" style="text-align:center">✨ no messages yet ✨</div>'; return; }
-      container.innerHTML = data.map(renderMessage).join('');
-      container.scrollTop = container.scrollHeight;
-      for (const msg of data) loadReactions(msg.id);
-    } catch(e) { console.error(e); }
-  }
-
-  // ============================================================
-  // SEND MESSAGE
-  // ============================================================
-  async function sendMessage() {
-    let text = document.getElementById('messageInput').value.trim();
-    if (!text) return;
-    document.getElementById('messageInput').value = '';
-    
-    if (globalSlowMode > 0 && !currentDMUserId && !currentGroupId) {
-      const now = Date.now();
-      if (now - lastMessageTime < globalSlowMode * 1000) { toast(`⏸ Slow mode! Wait ${globalSlowMode}s`); return; }
-      lastMessageTime = now;
-    }
-    
-    if (mutedUsers[currentUser.id] && new Date(mutedUsers[currentUser.id]) > new Date()) { toast('🔇 You are muted!'); return; }
-    if (timedOutUsers[currentUser.id] && new Date(timedOutUsers[currentUser.id]) > new Date()) { toast('⏰ You are timed out!'); return; }
-    
-    if (text.startsWith('/')) {
-      const parts = text.slice(1).split(' ');
-      const cmd = parts[0].toLowerCase();
-      if (cmd === 'roll') text = `🎲 ${currentUser.displayName} rolled ${Math.floor(Math.random()*100)+1}!`;
-      else if (cmd === '8ball') { const a=['Yes','No','Maybe','Definitely','Never']; text = `🎱 ${a[Math.floor(Math.random()*a.length)]}`; }
-      else if (cmd === 'flip') text = `🪙 ${Math.random()>0.5?'Heads':'Tails'}!`;
-      else if (cmd === 'help') { toast('Commands: /roll, /8ball, /flip, /nick [name]'); return; }
-      else if (cmd === 'nick' && parts[1]) {
-        currentUser.displayName = parts.slice(1).join(' ');
-        localStorage.setItem('fanter_currentUser', JSON.stringify(currentUser));
-        toast(`✅ Nickname: ${currentUser.displayName}`);
-        updatePresence();
-        return;
-      }
-      else { toast('Unknown command'); return; }
-    }
-    
-    try {
-      let channelId;
-      if (currentDMUserId) channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
-      else if (currentGroupId) channelId = `group_${currentGroupId}`;
-      else channelId = currentChannel;
-      
-      await sb.from('fanter_chat').insert({
-        channel_id: channelId, user_id: currentUser.id,
-        username: currentUser.displayName || currentUser.username,
-        message: text, nameColor: nameColor,
-        reply_to_id: replyingTo?.id || null, reply_username: replyingTo?.username || null, reply_preview: replyingTo?.preview || null,
-        is_voice_message: false
-      });
-      replyingTo = null;
-      document.getElementById('replyBar').classList.remove('show');
-      messageCounts[currentUser.id] = (messageCounts[currentUser.id] || 0) + 1;
-      save(); addXP(5); checkBadges();
-    } catch(e) { toast('❌ Failed'); }
-  }
-
-  // ============================================================
-  // REALTIME
-  // ============================================================
-  function setupRealtime() {
-    if (channelSub) sb.removeChannel(channelSub);
-    let channelId;
-    if (currentDMUserId) channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
-    else if (currentGroupId) channelId = `group_${currentGroupId}`;
-    else channelId = currentChannel;
-    
-    channelSub = sb.channel(`room-${channelId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'fanter_chat', filter: `channel_id=eq.${channelId}` }, payload => {
-        const container = document.getElementById('messages');
-        if (container.querySelector('.hint')) container.innerHTML = '';
-        container.insertAdjacentHTML('beforeend', renderMessage(payload.new));
-        container.scrollTop = container.scrollHeight;
-        loadReactions(payload.new.id);
-      })
-      .subscribe();
-  }
-
-  // ============================================================
-  // GROUPS
-  // ============================================================
-  async function loadGroups() {
-    try {
-      const { data } = await sb.from('fanter_groups').select('*');
-      const myGroups = (data || []).filter(g => g.members && g.members.includes(currentUser.id));
-      const container = document.getElementById('groupsList');
-      if (!myGroups.length) { container.innerHTML = '<div class="hint">no groups</div>'; return; }
-      container.innerHTML = myGroups.map(g => `<div class="sidebar-item" onclick="openGroup('${g.id}','${esc(g.name)}')"><span>👥</span><span>${esc(g.name)}</span></div>`).join('');
-    } catch(e) {}
-  }
-  
-  window.openGroup = async function(gid, name) {
-    currentGroupId = gid;
-    currentDMUserId = null;
-    document.getElementById('chatTitle').innerHTML = `👥 ${name}`;
-    document.getElementById('currentGroupName').textContent = name;
-    document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
-    await loadMessages();
-    setupRealtime();
-    await loadGroupHosts();
-    await loadGroupMembers();
-    updatePanels();
-  };
-  
-  async function loadGroupMembers() {
-    if (!currentGroupId) return;
-    const { data: group } = await sb.from('fanter_groups').select('members, owner_id').eq('id', currentGroupId).single();
-    const members = group?.members || [];
-    const memberNames = await Promise.all(members.map(async m => {
-      const { data: u } = await sb.from('fanter_presence').select('display_name, user_id').eq('user_id', m).single();
-      const isOwner = group?.owner_id === m;
-      const isHost = groupHostsList.some(h => h.user_id === m);
-      return `<div style="padding:4px 0">${isOwner ? '👑' : isHost ? '👥' : '👤'} ${esc(u?.display_name || m.slice(0,8))}</div>`;
-    }));
-    document.getElementById('groupMembersList').innerHTML = memberNames.join('') || 'no members';
-    
-    const memberOptions = members.map(m => `<option value="${m}">${esc(m.slice(0,8))}</option>`).join('');
-    document.getElementById('hostUserSelect').innerHTML = '<option value="">select member</option>' + memberOptions;
-    document.getElementById('kickMemberSelect').innerHTML = '<option value="">select member</option>' + memberOptions;
-  }
-  
-  async function createGroup(name) {
-    await sb.from('fanter_groups').insert({ name, owner_id: currentUser.id, members: [currentUser.id] });
-    toast(`✅ Group "${name}" created!`);
-    loadGroups();
-  }
-
-  // ============================================================
-  // FRIENDS
-  // ============================================================
-  async function loadFriends() {
-    try {
-      const { data: fData } = await sb.from('fanter_friends').select('friend_id').eq('user_id', currentUser.id);
-      const container = document.getElementById('friendsList');
-      if (!fData || !fData.length) { container.innerHTML = '<div class="hint">no friends</div>'; return; }
-      const { data: f } = await sb.from('fanter_presence').select('*').in('user_id', fData.map(d => d.friend_id));
-      if (!f || !f.length) { container.innerHTML = '<div class="hint">no friends</div>'; return; }
-      container.innerHTML = f.map(fr => `<div class="sidebar-item" onclick="openDM('${fr.user_id}', '${esc(fr.display_name || fr.username)}')"><div class="mini-avatar">${fr.profile_pic ? `<img src="${fr.profile_pic}">` : (fr.username?.[0]?.toUpperCase() || 'U')}</div><span>${esc(fr.display_name || fr.username)}</span></div>`).join('');
-      
-      const friendOptions = f.map(fr => `<option value="${fr.user_id}">${esc(fr.display_name || fr.username)}</option>`).join('');
-      document.getElementById('inviteFriendSelect').innerHTML = '<option value="">select friend</option>' + friendOptions;
-    } catch(e) {}
-  }
-  
-  async function loadDMList() {
-    try {
-      const { data } = await sb.from('fanter_dm_conversations').select('*').or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`).order('last_message_time', { ascending: false });
-      const container = document.getElementById('dmList');
-      if (!data || !data.length) { container.innerHTML = '<div class="hint">no DMs</div>'; return; }
-      container.innerHTML = data.map(d => {
-        const otherId = d.user1_id === currentUser.id ? d.user2_id : d.user1_id;
-        const otherUser = allUsersList.find(u => u.user_id === otherId);
-        const name = otherUser?.display_name || otherUser?.username || otherId.slice(0,8);
-        return `<div class="sidebar-item" onclick="openDM('${esc(otherId)}','${esc(name)}')"><span>💬</span><span>${esc(name)}</span></div>`;
-      }).join('');
-    } catch(e) {}
-  }
-  
-  window.openDM = async function(userId, username) {
-    currentDMUserId = userId;
-    currentGroupId = null;
-    document.getElementById('chatTitle').innerHTML = `💬 @${username}`;
-    document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
-    await loadMessages();
-    setupRealtime();
-    try {
-      const ids = [currentUser.id, userId].sort();
-      await sb.from('fanter_dm_conversations').upsert({ user1_id: ids[0], user2_id: ids[1], last_message_time: new Date().toISOString() });
-    } catch(e) {}
-    loadDMList();
-  };
-
-  // ============================================================
-  // MEMBERS & PRESENCE
-  // ============================================================
-  async function updatePresence() {
-    try {
-      await sb.from('fanter_presence').upsert({
-        user_id: currentUser.id, username: currentUser.username,
-        display_name: currentUser.displayName || currentUser.username,
-        status: 'online', custom_activity: customActivity, bio: userBio,
-        profile_pic: userAvatars[currentUser.id] || null, nameColor: nameColor,
-        xp: userXP[currentUser.id] || 0, level: getLevel(userXP[currentUser.id] || 0),
-        coins: currentUser.coins || 0, message_count: messageCounts[currentUser.id] || 0,
-        badges: userBadges[currentUser.id] || [], last_seen: new Date().toISOString()
-      });
-    } catch(e) {}
-  }
-
-  async function loadMembers() {
-    try {
-      const { data } = await sb.from('fanter_presence').select('*');
-      if (!data) return;
-      allUsersList = data;
-      for (const user of data) { if (user.profile_pic && !userAvatars[user.user_id]) userAvatars[user.user_id] = user.profile_pic; }
-      save();
-      const online = data.filter(m => m.status !== 'offline');
-      document.getElementById('onlineCount').textContent = online.length;
-      const statusClass = s => ({ online:'status-online', away:'status-away', gaming:'status-gaming' }[s] || 'status-offline');
-      const memberEl = m => {
-        const avatarUrl = userAvatars[m.user_id] || m.profile_pic;
-        return `<div class="member" onclick="showProfile('${esc(m.user_id)}')">
-          <div class="member-avatar">${avatarUrl ? `<img src="${avatarUrl}">` : (m.username?.[0]?.toUpperCase() || 'U')}<div class="member-status ${statusClass(m.status)}"></div></div>
-          <div class="member-info"><div class="member-name">${esc(m.display_name || m.username)}</div>${m.custom_activity ? `<div class="member-activity">${esc(m.custom_activity)}</div>` : ''}</div>
-        </div>`;
-      };
-      document.getElementById('membersList').innerHTML = (online.length ? `<div class="section-sep">ONLINE — ${online.length}</div>` + online.map(memberEl).join('') : '') + `<div class="section-sep">OFFLINE</div>` + data.filter(m => m.status === 'offline').map(memberEl).join('');
-      
-      const userOptions = data.map(u => `<option value="${esc(u.user_id)}|${esc(u.display_name || u.username)}">${esc(u.display_name || u.username)}</option>`).join('');
-      document.getElementById('targetUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('xpTargetSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('modUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('actionUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('kickUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('muteUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('warnUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('modActionUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('modKickUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('modMuteUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-      document.getElementById('modWarnUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
-    } catch(e) {}
-  }
-
-  // ============================================================
-  // PROFILE
-  // ============================================================
   window.showProfile = async function(userId) {
     try {
       const { data } = await sb.from('fanter_presence').select('*').eq('user_id', userId).single();
@@ -1284,40 +664,321 @@ document.addEventListener('DOMContentLoaded', function() {
       dmBtn.style.display = isOwn ? 'none' : 'block';
       dmBtn.onclick = () => { closeOverlay('profileOverlay'); openDM(userId, name); };
       openOverlay('profileOverlay');
-    } catch(e) {}
+    } catch(e) { toast('Error loading profile'); }
   };
 
-  async function uploadAvatar(file) {
-    if (!file) return;
-    const fileName = `${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+  window.addReaction = async function(msgId, emoji) {
     try {
-      const { error } = await sb.storage.from('avatars').upload(fileName, file);
-      if (error) throw error;
-      const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
-      userAvatars[currentUser.id] = urlData.publicUrl;
-      save();
-      await updatePresence();
-      toast('✅ Profile picture updated!');
-      loadMembers();
-    } catch(e) { toast('Upload failed'); }
+      const { data: existing } = await sb.from('fanter_reactions').select('id').eq('message_id', msgId).eq('user_id', currentUser.id).eq('emoji', emoji);
+      if (existing && existing.length) {
+        await sb.from('fanter_reactions').delete().eq('id', existing[0].id);
+      } else {
+        await sb.from('fanter_reactions').insert({ message_id: msgId, user_id: currentUser.id, emoji });
+        addXP(1);
+      }
+      loadReactions(msgId);
+    } catch(e) { console.error(e); }
+  };
+
+  window.toggleReactionPicker = function(msgId) {
+    const picker = document.getElementById(`rp-${msgId}`);
+    if (!picker) return;
+    document.querySelectorAll('.reaction-picker.open').forEach(p => p.classList.remove('open'));
+    picker.classList.add('open');
+  };
+
+  window.startReply = function(id, username, preview) {
+    replyingTo = { id, username, preview };
+    document.getElementById('replyBarText').innerHTML = `↩ replying to <strong>${esc(username)}</strong>: ${esc(preview)}`;
+    document.getElementById('replyBar').classList.add('show');
+    document.getElementById('messageInput').focus();
+  };
+
+  window.editMessage = async function(msgId) {
+    const newText = prompt('Edit message:');
+    if (newText && newText.trim()) {
+      const { error } = await sb.from('fanter_chat').update({ message: newText, edited: true }).eq('id', msgId);
+      if (!error) { toast('✅ Edited'); loadMessages(); }
+      else toast('❌ Edit failed');
+    }
+  };
+
+  window.deleteMsg = async function(msgId) {
+    if (confirm('Delete this message?')) {
+      const { error } = await sb.from('fanter_chat').delete().eq('id', msgId);
+      if (!error) { document.getElementById(`msg-${msgId}`)?.remove(); toast('🗑 Deleted'); }
+      else toast('❌ Delete failed');
+    }
+  };
+
+  window.modActions = function(userId, username) {
+    const action = prompt(`Actions for ${username}:\n1 - Timeout (minutes)\n2 - Kick\n3 - Mute (minutes)\n4 - Warn\nEnter number:`);
+    if (action === '1') { const mins = prompt('Minutes to timeout:'); if(mins) timeoutUser(userId, parseInt(mins)); }
+    else if (action === '2') { if(confirm(`Kick ${username}?`)) kickUser(userId); }
+    else if (action === '3') { const mins = prompt('Minutes to mute:'); if(mins) muteUser(userId, parseInt(mins)); }
+    else if (action === '4') { const reason = prompt('Warning reason:'); if(reason) warnUser(username, reason); }
+  };
+
+  async function loadReactions(msgId) {
+    try {
+      const { data } = await sb.from('fanter_reactions').select('*').eq('message_id', msgId);
+      if (!data) return;
+      const grouped = {};
+      data.forEach(r => { if (!grouped[r.emoji]) grouped[r.emoji] = []; grouped[r.emoji].push(r.user_id); });
+      const container = document.getElementById(`reactions-${msgId}`);
+      if (container) {
+        container.innerHTML = Object.entries(grouped).map(([emoji, users]) => 
+          `<div class="reaction-chip" onclick="window.addReaction('${msgId}','${emoji}')">${emoji} ${users.length}</div>`
+        ).join('');
+      }
+    } catch(e) {}
   }
-  document.getElementById('avatarUpload').onchange = async (e) => { if (e.target.files?.[0]) await uploadAvatar(e.target.files[0]); };
 
   // ============================================================
-  // TYPING INDICATOR
+  // LOAD MESSAGES - FIXED
   // ============================================================
-  let isTyping = false, typingTimeout = null;
-  document.getElementById('messageInput').addEventListener('input', async () => {
-    if (!isTyping) { isTyping = true; await sb.from('fanter_presence').upsert({ user_id: currentUser.id, is_typing: currentChannel }); }
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(async () => { isTyping = false; await sb.from('fanter_presence').upsert({ user_id: currentUser.id, is_typing: null }); }, 2000);
-  });
-  setInterval(async () => {
-    const { data } = await sb.from('fanter_presence').select('display_name,is_typing').eq('is_typing', currentChannel).neq('user_id', currentUser.id);
-    const ti = document.getElementById('typingIndicator');
-    if (data && data.length) ti.textContent = `${data.map(d => d.display_name).join(', ')} ${data.length > 1 ? 'are' : 'is'} typing...`;
-    else ti.textContent = '';
-  }, 2500);
+  async function loadMessages() {
+    try {
+      let channelId;
+      if (currentDMUserId) channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
+      else if (currentGroupId) channelId = `group_${currentGroupId}`;
+      else channelId = currentChannel;
+      
+      const { data, error } = await sb.from('fanter_chat').select('*').eq('channel_id', channelId).order('created_at', { ascending: true }).limit(100);
+      if (error) throw error;
+      const container = document.getElementById('messages');
+      if (!data || !data.length) { 
+        container.innerHTML = '<div class="hint" style="text-align:center">✨ no messages yet ✨</div>'; 
+        return; 
+      }
+      container.innerHTML = data.map(renderMessage).join('');
+      container.scrollTop = container.scrollHeight;
+      for (const msg of data) loadReactions(msg.id);
+    } catch(e) { console.error('Load messages error:', e); toast('❌ Failed to load messages'); }
+  }
+
+  // ============================================================
+  // SEND MESSAGE - FIXED
+  // ============================================================
+  async function sendMessage() {
+    let text = document.getElementById('messageInput').value.trim();
+    if (!text) return;
+    document.getElementById('messageInput').value = '';
+    
+    if (globalSlowMode > 0 && !currentDMUserId && !currentGroupId) {
+      const now = Date.now();
+      if (now - lastMessageTime < globalSlowMode * 1000) { 
+        toast(`⏸ Slow mode! Wait ${globalSlowMode}s`); 
+        document.getElementById('messageInput').value = text;
+        return; 
+      }
+      lastMessageTime = now;
+    }
+    
+    try {
+      let channelId;
+      if (currentDMUserId) channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
+      else if (currentGroupId) channelId = `group_${currentGroupId}`;
+      else channelId = currentChannel;
+      
+      // Handle commands
+      if (text.startsWith('/')) {
+        const parts = text.slice(1).split(' ');
+        const cmd = parts[0].toLowerCase();
+        if (cmd === 'roll') text = `🎲 ${currentUser.displayName} rolled ${Math.floor(Math.random()*100)+1}!`;
+        else if (cmd === '8ball') { const a=['Yes','No','Maybe','Definitely','Never','Ask again']; text = `🎱 ${a[Math.floor(Math.random()*a.length)]}`; }
+        else if (cmd === 'flip') text = `🪙 ${Math.random()>0.5?'Heads':'Tails'}!`;
+        else if (cmd === 'help') { toast('Commands: /roll, /8ball, /flip, /nick [name]'); return; }
+        else if (cmd === 'nick' && parts[1]) {
+          currentUser.displayName = parts.slice(1).join(' ');
+          localStorage.setItem('fanter_currentUser', JSON.stringify(currentUser));
+          toast(`✅ Nickname: ${currentUser.displayName}`);
+          await updatePresence();
+          return;
+        }
+        else { toast('Unknown command. Try /help'); return; }
+      }
+      
+      const { error } = await sb.from('fanter_chat').insert({
+        channel_id: channelId,
+        user_id: currentUser.id,
+        username: currentUser.displayName || currentUser.username,
+        message: text,
+        name_color: nameColor,
+        reply_to_id: replyingTo?.id || null,
+        reply_username: replyingTo?.username || null,
+        reply_preview: replyingTo?.preview || null,
+        is_voice_message: false
+      });
+      
+      if (error) throw error;
+      
+      replyingTo = null;
+      document.getElementById('replyBar').classList.remove('show');
+      messageCounts[currentUser.id] = (messageCounts[currentUser.id] || 0) + 1;
+      save();
+      addXP(5);
+      
+    } catch(e) { console.error('Send error:', e); toast('❌ Failed to send message'); }
+  }
+
+  // ============================================================
+  // REALTIME SUBSCRIPTION - FIXED
+  // ============================================================
+  function setupRealtime() {
+    if (channelSub) {
+      try { sb.removeChannel(channelSub); } catch(e) {}
+    }
+    
+    let channelId;
+    if (currentDMUserId) channelId = `dm_${[currentUser.id, currentDMUserId].sort().join('_')}`;
+    else if (currentGroupId) channelId = `group_${currentGroupId}`;
+    else channelId = currentChannel;
+    
+    channelSub = sb
+      .channel(`room-${channelId}`)
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'fanter_chat', 
+        filter: `channel_id=eq.${channelId}` 
+      }, payload => {
+        const container = document.getElementById('messages');
+        if (container.querySelector('.hint')) container.innerHTML = '';
+        container.insertAdjacentHTML('beforeend', renderMessage(payload.new));
+        container.scrollTop = container.scrollHeight;
+        loadReactions(payload.new.id);
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') console.log('✅ Subscribed to:', channelId);
+        else if (status === 'CHANNEL_ERROR') console.error('❌ Subscription error:', channelId);
+      });
+  }
+
+  // ============================================================
+  // GROUPS & FRIENDS
+  // ============================================================
+  async function loadGroups() {
+    try {
+      const { data } = await sb.from('fanter_groups').select('*');
+      const myGroups = (data || []).filter(g => g.members && g.members.includes(currentUser.id));
+      const container = document.getElementById('groupsList');
+      if (!myGroups.length) { container.innerHTML = '<div class="hint">no groups</div>'; return; }
+      container.innerHTML = myGroups.map(g => `<div class="sidebar-item" onclick="window.openGroup('${g.id}','${esc(g.name)}')"><span>👥</span><span>${esc(g.name)}</span></div>`).join('');
+    } catch(e) { console.error(e); }
+  }
+  
+  window.openGroup = async function(gid, name) {
+    currentGroupId = gid;
+    currentDMUserId = null;
+    document.getElementById('chatTitle').innerHTML = `👥 ${name}`;
+    document.getElementById('currentGroupName').textContent = name;
+    document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
+    await loadMessages();
+    setupRealtime();
+    updatePanels();
+  };
+  
+  async function loadFriends() {
+    try {
+      const { data: fData } = await sb.from('fanter_friends').select('friend_id').eq('user_id', currentUser.id);
+      const container = document.getElementById('friendsList');
+      if (!fData || !fData.length) { container.innerHTML = '<div class="hint">no friends</div>'; return; }
+      const { data: f } = await sb.from('fanter_presence').select('*').in('user_id', fData.map(d => d.friend_id));
+      if (!f || !f.length) { container.innerHTML = '<div class="hint">no friends</div>'; return; }
+      container.innerHTML = f.map(fr => `<div class="sidebar-item" onclick="window.openDM('${fr.user_id}', '${esc(fr.display_name || fr.username)}')"><div class="mini-avatar">${fr.profile_pic ? `<img src="${fr.profile_pic}">` : (fr.username?.[0]?.toUpperCase() || 'U')}</div><span>${esc(fr.display_name || fr.username)}</span></div>`).join('');
+      
+      const friendOptions = f.map(fr => `<option value="${fr.user_id}">${esc(fr.display_name || fr.username)}</option>`).join('');
+      document.getElementById('inviteFriendSelect').innerHTML = '<option value="">select friend</option>' + friendOptions;
+    } catch(e) {}
+  }
+  
+  async function loadDMList() {
+    try {
+      const { data } = await sb.from('fanter_dm_conversations').select('*').or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`).order('last_message_time', { ascending: false });
+      const container = document.getElementById('dmList');
+      if (!data || !data.length) { container.innerHTML = '<div class="hint">no DMs</div>'; return; }
+      container.innerHTML = data.map(d => {
+        const otherId = d.user1_id === currentUser.id ? d.user2_id : d.user1_id;
+        const otherUser = allUsersList.find(u => u.user_id === otherId);
+        const name = otherUser?.display_name || otherUser?.username || otherId.slice(0,8);
+        return `<div class="sidebar-item" onclick="window.openDM('${esc(otherId)}','${esc(name)}')"><span>💬</span><span>${esc(name)}</span></div>`;
+      }).join('');
+    } catch(e) {}
+  }
+  
+  window.openDM = async function(userId, username) {
+    currentDMUserId = userId;
+    currentGroupId = null;
+    document.getElementById('chatTitle').innerHTML = `💬 @${username}`;
+    document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
+    await loadMessages();
+    setupRealtime();
+    try {
+      const ids = [currentUser.id, userId].sort();
+      await sb.from('fanter_dm_conversations').upsert({ user1_id: ids[0], user2_id: ids[1], last_message_time: new Date().toISOString() });
+    } catch(e) {}
+    loadDMList();
+  };
+
+  // ============================================================
+  // UPDATE PRESENCE & MEMBERS
+  // ============================================================
+  async function updatePresence() {
+    try {
+      await sb.from('fanter_presence').upsert({
+        user_id: currentUser.id,
+        username: currentUser.username,
+        display_name: currentUser.displayName || currentUser.username,
+        status: 'online',
+        custom_activity: customActivity,
+        bio: userBio,
+        profile_pic: userAvatars[currentUser.id] || null,
+        name_color: nameColor,
+        xp: userXP[currentUser.id] || 0,
+        level: getLevel(userXP[currentUser.id] || 0),
+        coins: currentUser.coins || 0,
+        message_count: messageCounts[currentUser.id] || 0,
+        badges: userBadges[currentUser.id] || [],
+        last_seen: new Date().toISOString()
+      });
+    } catch(e) { console.error('Presence update failed:', e); }
+  }
+
+  async function loadMembers() {
+    try {
+      const { data } = await sb.from('fanter_presence').select('*');
+      if (!data) return;
+      allUsersList = data;
+      for (const user of data) { 
+        if (user.profile_pic && !userAvatars[user.user_id]) userAvatars[user.user_id] = user.profile_pic; 
+      }
+      save();
+      const online = data.filter(m => m.status !== 'offline');
+      document.getElementById('onlineCount').textContent = online.length;
+      const statusClass = s => ({ online:'status-online', away:'status-away', gaming:'status-gaming' }[s] || 'status-offline');
+      const memberEl = m => {
+        const avatarUrl = userAvatars[m.user_id] || m.profile_pic;
+        return `<div class="member" onclick="window.showProfile('${esc(m.user_id)}')">
+          <div class="member-avatar">${avatarUrl ? `<img src="${avatarUrl}">` : (m.username?.[0]?.toUpperCase() || 'U')}<div class="member-status ${statusClass(m.status)}"></div></div>
+          <div class="member-info"><div class="member-name">${esc(m.display_name || m.username)}</div>${m.custom_activity ? `<div class="member-activity">${esc(m.custom_activity)}</div>` : ''}</div>
+        </div>`;
+      };
+      document.getElementById('membersList').innerHTML = (online.length ? `<div class="section-sep">ONLINE — ${online.length}</div>` + online.map(memberEl).join('') : '') + `<div class="section-sep">OFFLINE</div>` + data.filter(m => m.status === 'offline').map(memberEl).join('');
+      
+      const userOptions = data.map(u => `<option value="${esc(u.user_id)}|${esc(u.display_name || u.username)}">${esc(u.display_name || u.username)}</option>`).join('');
+      document.getElementById('targetUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('xpTargetSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('modUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('actionUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('kickUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('muteUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('warnUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('modActionUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('modKickUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+      document.getElementById('modMuteUserSelect').innerHTML = '<option value="">select user</option>' + userOptions;
+    } catch(e) { console.error(e); }
+  }
 
   // ============================================================
   // UI HELPERS
@@ -1342,106 +1003,213 @@ document.addEventListener('DOMContentLoaded', function() {
     const isModUser = isModerator();
     document.getElementById('ownerPanel').style.display = isOwnerUser ? 'flex' : 'none';
     document.getElementById('moderatorPanel').style.display = (isModUser && !isOwnerUser) ? 'flex' : 'none';
-    isGroupHost().then(isHost => {
-      document.getElementById('hostPanel').style.display = (isHost && currentGroupId) ? 'flex' : 'none';
-    });
+    // Host panel would need group host check
   }
 
   // ============================================================
-  // SHOP
+  // OWNER PANEL EVENT HANDLERS - FIXED
   // ============================================================
-  const SHOP_ITEMS = [
-    { id: 'r', name: 'Red Name', price: 200, emoji: '🔴', value: '#ff4444', type: 'name_color' },
-    { id: 'p', name: 'Purple Name', price: 200, emoji: '🟣', value: '#9f5ae3', type: 'name_color' },
-    { id: 'g', name: 'Green Name', price: 200, emoji: '🟢', value: '#00e87a', type: 'name_color' },
-    { id: 'xp', name: 'XP Boost (+100 XP)', price: 150, emoji: '⚡', value: '100', type: 'xp' },
-  ];
-  function renderShop() {
-    updateCoinDisplay();
-    document.getElementById('shopGrid').innerHTML = SHOP_ITEMS.map(item => `<div class="shop-item" onclick="buyItem('${item.id}')"><div class="shop-emoji">${item.emoji}</div><div class="shop-name">${item.name}</div><div class="shop-price">🪙 ${item.price}</div></div>`).join('');
-  }
-  window.buyItem = function(itemId) {
-    const item = SHOP_ITEMS.find(i => i.id === itemId);
-    if (!item) return;
-    if ((currentUser.coins || 0) < item.price) { toast(`❌ Need ${item.price} coins`); return; }
-    addCoins(-item.price);
-    if (item.type === 'name_color') { nameColor = item.value; localStorage.setItem('fanter_nameColor', nameColor); toast(`✅ Name color changed!`); }
-    else if (item.type === 'xp') { addXP(100); }
-    renderShop();
+  document.getElementById('ownerPanelBtn').onclick = () => {
+    document.getElementById('ownerPanelContent').classList.toggle('open');
+  };
+  document.getElementById('ownerPanelClose').onclick = () => {
+    document.getElementById('ownerPanelContent').classList.remove('open');
+  };
+  
+  document.getElementById('applyBgBtn').onclick = () => {
+    const preset = document.getElementById('bgPresetSelect').value;
+    const presets = { default: '#07081a', ocean: 'linear-gradient(135deg,#0a2a4a,#0a1a2a)', sunset: 'linear-gradient(135deg,#4a1a0a,#2a0a0a)' };
+    document.body.style.background = presets[preset] || presets.default;
+    toast('Background changed');
+  };
+  
+  document.getElementById('triggerEventBtn').onclick = () => {
+    const event = document.getElementById('eventSelect').value;
+    if (event === 'confetti') {
+      for (let i = 0; i < 100; i++) {
+        const c = document.createElement('div');
+        c.style.cssText = `position:fixed;left:${Math.random()*100}%;top:-10px;width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;background:hsl(${Math.random()*360},100%,50%);border-radius:50%;animation:confettiFall ${Math.random()*2+2}s linear forwards;z-index:9999;pointer-events:none`;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+      }
+      toast('🎉 Confetti!');
+    } else if (event === 'fireworks') {
+      toast('🎆 Fireworks!');
+    }
+  };
+  
+  document.getElementById('giveCoinsBtn').onclick = async () => {
+    const val = document.getElementById('targetUserSelect').value;
+    const amount = parseInt(document.getElementById('coinAmount').value);
+    if (val && amount > 0) {
+      const [userId, username] = val.split('|');
+      userCoinsMap[userId] = (userCoinsMap[userId] || 0) + amount;
+      if (userId === currentUser.id) currentUser.coins = userCoinsMap[userId];
+      save();
+      toast(`🎁 Gave ${amount} coins to ${username}`);
+      updateCoinDisplay();
+      await updatePresence();
+    } else toast('❌ Select user and amount');
+  };
+  
+  document.getElementById('giveXPBtn').onclick = async () => {
+    const val = document.getElementById('xpTargetSelect').value;
+    const amount = parseInt(document.getElementById('xpAmount').value);
+    if (val && amount > 0) {
+      const [userId, username] = val.split('|');
+      userXP[userId] = (userXP[userId] || 0) + amount;
+      save();
+      toast(`⚡ Gave ${amount} XP to ${username}`);
+      if (userId === currentUser.id) {
+        document.getElementById('levelBadge').textContent = `Lv ${getLevel(userXP[currentUser.id])}`;
+      }
+      await updatePresence();
+    } else toast('❌ Select user and amount');
+  };
+  
+  document.getElementById('makeModBtn').onclick = () => {
+    const val = document.getElementById('modUserSelect').value;
+    if (val) {
+      const [_, username] = val.split('|');
+      if (!moderatorsList.includes(username)) {
+        moderatorsList.push(username);
+        save();
+        toast(`✅ ${username} is now a moderator`);
+        updatePanels();
+      } else toast(`${username} is already a moderator`);
+    } else toast('❌ Select a user');
+  };
+  
+  document.getElementById('revokeModBtn').onclick = () => {
+    const val = document.getElementById('modUserSelect').value;
+    if (val) {
+      const [_, username] = val.split('|');
+      if (OWNER_USERNAMES.includes(username)) {
+        toast('❌ Cannot revoke owner status');
+        return;
+      }
+      moderatorsList = moderatorsList.filter(m => m !== username);
+      save();
+      toast(`✅ ${username} is no longer a moderator`);
+      updatePanels();
+    } else toast('❌ Select a user');
+  };
+  
+  document.getElementById('applySlowModeBtn').onclick = () => {
+    globalSlowMode = parseInt(document.getElementById('globalSlowModeSec').value) || 0;
+    toast(`Slow mode: ${globalSlowMode} seconds between messages`);
+  };
+  
+  document.getElementById('timeoutUserBtn').onclick = () => {
+    const val = document.getElementById('actionUserSelect').value;
+    const mins = parseInt(document.getElementById('timeoutMinutes').value);
+    if (val && mins) { 
+      const [userId] = val.split('|'); 
+      timeoutUser(userId, mins); 
+    } else toast('❌ Select user and minutes');
+  };
+  
+  document.getElementById('kickUserBtn').onclick = () => {
+    const val = document.getElementById('kickUserSelect').value;
+    if (val) { 
+      const [userId] = val.split('|'); 
+      kickUser(userId); 
+    } else toast('❌ Select a user');
+  };
+  
+  document.getElementById('muteUserBtn').onclick = () => {
+    const val = document.getElementById('muteUserSelect').value;
+    const mins = parseInt(document.getElementById('muteMinutes').value);
+    if (val && mins) { 
+      const [userId] = val.split('|'); 
+      muteUser(userId, mins); 
+    } else toast('❌ Select user and minutes');
+  };
+  
+  document.getElementById('warnUserBtn').onclick = () => {
+    const val = document.getElementById('warnUserSelect').value;
+    const reason = document.getElementById('warnReason').value;
+    if (val) { 
+      const [_, username] = val.split('|'); 
+      warnUser(username, reason); 
+    } else toast('❌ Select a user');
   };
 
   // ============================================================
-  // GIF PICKER
+  // MODERATOR PANEL
   // ============================================================
-  async function searchGifs(query) {
-    try {
-      const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=12`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const grid = document.getElementById('gifGrid');
-      grid.innerHTML = '';
-      (data.data || []).forEach(gif => {
-        const src = gif.images?.fixed_height_small?.url;
-        if (!src) return;
-        const el = document.createElement('div');
-        el.className = 'gif-item';
-        el.innerHTML = `<img src="${src}">`;
-        el.onclick = () => sendGif(gif.images?.original?.url || src);
-        grid.appendChild(el);
-      });
-    } catch(e) {}
-  }
-  async function sendGif(url) {
-    let channelId = currentDMUserId ? `dm_${[currentUser.id, currentDMUserId].sort().join('_')}` : currentGroupId ? `group_${currentGroupId}` : currentChannel;
-    await sb.from('fanter_chat').insert({ channel_id: channelId, user_id: currentUser.id, username: currentUser.displayName || currentUser.username, message: `[GIF] ${url}`, nameColor: nameColor, is_voice_message: false });
-    addXP(3);
-    document.getElementById('gifPicker').classList.remove('open');
-  }
-  document.getElementById('gifBtn').onclick = () => { const p = document.getElementById('gifPicker'); p.classList.toggle('open'); if (p.classList.contains('open')) searchGifs('trending'); };
-  document.getElementById('gifSearch').addEventListener('input', e => searchGifs(e.target.value));
+  document.getElementById('moderatorPanelBtn').onclick = () => {
+    document.getElementById('moderatorPanelContent').classList.toggle('open');
+  };
+  document.getElementById('moderatorPanelClose').onclick = () => {
+    document.getElementById('moderatorPanelContent').classList.remove('open');
+  };
+  
+  document.getElementById('modTimeoutUserBtn').onclick = () => {
+    const val = document.getElementById('modActionUserSelect').value;
+    const mins = parseInt(document.getElementById('modTimeoutMinutes').value);
+    if (val && mins) { const [userId] = val.split('|'); timeoutUser(userId, mins); }
+    else toast('❌ Select user and minutes');
+  };
+  
+  document.getElementById('modKickUserBtn').onclick = () => {
+    const val = document.getElementById('modKickUserSelect').value;
+    if (val) { const [userId] = val.split('|'); kickUser(userId); }
+    else toast('❌ Select a user');
+  };
+  
+  document.getElementById('modMuteUserBtn').onclick = () => {
+    const val = document.getElementById('modMuteUserSelect').value;
+    const mins = parseInt(document.getElementById('modMuteMinutes').value);
+    if (val && mins) { const [userId] = val.split('|'); muteUser(userId, mins); }
+    else toast('❌ Select user and minutes');
+  };
+  
+  document.getElementById('modWarnUserBtn').onclick = () => {
+    const val = document.getElementById('modWarnUserSelect').value;
+    const reason = document.getElementById('modWarnReason').value;
+    if (val) { const [_, username] = val.split('|'); warnUser(username, reason); }
+    else toast('❌ Select a user');
+  };
 
   // ============================================================
-  // EMOJI PICKER
-  // ============================================================
-  const ALL_EMOJIS = ['😀','😂','😊','😍','🔥','💀','🎮','🏆','⭐','👑','❤️','👻','🐉','🍕','⚡','👍','🎉','🥺','😈','👀','💯','😭','🙏','😎','🤔','🥶','🤯','💪','🎯','🧠','✨','🌟','🎲','🪙'];
-  function renderEmojis(filter = '') { const f = ALL_EMOJIS.filter(e => e.includes(filter)); document.getElementById('emojiGrid').innerHTML = f.map(e => `<div class="emoji-btn" onclick="insertEmoji('${e}')">${e}</div>`).join(''); }
-  renderEmojis();
-  document.getElementById('emojiSearch').addEventListener('input', e => renderEmojis(e.target.value));
-  window.insertEmoji = function(emoji) { const inp = document.getElementById('messageInput'); inp.value += emoji; inp.focus(); };
-  document.getElementById('emojiBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('emojiPicker').classList.toggle('open'); };
-  document.addEventListener('click', e => { if (!e.target.closest('#emojiPicker') && !e.target.closest('#emojiBtn')) document.getElementById('emojiPicker').classList.remove('open'); });
-
-  // ============================================================
-  // EVENT BINDINGS
+  // OTHER UI BINDINGS
   // ============================================================
   document.getElementById('enterBtn').onclick = () => {
     document.getElementById('welcomeScreen').classList.add('out');
-    setTimeout(() => { document.getElementById('welcomeScreen').style.display = 'none'; document.getElementById('chatContainer').classList.add('active'); initChat(); }, 500);
+    setTimeout(() => { 
+      document.getElementById('welcomeScreen').style.display = 'none'; 
+      document.getElementById('chatContainer').classList.add('active'); 
+      initChat(); 
+    }, 500);
     localStorage.setItem('fantarena_welcomed', 'true');
   };
+  
   if (localStorage.getItem('fantarena_welcomed') === 'true') {
     document.getElementById('welcomeScreen').style.display = 'none';
     document.getElementById('chatContainer').classList.add('active');
     initChat();
   }
-
+  
   document.querySelectorAll('.channel').forEach(ch => {
     ch.onclick = () => {
-      currentDMUserId = null; currentGroupId = null;
+      currentDMUserId = null;
+      currentGroupId = null;
       currentChannel = ch.dataset.channel;
       document.getElementById('chatTitle').innerHTML = `# ${currentChannel}`;
       document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
       ch.classList.add('active');
       updateChannelPill();
-      loadMessages(); setupRealtime(); updatePanels();
+      loadMessages();
+      setupRealtime();
+      updatePanels();
     };
   });
-
+  
   document.getElementById('sendBtn').onclick = sendMessage;
   document.getElementById('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-  document.getElementById('voiceMsgBtn').onclick = () => { if (isRecording) stopVoiceRecording(); else startVoiceRecording(); };
-  document.getElementById('stageBtn').onclick = () => { window.open('fantarena-voice.html', 'TheStage', 'width=500,height=700,popup=true'); };
-
+  document.getElementById('replyCancel').onclick = () => { replyingTo = null; document.getElementById('replyBar').classList.remove('show'); };
+  
   // Settings
   document.getElementById('settingsBtn').onclick = () => openOverlay('settingsOverlay');
   document.getElementById('editProfileBtn').onclick = () => openOverlay('settingsOverlay');
@@ -1460,10 +1228,28 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('nameColor').value = nameColor;
   document.getElementById('customActivity').value = customActivity;
   document.getElementById('userBio').value = userBio;
-
+  
+  // Avatar upload
+  document.getElementById('avatarUpload').onchange = async (e) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        userAvatars[currentUser.id] = reader.result;
+        save();
+        updatePresence();
+        toast('✅ Profile picture updated!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  // Close profile
+  document.getElementById('closeProfileBtn').onclick = () => closeOverlay('profileOverlay');
+  
   // Daily
   document.getElementById('dailyBtn').onclick = () => {
-    if (lastDailyClaim === new Date().toDateString()) { toast('Already claimed!'); return; }
+    if (lastDailyClaim === new Date().toDateString()) { toast('Already claimed today!'); return; }
     const bonus = dailyStreak >= 6 ? 150 : dailyStreak >= 3 ? 100 : 50;
     document.getElementById('dailyAmount').innerHTML = `+${bonus} 🪙`;
     document.getElementById('dailyStreakText').innerHTML = `streak: ${dailyStreak + 1} day`;
@@ -1471,20 +1257,43 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.getElementById('claimDaily').onclick = () => {
     const bonus = dailyStreak >= 6 ? 150 : dailyStreak >= 3 ? 100 : 50;
-    addCoins(bonus); addXP(25);
+    addCoins(bonus);
+    addXP(25);
     lastDailyClaim = new Date().toDateString();
     dailyStreak++;
     localStorage.setItem('lastDailyClaim', lastDailyClaim);
     localStorage.setItem('dailyStreak', dailyStreak);
     closeOverlay('dailyOverlay');
     toast(`🎁 +${bonus} coins!`);
-    checkBadges();
   };
   document.getElementById('closeDailyModal').onclick = () => closeOverlay('dailyOverlay');
-
+  
   // Shop
+  const SHOP_ITEMS = [
+    { id: 'r', name: 'Red Name', price: 200, emoji: '🔴', value: '#ff4444', type: 'name_color' },
+    { id: 'p', name: 'Purple Name', price: 200, emoji: '🟣', value: '#9f5ae3', type: 'name_color' },
+    { id: 'g', name: 'Green Name', price: 200, emoji: '🟢', value: '#00e87a', type: 'name_color' },
+    { id: 'xp', name: 'XP Boost (+100 XP)', price: 150, emoji: '⚡', value: '100', type: 'xp' },
+  ];
+  function renderShop() {
+    updateCoinDisplay();
+    document.getElementById('shopGrid').innerHTML = SHOP_ITEMS.map(item => `<div class="shop-item" onclick="window.buyItem('${item.id}')"><div class="shop-emoji">${item.emoji}</div><div class="shop-name">${item.name}</div><div class="shop-price">🪙 ${item.price}</div></div>`).join('');
+  }
+  window.buyItem = function(itemId) {
+    const item = SHOP_ITEMS.find(i => i.id === itemId);
+    if (!item) return;
+    if ((currentUser.coins || 0) < item.price) { toast(`❌ Need ${item.price} coins`); return; }
+    addCoins(-item.price);
+    if (item.type === 'name_color') { 
+      nameColor = item.value; 
+      localStorage.setItem('fanter_nameColor', nameColor); 
+      document.getElementById('nameColor').value = nameColor;
+      toast(`✅ Name color changed!`); 
+    } else if (item.type === 'xp') { addXP(100); }
+    renderShop();
+  };
   document.getElementById('shopBtn').onclick = () => { renderShop(); openOverlay('shopOverlay'); };
-
+  
   // Add friend
   document.getElementById('addFriendBtn').onclick = () => openOverlay('addFriendOverlay');
   document.getElementById('closeAddFriendModal').onclick = () => closeOverlay('addFriendOverlay');
@@ -1493,165 +1302,172 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!username) return;
     const { data: users } = await sb.from('fanter_presence').select('user_id').ilike('username', `%${username}%`);
     if (users && users.length && users[0].user_id !== currentUser.id) {
-      await sb.from('fanter_friend_requests').insert({ sender_id: currentUser.id, receiver_id: users[0].user_id });
-      toast('✅ Friend request sent!');
+      await sb.from('fanter_friends').insert({ user_id: currentUser.id, friend_id: users[0].user_id });
+      toast('✅ Friend added!');
+      loadFriends();
     } else toast('❌ User not found');
     closeOverlay('addFriendOverlay');
   };
-
+  
   // Create group
   document.getElementById('createGroupBtn').onclick = () => openOverlay('createGroupOverlay');
   document.getElementById('closeCreateGroupModal').onclick = () => closeOverlay('createGroupOverlay');
   document.getElementById('confirmCreateGroup').onclick = async () => {
     const name = document.getElementById('groupName').value.trim();
     if (!name) return;
-    await createGroup(name);
+    const { error } = await sb.from('fanter_groups').insert({ name, owner_id: currentUser.id, members: [currentUser.id] });
+    if (!error) { toast(`✅ Group "${name}" created!`); loadGroups(); }
+    else toast('❌ Failed to create group');
     closeOverlay('createGroupOverlay');
   };
-
-  // ============================================================
-  // OWNER PANEL
-  // ============================================================
-  const ownerPanelBtn = document.getElementById('ownerPanelBtn');
-  const ownerPanelContent = document.getElementById('ownerPanelContent');
-  const ownerPanelClose = document.getElementById('ownerPanelClose');
-  ownerPanelBtn.onclick = () => ownerPanelContent.classList.toggle('open');
-  ownerPanelClose.onclick = () => ownerPanelContent.classList.remove('open');
-
-  document.getElementById('applyBgBtn').onclick = () => {
-    const preset = document.getElementById('bgPresetSelect').value;
-    const presets = { default: 'var(--bg)', ocean: 'linear-gradient(135deg,#0a2a4a,#0a1a2a)', sunset: 'linear-gradient(135deg,#4a1a0a,#2a0a0a)' };
-    document.body.style.background = presets[preset] || presets.default;
-    toast('Background changed');
-  };
-  document.getElementById('triggerEventBtn').onclick = () => {
-    const event = document.getElementById('eventSelect').value;
-    if (event === 'confetti') triggerConfetti();
-    else if (event === 'fireworks') triggerFireworks();
-  };
-  document.getElementById('giveCoinsBtn').onclick = () => {
-    const val = document.getElementById('targetUserSelect').value;
-    const amount = parseInt(document.getElementById('coinAmount').value);
-    if (val && amount) {
-      const [userId, username] = val.split('|');
-      userCoinsMap[userId] = (userCoinsMap[userId] || 0) + amount;
-      if (userId === currentUser.id) currentUser.coins = userCoinsMap[userId];
-      save(); toast(`🎁 Gave ${amount} coins to ${username}`); updateCoinDisplay();
+  
+  // Stage
+  document.getElementById('stageBtn').onclick = () => { window.open('fantarena-voice.html', 'TheStage', 'width=500,height=700,popup=true'); };
+  
+  // Typing indicator
+  let isTyping = false, typingTimeout = null;
+  document.getElementById('messageInput').addEventListener('input', async () => {
+    if (!isTyping) { 
+      isTyping = true; 
+      await sb.from('fanter_presence').upsert({ user_id: currentUser.id, is_typing: currentChannel }); 
     }
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(async () => { 
+      isTyping = false; 
+      await sb.from('fanter_presence').upsert({ user_id: currentUser.id, is_typing: null }); 
+    }, 2000);
+  });
+  
+  setInterval(async () => {
+    const { data } = await sb.from('fanter_presence').select('display_name,is_typing').eq('is_typing', currentChannel).neq('user_id', currentUser.id);
+    const ti = document.getElementById('typingIndicator');
+    if (data && data.length) ti.textContent = `${data.map(d => d.display_name).join(', ')} ${data.length > 1 ? 'are' : 'is'} typing...`;
+    else ti.textContent = '';
+  }, 2500);
+  
+  // GIF Picker
+  const GIPHY_API_KEY = "PmyjdmHi6rRNGecMM9OaNhQ0dnt2mQfg";
+  async function searchGifs(query) {
+    try {
+      const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=12`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const grid = document.getElementById('gifGrid');
+      grid.innerHTML = '';
+      (data.data || []).forEach(gif => {
+        const src = gif.images?.fixed_height_small?.url;
+        if (!src) return;
+        const el = document.createElement('div');
+        el.className = 'gif-item';
+        el.innerHTML = `<img src="${src}">`;
+        el.onclick = () => sendGif(gif.images?.original?.url || src);
+        grid.appendChild(el);
+      });
+    } catch(e) { console.error(e); }
+  }
+  async function sendGif(url) {
+    let channelId = currentDMUserId ? `dm_${[currentUser.id, currentDMUserId].sort().join('_')}` : currentGroupId ? `group_${currentGroupId}` : currentChannel;
+    await sb.from('fanter_chat').insert({ 
+      channel_id: channelId, 
+      user_id: currentUser.id, 
+      username: currentUser.displayName || currentUser.username, 
+      message: `[GIF] ${url}`, 
+      name_color: nameColor, 
+      is_voice_message: false 
+    });
+    addXP(3);
+    document.getElementById('gifPicker').classList.remove('open');
+  }
+  document.getElementById('gifBtn').onclick = () => { 
+    const p = document.getElementById('gifPicker'); 
+    p.classList.toggle('open'); 
+    if (p.classList.contains('open')) searchGifs('trending'); 
   };
-  document.getElementById('giveXPBtn').onclick = () => {
-    const val = document.getElementById('xpTargetSelect').value;
-    const amount = parseInt(document.getElementById('xpAmount').value);
-    if (val && amount) {
-      const [userId, username] = val.split('|');
-      userXP[userId] = (userXP[userId] || 0) + amount;
-      save(); toast(`⚡ Gave ${amount} XP to ${username}`);
+  document.getElementById('gifSearch').addEventListener('input', e => searchGifs(e.target.value));
+  
+  // Emoji picker
+  const ALL_EMOJIS = ['😀','😂','😊','😍','🔥','💀','🎮','🏆','⭐','👑','❤️','👻','🐉','🍕','⚡','👍','🎉','🥺','😈','👀','💯','😭','🙏','😎','🤔','🥶','🤯','💪','🎯','🧠','✨','🌟','🎲','🪙'];
+  function renderEmojis(filter = '') { 
+    const f = ALL_EMOJIS.filter(e => e.includes(filter)); 
+    document.getElementById('emojiGrid').innerHTML = f.map(e => `<div class="emoji-btn" onclick="window.insertEmoji('${e}')">${e}</div>`).join(''); 
+  }
+  window.insertEmoji = function(emoji) { 
+    const inp = document.getElementById('messageInput'); 
+    inp.value += emoji; 
+    inp.focus(); 
+  };
+  renderEmojis();
+  document.getElementById('emojiSearch').addEventListener('input', e => renderEmojis(e.target.value));
+  document.getElementById('emojiBtn').onclick = (e) => { 
+    e.stopPropagation(); 
+    document.getElementById('emojiPicker').classList.toggle('open'); 
+  };
+  document.addEventListener('click', e => { 
+    if (!e.target.closest('#emojiPicker') && !e.target.closest('#emojiBtn')) 
+      document.getElementById('emojiPicker').classList.remove('open'); 
+  });
+  
+  // Voice recording
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let isRecording = false;
+  let currentStream = null;
+  
+  async function startVoiceRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      currentStream = stream;
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = async () => {
+          const base64Audio = reader.result;
+          const duration = 5;
+          let channelId = currentDMUserId ? `dm_${[currentUser.id, currentDMUserId].sort().join('_')}` : currentGroupId ? `group_${currentGroupId}` : currentChannel;
+          await sb.from('fanter_chat').insert({
+            channel_id: channelId, user_id: currentUser.id,
+            username: currentUser.displayName || currentUser.username,
+            message: '[Voice Message]',
+            name_color: nameColor,
+            is_voice_message: true, voice_duration: duration, voice_url: base64Audio
+          });
+          toast('✅ Voice message sent!');
+        };
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+        const indicator = document.querySelector('.voice-recording-indicator');
+        if (indicator) indicator.remove();
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      const indicator = document.createElement('div');
+      indicator.className = 'voice-recording-indicator';
+      indicator.innerHTML = '🔴 Recording... click to stop';
+      indicator.onclick = stopVoiceRecording;
+      document.body.appendChild(indicator);
+      toast('🔴 Recording... click to stop');
+    } catch(e) { toast('❌ Microphone access denied'); }
+  }
+  
+  function stopVoiceRecording() {
+    if (mediaRecorder && isRecording) { 
+      mediaRecorder.stop(); 
+      isRecording = false; 
     }
+    const indicator = document.querySelector('.voice-recording-indicator');
+    if (indicator) indicator.remove();
+  }
+  
+  document.getElementById('voiceMsgBtn').onclick = () => { 
+    if (isRecording) stopVoiceRecording(); 
+    else startVoiceRecording(); 
   };
-  document.getElementById('makeModBtn').onclick = () => {
-    const val = document.getElementById('modUserSelect').value;
-    if (val) {
-      const [_, username] = val.split('|');
-      if (!moderatorsList.includes(username)) { moderatorsList.push(username); save(); toast(`✅ ${username} is now a moderator`); updatePanels(); }
-    }
-  };
-  document.getElementById('revokeModBtn').onclick = () => {
-    const val = document.getElementById('modUserSelect').value;
-    if (val) {
-      const [_, username] = val.split('|');
-      moderatorsList = moderatorsList.filter(m => m !== username);
-      save(); toast(`✅ ${username} is no longer a moderator`); updatePanels();
-    }
-  };
-  document.getElementById('applySlowModeBtn').onclick = () => {
-    globalSlowMode = parseInt(document.getElementById('globalSlowModeSec').value) || 0;
-    toast(`Slow mode: ${globalSlowMode}s`);
-  };
-  document.getElementById('timeoutUserBtn').onclick = () => {
-    const val = document.getElementById('actionUserSelect').value;
-    const mins = parseInt(document.getElementById('timeoutMinutes').value);
-    if (val && mins) { const [userId] = val.split('|'); timeoutUser(userId, mins); }
-  };
-  document.getElementById('kickUserBtn').onclick = () => {
-    const val = document.getElementById('kickUserSelect').value;
-    if (val) { const [userId] = val.split('|'); kickUser(userId); }
-  };
-  document.getElementById('muteUserBtn').onclick = () => {
-    const val = document.getElementById('muteUserSelect').value;
-    const mins = parseInt(document.getElementById('muteMinutes').value);
-    if (val && mins) { const [userId] = val.split('|'); muteUser(userId, mins); }
-  };
-  document.getElementById('warnUserBtn').onclick = () => {
-    const val = document.getElementById('warnUserSelect').value;
-    const reason = document.getElementById('warnReason').value;
-    if (val) { const [_, username] = val.split('|'); warnUser(username, reason); }
-  };
-
+  
   // ============================================================
-  // MODERATOR PANEL
-  // ============================================================
-  const modPanelBtn = document.getElementById('moderatorPanelBtn');
-  const modPanelContent = document.getElementById('moderatorPanelContent');
-  const modPanelClose = document.getElementById('moderatorPanelClose');
-  modPanelBtn.onclick = () => modPanelContent.classList.toggle('open');
-  modPanelClose.onclick = () => modPanelContent.classList.remove('open');
-
-  document.getElementById('modTimeoutUserBtn').onclick = () => {
-    const val = document.getElementById('modActionUserSelect').value;
-    const mins = parseInt(document.getElementById('modTimeoutMinutes').value);
-    if (val && mins) { const [userId] = val.split('|'); timeoutUser(userId, mins); }
-  };
-  document.getElementById('modKickUserBtn').onclick = () => {
-    const val = document.getElementById('modKickUserSelect').value;
-    if (val) { const [userId] = val.split('|'); kickUser(userId); }
-  };
-  document.getElementById('modMuteUserBtn').onclick = () => {
-    const val = document.getElementById('modMuteUserSelect').value;
-    const mins = parseInt(document.getElementById('modMuteMinutes').value);
-    if (val && mins) { const [userId] = val.split('|'); muteUser(userId, mins); }
-  };
-  document.getElementById('modWarnUserBtn').onclick = () => {
-    const val = document.getElementById('modWarnUserSelect').value;
-    const reason = document.getElementById('modWarnReason').value;
-    if (val) { const [_, username] = val.split('|'); warnUser(username, reason); }
-  };
-
-  // ============================================================
-  // GROUP HOST PANEL
-  // ============================================================
-  const hostPanelBtn = document.getElementById('hostPanelBtn');
-  const hostPanelContent = document.getElementById('hostPanelContent');
-  const hostPanelClose = document.getElementById('hostPanelClose');
-  hostPanelBtn.onclick = () => hostPanelContent.classList.toggle('open');
-  hostPanelClose.onclick = () => hostPanelContent.classList.remove('open');
-
-  document.getElementById('inviteToGroupBtn').onclick = () => {
-    const val = document.getElementById('inviteFriendSelect').value;
-    if (val) inviteToGroup(val);
-  };
-  document.getElementById('createInviteLinkBtn').onclick = async () => {
-    if (!currentGroupId) return toast('No group selected');
-    const code = Math.random().toString(36).slice(2,10);
-    await sb.from('fanter_group_invites').insert({ group_id: currentGroupId, invite_code: code, created_by: currentUser.id });
-    const link = `${window.location.origin}${window.location.pathname}?invite=${code}`;
-    document.getElementById('inviteLinkDisplay').value = link;
-    toast('Invite link created!');
-  };
-  document.getElementById('addHostBtn').onclick = () => {
-    const val = document.getElementById('hostUserSelect').value;
-    if (val) addGroupHost(val);
-  };
-  document.getElementById('removeHostBtn').onclick = () => {
-    const val = document.getElementById('hostUserSelect').value;
-    if (val) removeGroupHost(val);
-  };
-  document.getElementById('kickMemberBtn').onclick = () => {
-    const val = document.getElementById('kickMemberSelect').value;
-    if (val) kickFromGroup(val);
-  };
-
-  // ============================================================
-  // INIT
+  // INITIALIZATION
   // ============================================================
   async function initChat() {
     updateCoinDisplay();
@@ -1669,8 +1485,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => updateChannelPill(), 100);
     console.log('✅ Fantarena ready!');
   }
-
-  console.log('✅ Fantarena script loaded!');
 });
 </script>
 </body>
